@@ -1,0 +1,38 @@
+[
+  {
+    "title": "title A1",
+    "author": {
+      "name": "name A",
+      "firstName": "firstName A"
+    },
+    "isbn": 1,
+    "summary": "summary A1"
+  },
+  {
+    "title": "title A2",
+    "author": {
+      "name": "name A",
+      "firstName": "firstName A"
+    },
+    "isbn": 2,
+    "summary": "summary A2"
+  },
+  {
+    "title": "title B1",
+    "author": {
+      "name": "name B",
+      "firstName": "firstName B"
+    },
+    "isbn": 3,
+    "summary": "summary B1"
+  },
+  {
+    "title": "title B2",
+    "author": {
+      "name": "name B",
+      "firstName": "firstName B"
+    },
+    "isbn": 4,
+    "summary": "summary B2"
+  }
+]

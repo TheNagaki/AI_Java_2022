@@ -1,0 +1,82 @@
+package org.helmo.gbeditor.models;
+
+import org.helmo.gbeditor.presenters.GBEInterface;
+import org.helmo.gbeditor.repositories.Repository;
+import org.helmo.gbeditor.utils.IsbnChecker;
+
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
+
+public class GBEditor implements GBEInterface {
+	private final Set<Author> authors;
+	private Author currentAuthor;
+	private final Set<Book> books;
+	private final Repository repository;
+	private final Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
+	private final Path imageDirectory = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
+
+	public GBEditor(Repository repository) {
+		this.repository = repository;
+		this.authors = repository.loadAuthors(bookPath);
+		this.books = repository.loadBooks(bookPath);
+	}
+
+	@Override
+	public boolean connect(String name, String firstName) {
+		Author author = new Author(name, firstName);
+		if (!authors.contains(new Author(name, firstName))) {
+			authors.add(author);
+		}
+		currentAuthor = author;
+		return true;
+	}
+
+	@Override
+	public boolean createBook(String title, String isbn, String summary, String imagePath) {
+		if (IsbnChecker.checkIsbn(isbn)) {
+			Book book = new Book(title, currentAuthor, isbn, summary, "");
+			if (!books.contains(book)) {
+				String path2Image = repository.moveImage(imagePath, imageDirectory + "/" + title + imagePath.substring(imagePath.lastIndexOf(".")));
+				book = new Book(title, currentAuthor, isbn, summary, path2Image);
+				books.add(book);
+				repository.saveBook(book, bookPath);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean deleteBook(Book book) {
+		return books.remove(book) && repository.deleteBook(book, bookPath);
+	}
+
+	@Override
+	public boolean updateBook(Book book, String title, String summary) {
+		book.setTitle(title);
+		book.setSummary(summary);
+		return books.add(book) && repository.saveBook(book, bookPath);
+	}
+
+	@Override
+	public Set<Book> getAllBooks() {
+		return books;
+	}
+
+	@Override
+	public Set<Book> getBooksFromCurrentAuthor() {
+		Set<Book> result = new HashSet<>();
+		for (Book book : books) {
+			if (book.getAuthor().equals(currentAuthor)) {
+				result.add(book);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public String getAuthorName() {
+		return currentAuthor != null ? currentAuthor.getFullName() : null;
+	}
+}
