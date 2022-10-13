@@ -4,7 +4,6 @@ import org.helmo.gbeditor.presenters.GBEInterface;
 import org.helmo.gbeditor.repositories.Repository;
 import org.helmo.gbeditor.utils.IsbnChecker;
 
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,13 +12,10 @@ public class GBEditor implements GBEInterface {
 	private Author currentAuthor;
 	private final Set<Book> books;
 	private final Repository repository;
-	private final Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
-	private final Path imageDirectory = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
-
 	public GBEditor(Repository repository) {
 		this.repository = repository;
-		this.authors = repository.loadAuthors(bookPath);
-		this.books = repository.loadBooks(bookPath);
+		this.authors = repository.loadAuthors();
+		this.books = repository.loadBooks();
 	}
 
 	@Override
@@ -37,10 +33,10 @@ public class GBEditor implements GBEInterface {
 		if (IsbnChecker.checkIsbn(isbn)) {
 			Book book = new Book(title, currentAuthor, isbn, summary, "");
 			if (!books.contains(book)) {
-				String path2Image = repository.moveImage(imagePath, imageDirectory + "/" + title + imagePath.substring(imagePath.lastIndexOf(".")));
+				String path2Image = repository.moveImage(imagePath);
 				book = new Book(title, currentAuthor, isbn, summary, path2Image);
 				books.add(book);
-				repository.saveBook(book, bookPath);
+				repository.saveBook(book);
 				return true;
 			}
 		}
@@ -49,14 +45,14 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public boolean deleteBook(Book book) {
-		return books.remove(book) && repository.deleteBook(book, bookPath);
+		return books.remove(book) && repository.deleteBook(book);
 	}
 
 	@Override
 	public boolean updateBook(Book book, String title, String summary) {
 		book.setTitle(title);
 		book.setSummary(summary);
-		return books.add(book) && repository.saveBook(book, bookPath);
+		return books.add(book) && repository.saveBook(book);
 	}
 
 	@Override

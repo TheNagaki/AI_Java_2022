@@ -13,6 +13,7 @@ import org.helmo.gbeditor.views.BaseView;
 import org.helmo.gbeditor.views.CreateBookView;
 import org.helmo.gbeditor.views.MainView;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,9 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		Repository repo = new JsonRepository();
+		Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
+		Path imageDirectoryPath = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
+		Repository repo = new JsonRepository(bookPath, imageDirectoryPath);
 		GBEInterface editor = new GBEditor(repo);
 		ViewInterface mainView = new BaseView(initViews(editor));
 		Parent root = mainView.getRoot();

@@ -12,24 +12,20 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class JsonRepository implements Repository {
-//	public static void main(String[] args) {
-//		final String pathRes = ("bouffiouxj/src/test/resources/repositories/resFiles");
-//		final Path pathBooksOk = Path.of(pathRes + "/booksOk.json");
-//		final Path pathSingleBook = Path.of(pathRes + "/singleBook.json");
-//		Set<Book> cyrilBooks;
-//		Author authorA = new Author("name A", "firstName A");
-//		cyrilBooks = new HashSet<>();
-//		cyrilBooks.add(new Book("title A1", authorA, 1, "summary A1"));
-//		JsonRepository jsonRepository = new JsonRepository();
-//
-//		System.out.println(pathSingleBook.toAbsolutePath());
-//		System.out.println(jsonRepository.saveBooks(cyrilBooks, pathSingleBook) + " ? ");
-//	}
+
+
+	private final Path bookPath;
+	private final Path imageDirectoryPath;
+
+	public JsonRepository(Path bookPath, Path imageDirectoryPath) {
+		this.bookPath = bookPath;
+		this.imageDirectoryPath = imageDirectoryPath;
+	}
 
 	@Override
-	public Set<Book> loadBooks(Path path) {
-		if (Files.exists(path)) {
-			try (BufferedReader reader = Files.newBufferedReader(path)) {
+	public Set<Book> loadBooks() {
+		if (Files.exists(bookPath)) {
+			try (BufferedReader reader = Files.newBufferedReader(bookPath)) {
 				Gson gson = new Gson();
 				gson.newJsonReader(reader);
 				return new LinkedHashSet<>(Arrays.asList(gson.fromJson(reader, Book[].class)));
@@ -43,16 +39,17 @@ public class JsonRepository implements Repository {
 	}
 
 	@Override
-	public boolean saveBooks(Set<Book> books, Path path) {
-		if (!Files.exists(path)) {
+	public boolean saveBooks(Set<Book> books) {
+		if (!Files.exists(bookPath)) {
 			try {
-				Files.createFile(path);
+				Files.createFile(bookPath);
 			} catch (IOException e) {
 				System.err.println("IOException : " + e.getMessage());
 				return false;
 			}
 		}
-		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(bookPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 			Gson gson = new Gson();
 			gson.toJson(books, writer);
 			return true;
@@ -64,28 +61,28 @@ public class JsonRepository implements Repository {
 	}
 
 	@Override
-	public boolean saveBook(Book book, Path path) {
-		Set<Book> books = loadBooks(path);
+	public boolean saveBook(Book book) {
+		Set<Book> books = loadBooks();
 		if (!books.contains(book)) {
 			books.add(book);
-			return saveBooks(new HashSet<>(books), path);
+			return saveBooks(new HashSet<>(books));
 		}
 		return true;
 	}
 
 	@Override
-	public boolean deleteBook(Book book, Path path) {
-		Set<Book> books = loadBooks(path);
+	public boolean deleteBook(Book book) {
+		Set<Book> books = loadBooks();
 		if (books.contains(book)) {
 			books.remove(book);
-			return saveBooks(new HashSet<>(books), path);
+			return saveBooks(new HashSet<>(books));
 		}
 		return false;
 	}
 
 	@Override
-	public Set<Author> loadAuthors(Path path) {
-		Set<Book> books = loadBooks(path);
+	public Set<Author> loadAuthors() {
+		Set<Book> books = loadBooks();
 		Set<Author> authors = new LinkedHashSet<>();
 		for (Book book : books) {
 			authors.add(book.getAuthor());
@@ -94,9 +91,11 @@ public class JsonRepository implements Repository {
 	}
 
 	@Override
-	public String moveImage(String imagePath, String newPath) {
-		try (InputStream in = new FileInputStream(Path.of(imagePath).toFile());
-		     OutputStream out = new FileOutputStream(Path.of(newPath).toFile())) {
+	public String moveImage(String imagePath) {
+		Path imageStored = Path.of(imagePath);
+		Path imageDestination = imageDirectoryPath.resolve(imageStored.getFileName());
+		try (InputStream in = new FileInputStream(imageStored.toFile());
+		     OutputStream out = new FileOutputStream(imageDestination.toFile())) {
 
 			byte[] buf = new byte[1024];
 			int len;
@@ -105,7 +104,7 @@ public class JsonRepository implements Repository {
 			}
 			in.close();
 			out.close();
-			return newPath;
+			return imageDestination.toString();
 		} catch (IOException e) {
 			System.err.println("IOException : " + e.getMessage());
 		}

@@ -58,8 +58,8 @@ class JsonRepositoryTest {
 	@Test
 	void loadBooks() {
 		try {
-			JsonRepository jsonRepository = new JsonRepository();
-			Set<Book> booksLoaded = jsonRepository.loadBooks(pathBooksOk);
+			JsonRepository jsonRepository = new JsonRepository(pathBooksOk, null);
+			Set<Book> booksLoaded = jsonRepository.loadBooks();
 			for (Book book : booksLoaded) {
 				assertTrue(bookSet.contains(book));
 			}
@@ -71,8 +71,8 @@ class JsonRepositoryTest {
 	@Test
 	void saveBooks() {
 		try {
-			JsonRepository jsonRepository = new JsonRepository();
-			jsonRepository.saveBooks(bookSet, pathSaveBooks);
+			JsonRepository jsonRepository = new JsonRepository(pathSaveBooks, null);
+			jsonRepository.saveBooks(bookSet);
 			try (Reader reader = Files.newBufferedReader(pathSaveBooks)) {
 				Gson gson = new Gson();
 				Book[] books = gson.fromJson(reader, Book[].class);
@@ -87,9 +87,9 @@ class JsonRepositoryTest {
 	@Test
 	void saveBook() {
 		try {
-			JsonRepository jsonRepository = new JsonRepository();
+			JsonRepository jsonRepository = new JsonRepository(pathAddBook, null);
 			Book book = new Book("title A1", new Author("name A", "firstName A"), "1", "summary A1");
-			jsonRepository.saveBook(book, pathAddBook);
+			jsonRepository.saveBook(book);
 			bookSet.add(book);
 			assertEquals(Files.readString(pathSingleBook), Files.readString(pathAddBook));
 		} catch (Exception e) {
@@ -100,10 +100,10 @@ class JsonRepositoryTest {
 	@Test
 	void deleteBook() {
 		try {
-			JsonRepository jsonRepository = new JsonRepository();
+			JsonRepository jsonRepository = new JsonRepository(pathAddBook, null);
 			Book book = new Book("title A1", new Author("name A", "firstName A"), "1", "summary A1");
 			Files.copy(pathSingleBook, pathAddBook);
-			jsonRepository.deleteBook(book, pathAddBook);
+			jsonRepository.deleteBook(book);
 			assertEquals("[]", Files.readString(pathAddBook));
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -113,9 +113,21 @@ class JsonRepositoryTest {
 	@Test
 	void loadAuthors() {
 		try {
-			JsonRepository jsonRepository = new JsonRepository();
-			Set<Author> authorsLoaded = jsonRepository.loadAuthors(pathBooksOk);
+			JsonRepository jsonRepository = new JsonRepository(pathBooksOk, null);
+			Set<Author> authorsLoaded = jsonRepository.loadAuthors();
 			assertIterableEquals(authorSet, authorsLoaded);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
+	@Test
+	void moveImage() {
+		try {
+			JsonRepository jsonRepository = new JsonRepository(null, Path.of(pathTest));
+			jsonRepository.moveImage(pathRes + "/testImage.png");
+			Path imageDestination = Path.of(pathTest + "/testImage.png");
+			assertTrue(Files.exists(imageDestination));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
