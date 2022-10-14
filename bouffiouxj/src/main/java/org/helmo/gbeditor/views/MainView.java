@@ -18,9 +18,11 @@ import java.util.Set;
 
 public class MainView implements ViewInterface {
 
-	private final int ITEMS_PER_ROW = 5;
 	private final MainPresenter presenter;
 	private ViewInterface baseView;
+	private final GridPane gridPane = new GridPane();
+	private final BorderPane topPane = new BorderPane();
+	private final BorderPane mainPane = new BorderPane();
 
 	public MainView(MainPresenter presenter) {
 		this.presenter = presenter;
@@ -31,6 +33,7 @@ public class MainView implements ViewInterface {
 	private void initView() {
 		Set<Book> bookSet = presenter.getBooksFromAuthor(); //TODO: give this responsibility to the presenter
 		Iterator<Book> ite = bookSet.iterator();
+		int ITEMS_PER_ROW = 5;
 		if (ite.hasNext()) {
 			for (int i = 0; ite.hasNext() && i < bookSet.size(); i++) {
 				Book b = ite.next();
@@ -68,10 +71,6 @@ public class MainView implements ViewInterface {
 		mainPane.setCenter(gridPane);
 	}
 
-	private final GridPane gridPane = new GridPane();
-	private final BorderPane topPane = new BorderPane();
-	private final BorderPane mainPane = new BorderPane();
-
 	@Override
 	public Parent getRoot() {
 		return mainPane;
@@ -92,6 +91,7 @@ public class MainView implements ViewInterface {
 		baseView.changeView(viewName);
 	}
 
+	@Override
 	public void refresh() {
 		gridPane.getChildren().clear();
 		initView();

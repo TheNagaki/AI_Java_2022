@@ -94,16 +94,16 @@ public class JsonRepository implements Repository {
 	public String moveImage(String imagePath) {
 		Path imageStored = Path.of(imagePath);
 		Path imageDestination = imageDirectoryPath.resolve(imageStored.getFileName());
-		try (InputStream in = new FileInputStream(imageStored.toFile());
-		     OutputStream out = new FileOutputStream(imageDestination.toFile())) {
+		try (InputStream inputStream = new FileInputStream(imageStored.toFile());
+		     OutputStream outputStream = new FileOutputStream(imageDestination.toFile())) {
 
 			byte[] buf = new byte[1024];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
+			int length;
+			while ((length = inputStream.read(buf)) > 0) {
+				outputStream.write(buf, 0, length);
 			}
-			in.close();
-			out.close();
+			inputStream.close();
+			outputStream.close();
 			return imageDestination.toString();
 		} catch (IOException e) {
 			System.err.println("IOException : " + e.getMessage());

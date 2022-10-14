@@ -30,6 +30,14 @@ public class CreateBookView implements ViewInterface {
 	private final BorderPane mainPane = new BorderPane();
 	private Button createBookButton;
 	private File imageChosen;
+	private final BorderPane topPane = new BorderPane();
+	private final FileChooser fileChooser = new FileChooser();
+
+	private final GridPane centerGrid = new GridPane();
+	private final TextArea inputTitle = new TextArea();
+	private final TextField inputIsbn = new TextField();
+	private final TextArea inputSummary = new TextArea();
+	private final Label authorName = new Label("");
 
 	public CreateBookView(CreateBookPresenter createBookPresenter) {
 		this.presenter = createBookPresenter;
@@ -37,17 +45,9 @@ public class CreateBookView implements ViewInterface {
 		initView();
 	}
 
-	private final BorderPane topPane = new BorderPane();
-	private final FileChooser fileChooser = new FileChooser();
-
 	{
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
 	}
-
-	private final GridPane centerGrid = new GridPane();
-	private final TextArea inputTitle = new TextArea();
-	private final TextField inputIsbn = new TextField();
-	private final TextArea inputSummary = new TextArea();
 
 	{
 		inputTitle.setPrefColumnCount(25);
@@ -129,8 +129,6 @@ public class CreateBookView implements ViewInterface {
 				inputSummary.getText().length() <= 0 || inputTitle.getText().length() > MAX_TITLE ||
 				inputIsbn.getText().length() > MAX_ISBN || inputSummary.getText().length() > MAX_SUMMARY);
 	}
-
-	private final Label authorName = new Label("");
 
 	private void initView() {
 		Label viewTitle = new Label("Créez votre livre");

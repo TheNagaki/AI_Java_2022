@@ -2,7 +2,6 @@ package org.helmo.gbeditor.models;
 
 import org.helmo.gbeditor.presenters.GBEInterface;
 import org.helmo.gbeditor.repositories.Repository;
-import org.helmo.gbeditor.utils.IsbnChecker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +11,7 @@ public class GBEditor implements GBEInterface {
 	private Author currentAuthor;
 	private final Set<Book> books;
 	private final Repository repository;
+
 	public GBEditor(Repository repository) {
 		this.repository = repository;
 		this.authors = repository.loadAuthors();
@@ -30,15 +30,13 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public boolean createBook(String title, String isbn, String summary, String imagePath) {
-		if (IsbnChecker.checkIsbn(isbn)) {
-			Book book = new Book(title, currentAuthor, isbn, summary, "");
-			if (!books.contains(book)) {
-				String path2Image = repository.moveImage(imagePath);
-				book = new Book(title, currentAuthor, isbn, summary, path2Image);
-				books.add(book);
-				repository.saveBook(book);
-				return true;
-			}
+		Book book = new Book(title, currentAuthor, isbn, summary, ""); //check isbn in constructor
+		if (!books.contains(book)) {
+			String path2Image = repository.moveImage(imagePath);
+			book = new Book(title, currentAuthor, isbn, summary, path2Image);
+			books.add(book);
+			repository.saveBook(book);
+			return true;
 		}
 		return false;
 	}

@@ -6,7 +6,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import org.helmo.gbeditor.presenters.ConnexionPresenter;
@@ -41,23 +40,23 @@ public class ConnexionView implements ViewInterface {
 
 	private final GridPane centerGrid = new GridPane();
 	private final TextField inputName = new TextField();
-	TextField inputFirstName = new TextField();
+	private final TextField inputFirstName = new TextField();
+	private final VBox mainPane = new VBox();
+	private final Button validerButton = new Button("Valider");
 
 	{
-		inputName.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputName.setText(inputName.getText().replaceAll("[^a-zA-Z- ]", ""));
-			if (inputName.getText().length() >= 20) {
-				event.consume();
-			}
-			inputName.positionCaret(inputName.getText().length());
-		});
-		inputFirstName.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputFirstName.setText(inputFirstName.getText().replaceAll("[^a-zA-Z- ]", ""));
-			if (inputFirstName.getText().length() >= 20) {
-				event.consume();
-			}
-			inputFirstName.positionCaret(inputFirstName.getText().length());
-		});
+		inputName.textProperty().addListener((observable, oldValue, newValue) -> handleNewValue(newValue, inputName));
+		inputFirstName.textProperty().addListener((observable, oldValue, newValue) -> handleNewValue(newValue, inputFirstName));
+	}
+
+	private void handleNewValue(String newValue, TextField textField) {
+		newValue = newValue.replaceAll("[^a-zA-Z- ]", "");
+		if (newValue.length() >= 20) {
+			newValue = newValue.substring(0, 20);
+		}
+		textField.setText(newValue);
+		textField.positionCaret(textField.getText().length());
+		validerButton.setDisable(checkDisableButton());
 	}
 
 	{
@@ -67,23 +66,26 @@ public class ConnexionView implements ViewInterface {
 		centerGrid.add(iv, 0, 0, 2, 1);
 		Label lName = new Label("Nom :");
 		Label lFirstName = new Label("Prénom");
-		Button valider = new Button("Valider");
-		valider.setOnAction(action -> clickOnValidate());
+
+		validerButton.setOnAction(action -> clickOnValidate());
 		centerGrid.add(lName, 0, 1);
 		centerGrid.add(inputName, 1, 1);
 		centerGrid.add(lFirstName, 0, 2);
 		centerGrid.add(inputFirstName, 1, 2);
-		centerGrid.add(valider, 0, 3);
+		centerGrid.add(validerButton, 0, 3);
 
-		inputName.setOnAction(action -> clickOnValidate());
-		inputFirstName.setOnAction(action -> clickOnValidate());
+		inputName.setOnAction(action -> handleEnter());
+		inputFirstName.setOnAction(action -> handleEnter());
+	}
+
+	private boolean checkDisableButton() {
+		return (inputName.getText().isBlank() || inputFirstName.getText().isBlank() ||
+				inputName.getText().length() > 20 || inputFirstName.getText().length() > 20);
 	}
 
 	private void clickOnValidate() {
 		presenter.connect(inputName.getText().strip(), inputFirstName.getText().strip());
 	}
-
-	private final VBox mainPane = new VBox();
 
 	{
 		mainPane.setAlignment(Pos.CENTER);
@@ -122,5 +124,18 @@ public class ConnexionView implements ViewInterface {
 		inputFirstName.setText("");
 		inputFirstName.setPromptText("Votre prénom");
 		display("");
+		validerButton.setDisable(checkDisableButton());
+	}
+
+	private void handleEnter() {
+		if (!checkDisableButton()) {
+			clickOnValidate();
+		} else {
+			if (inputName.getText().isEmpty() || (!inputFirstName.getText().isEmpty() && inputName.getText().length() >= 20)) {
+				inputName.requestFocus();
+			} else {
+				inputFirstName.requestFocus();
+			}
+		}
 	}
 }
