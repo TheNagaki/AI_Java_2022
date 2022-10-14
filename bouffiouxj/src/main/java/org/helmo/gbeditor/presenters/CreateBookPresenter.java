@@ -13,7 +13,11 @@ public class CreateBookPresenter extends Presenter {
 		}
 	}
 
-	public String getAuthorName() {
+	private String getAuthorName() {
 		return getEngine().getAuthorName();
+	}
+
+	public void askAuthorName() {
+		getView().setAuthorName(getAuthorName());
 	}
 }

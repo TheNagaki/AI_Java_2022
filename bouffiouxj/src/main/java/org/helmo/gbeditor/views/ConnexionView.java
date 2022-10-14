@@ -127,6 +127,11 @@ public class ConnexionView implements ViewInterface {
 		validerButton.setDisable(checkDisableButton());
 	}
 
+	@Override
+	public void setAuthorName(String authorName) {
+		//Do nothing because this view is not used in this context
+	}
+
 	private void handleEnter() {
 		if (!checkDisableButton()) {
 			clickOnValidate();

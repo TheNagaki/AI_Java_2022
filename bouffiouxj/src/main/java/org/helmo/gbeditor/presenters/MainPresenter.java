@@ -10,11 +10,15 @@ public class MainPresenter extends Presenter {
 		super(gbEditor);
 	}
 
-	public String getAuthorName() {
+	private String getAuthorName() {
 		return getEngine().getAuthorName() != null ? getEngine().getAuthorName() : "Prénom Nom";
 	}
 
 	public Set<Book> getBooksFromAuthor() {
 		return getEngine().getBooksFromCurrentAuthor() != null ? getEngine().getBooksFromCurrentAuthor() : new HashSet<>();
+	}
+
+	public void askAuthorName() {
+		getView().setAuthorName(getAuthorName());
 	}
 }

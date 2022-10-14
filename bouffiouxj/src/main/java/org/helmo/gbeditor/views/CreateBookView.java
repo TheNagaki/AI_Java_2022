@@ -217,8 +217,13 @@ public class CreateBookView implements ViewInterface {
 		inputTitle.setText("");
 		inputIsbn.setText("");
 		inputSummary.setText("");
-		authorName.setText(presenter.getAuthorName());
+		presenter.askAuthorName();
 		checkToEnableButton();
+	}
+
+	@Override
+	public void setAuthorName(String authorName) {
+		this.authorName.setText(authorName);
 	}
 
 	private void createBook(String title, String isbn, String summary) {

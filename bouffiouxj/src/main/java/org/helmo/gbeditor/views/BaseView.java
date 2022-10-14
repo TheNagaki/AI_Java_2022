@@ -55,4 +55,9 @@ public class BaseView implements ViewInterface {
 	public void refresh() {
 		currentView.refresh();
 	}
+
+	@Override
+	public void setAuthorName(String authorName) {
+		//Do nothing because this view is not used in this context
+	}
 }

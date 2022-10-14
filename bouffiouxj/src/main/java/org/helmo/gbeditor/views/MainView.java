@@ -60,15 +60,14 @@ public class MainView implements ViewInterface {
 		gridPane.setHgap(10);
 		gridPane.setVgap(10);
 
-		Label viewAuthorName = new Label(presenter.getAuthorName());
-		viewAuthorName.getStyleClass().add("authorName");
-		topPane.setRight(viewAuthorName);
 		Label viewTitle = new Label("Mes livres");
 		viewTitle.getStyleClass().add("title");
 		topPane.setCenter(viewTitle);
 
 		mainPane.setTop(topPane);
 		mainPane.setCenter(gridPane);
+
+		presenter.askAuthorName();
 	}
 
 	@Override
@@ -95,5 +94,11 @@ public class MainView implements ViewInterface {
 	public void refresh() {
 		gridPane.getChildren().clear();
 		initView();
+	}
+
+	public void setAuthorName(String name) {
+		Label viewAuthorName = new Label(name);
+		viewAuthorName.getStyleClass().add("authorName");
+		topPane.setRight(viewAuthorName);
 	}
 }

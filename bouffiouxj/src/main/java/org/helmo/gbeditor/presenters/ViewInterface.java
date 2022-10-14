@@ -11,4 +11,6 @@ public interface ViewInterface {
 	void changeView(ViewsEnum viewName);
 
 	void refresh();
+
+	void setAuthorName(String authorName);
 }
