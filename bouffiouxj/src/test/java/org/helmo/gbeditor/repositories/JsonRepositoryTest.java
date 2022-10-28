@@ -25,20 +25,22 @@ class JsonRepositoryTest {
 	private final Path pathSaveBooks = Path.of(pathTest + "/saveBooks.json");
 	private final Path pathAddBook = Path.of(pathTest + "/addBook.json");
 	private Set<Book> bookSet;
-	private Set<Author> authorSet;
+	private HashSet<Author> authorSet;
+	private Book bookA;
 
 	@BeforeEach
 	void setUp() {
-		final Author authorA = new Author("name A", "firstName A");
+		final Author authorA = new Author("name A", "firstName A", 961380);
 		final Author authorB = new Author("name B", "firstName B");
 		bookSet = new HashSet<>();
 		authorSet = new HashSet<>();
 		authorSet.add(authorA);
 		authorSet.add(authorB);
-		bookSet.add(new Book("title A1", authorA, "1", "summary A1"));
-		bookSet.add(new Book("title A2", authorA, "2", "summary A2"));
-		bookSet.add(new Book("title B1", authorB, "3", "summary B1"));
-		bookSet.add(new Book("title B2", authorB, "4", "summary B2"));
+		bookA = new Book("title A1", authorA, "summary A1", "2-961380-61-3");
+		bookSet.add(bookA);
+		bookSet.add(new Book("title A2", authorA, "summary A2"));
+		bookSet.add(new Book("title B1", authorB, "summary B1"));
+		bookSet.add(new Book("title B2", authorB, "summary B2"));
 	}
 
 	@AfterEach
@@ -88,9 +90,7 @@ class JsonRepositoryTest {
 	void saveBook() {
 		try {
 			JsonRepository jsonRepository = new JsonRepository(pathAddBook, null);
-			Book book = new Book("title A1", new Author("name A", "firstName A"), "1", "summary A1");
-			jsonRepository.saveBook(book);
-			bookSet.add(book);
+			jsonRepository.saveBook(bookA);
 			assertEquals(Files.readString(pathSingleBook), Files.readString(pathAddBook));
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -101,7 +101,7 @@ class JsonRepositoryTest {
 	void deleteBook() {
 		try {
 			JsonRepository jsonRepository = new JsonRepository(pathAddBook, null);
-			Book book = new Book("title A1", new Author("name A", "firstName A"), "1", "summary A1");
+			Book book = new Book("title A1", new Author("name A", "firstName A"), "summary A1");
 			Files.copy(pathSingleBook, pathAddBook);
 			jsonRepository.deleteBook(book);
 			assertEquals("[]", Files.readString(pathAddBook));

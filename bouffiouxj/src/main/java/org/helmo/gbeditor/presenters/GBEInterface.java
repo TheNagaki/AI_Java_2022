@@ -7,7 +7,7 @@ import java.util.Set;
 public interface GBEInterface {
 	boolean connect(String name, String firstName);
 
-	boolean createBook(String title, String isbn, String summary, String imagePath);
+	String createBook(String title, String summary, String isbn, String imagePath);
 
 	boolean deleteBook(Book book);
 
@@ -18,4 +18,6 @@ public interface GBEInterface {
 	String getAuthorName();
 
 	Set<Book> getBooksFromCurrentAuthor();
+
+	int[] presetISBN();
 }

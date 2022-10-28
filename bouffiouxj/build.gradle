@@ -10,8 +10,8 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     //PMD
-	id 'pmd'
-	//Code coverage
+    id 'pmd'
+    //Code coverage
     id 'jacoco'
     //JavaFX
     id 'org.openjfx.javafxplugin' version '0.0.10'
@@ -19,14 +19,14 @@ plugins {
 
 repositories {
     // Use Maven Central for resolving dependencies.
-	mavenCentral()
-	//jcenter()  to use if mavenCentral doesn't find dependencies
+    mavenCentral()
+    //jcenter()  to use if mavenCentral doesn't find dependencies
 }
 
 dependencies {
-     // Use JUnit Jupiter for testing.
+    // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
-    
+
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'org.assertj:assertj-core:3.20.2'
     //Use derby as test database
@@ -49,21 +49,22 @@ tasks.named('test') {
 }
 
 java {
-  toolchain {
-      languageVersion = JavaLanguageVersion.of(11)
-  }
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 }
 
 javafx {
-	version = "17"
-	modules = ['javafx.controls']
+    version = "17"
+    modules = ['javafx.controls']
 }
 
 pmd {
-	//To also display results in the console
+    //To also display results in the console
     consoleOutput = true
     toolVersion = "6.21.0"
     ruleSetFiles = files("config/pmd/b2-ruleset.xml")
+    ruleSets = []
     //maxFailures = 100
     ignoreFailures = true //but don't forget to check the pmd results!
 }

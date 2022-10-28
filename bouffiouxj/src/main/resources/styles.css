@@ -4,9 +4,22 @@
     -fx-text-fill: #000000;
     -fx-padding: 0 0 5 0;
 }
-.author_name {
+
+.author-name {
     -fx-font-size: 15px;
     -fx-alignment: top-right;
-    -fx-text-fill: #000000;
     -fx-padding: 0 20 0 0;
+}
+
+.thumbnail-title {
+    -fx-font-size: 15px;
+    -fx-text-fill: #000000;
+    -fx-text-overrun: ellipsis;
+    -fx-alignment: center;
+}
+
+.thumbnail-isbn{
+    -fx-font-size: 11px;
+    -fx-text-fill: #242424;
+    -fx-font-style: italic;
 }

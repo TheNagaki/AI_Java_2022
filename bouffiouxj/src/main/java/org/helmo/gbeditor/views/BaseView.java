@@ -54,6 +54,7 @@ public class BaseView implements ViewInterface {
 	@Override
 	public void refresh() {
 		currentView.refresh();
+		display("");
 	}
 
 	@Override

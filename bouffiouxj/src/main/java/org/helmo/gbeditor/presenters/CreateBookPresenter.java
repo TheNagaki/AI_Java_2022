@@ -1,23 +1,36 @@
 package org.helmo.gbeditor.presenters;
 
-public class CreateBookPresenter extends Presenter {
+public class CreateBookPresenter implements Presenter {
+	private final GBEInterface engine;
+	private CreateBookViewInterface view;
+
 	public CreateBookPresenter(GBEInterface editor) {
-		super(editor);
+		this.engine = editor;
 	}
 
 	public void createBook(String title, String isbn, String summary, String imagePath) {
-		if (getEngine().createBook(title, isbn, summary, imagePath)) {
-			getView().display(String.format("Book %s created.", title));
-		} else {
-			getView().display("Book not created.");
-		}
-	}
-
-	private String getAuthorName() {
-		return getEngine().getAuthorName();
+		view.display(engine.createBook(title, summary, isbn, imagePath));
 	}
 
 	public void askAuthorName() {
-		getView().setAuthorName(getAuthorName());
+		view.setAuthorName(engine.getAuthorName());
+	}
+
+	public void setView(CreateBookViewInterface view) {
+		this.view = view;
+	}
+
+	@Override
+	public GBEInterface getEngine() {
+		return engine;
+	}
+
+	@Override
+	public ViewInterface getView() {
+		return view;
+	}
+
+	public void askISBN() {
+		view.presetISBN(engine.presetISBN());
 	}
 }

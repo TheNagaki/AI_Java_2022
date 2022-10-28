@@ -8,19 +8,26 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.helmo.gbeditor.presenters.CreateBookPresenter;
+import org.helmo.gbeditor.presenters.CreateBookViewInterface;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.io.File;
 import java.util.Objects;
 
-public class CreateBookView implements ViewInterface {
+/**
+ * View for the creation of a book
+ * It displays a form to fill in order to create a new book (title, summary, ISBN, image)
+ * It also allows to cancel the creation of the book and to go back to the main view
+ */
+public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 
 	private static final int MAX_TITLE = 150;
 	private static final int MAX_ISBN = 13;
@@ -38,7 +45,12 @@ public class CreateBookView implements ViewInterface {
 	private final TextField inputIsbn = new TextField();
 	private final TextArea inputSummary = new TextArea();
 	private final Label authorName = new Label("");
+	private String baseIsbn;
 
+	/**
+	 * Constructor of the CreateBookView class
+	 * @param createBookPresenter the presenter of the view
+	 */
 	public CreateBookView(CreateBookPresenter createBookPresenter) {
 		this.presenter = createBookPresenter;
 		this.presenter.setView(this);
@@ -47,9 +59,7 @@ public class CreateBookView implements ViewInterface {
 
 	{
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
-	}
 
-	{
 		inputTitle.setPrefColumnCount(25);
 		inputTitle.setPrefRowCount(4);
 
@@ -61,61 +71,52 @@ public class CreateBookView implements ViewInterface {
 
 		// You can not enter more than 150 in the text area for the title
 		inputTitle.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputTitle.setText(inputTitle.getText().replaceAll("[^0-9a-zA-Z.,;!?() \\-/]", ""));
+			inputTitle.setText(inputTitle.getText().replaceAll("[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?() \\-/]", ""));
 			if (inputTitle.getText().length() > MAX_TITLE) {
 				event.consume();
 				display(String.format("Vous avez atteint la limite de %d caractères pour le titre", MAX_TITLE));
 			}
-//			else {
-//				final int MAX_COLUMNS = 23;
-//				final int MAX_ROWS = 4;
-//				final int actualColumns = inputTitle.getPrefColumnCount();
-//				final int actualRows = inputTitle.getPrefRowCount();
-//				double rowsNeeded = (inputTitle.getText().length() * inputTitle.getFont().getSize()) / inputSummary.getPrefColumnCount();
-//				if (actualColumns < MAX_COLUMNS) {
-//					inputTitle.setPrefColumnCount(actualColumns + 1);
-//				} else if (actualRows < MAX_ROWS && rowsNeeded > 1) {
-//					inputTitle.setPrefRowCount((int) (Math.floor(rowsNeeded) + 1));
-//				}
-//			}
 			inputTitle.positionCaret(inputTitle.getText().length());
 			checkToEnableButton();
-//			inputTitle.setPrefHeight(inputTitle.getPrefHeight() + 10);
 		});
-		// You can not enter more than 13 in the text field for the isbn
-		inputIsbn.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			if (inputIsbn.getText().length() > MAX_ISBN) {
-				event.consume();
+
+//		 You can not enter more than 13 in the text field for the isbn
+		inputIsbn.addEventHandler(KeyEvent.KEY_TYPED, keyEvent -> {
+			if (inputIsbn.getText().length() >= MAX_ISBN) {
+				keyEvent.consume();
 				display(String.format("L'ISBN ne peut pas dépasser %d caractères", MAX_ISBN));
 			} else {
-				String cleanedIsbn = inputIsbn.getText().strip().replaceAll("[^0-9]", "");
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < cleanedIsbn.length(); i++) {
-					if (sb.length() == 1 || sb.length() == 8 || sb.length() == 11) {
-						sb.append("-");
-					}
-					sb.append(cleanedIsbn.charAt(i));
+				if (!keyEvent.getCharacter().matches("[0-9X]")) {
+					keyEvent.consume();
 				}
-				inputIsbn.setText(sb.toString());
+				String text = inputIsbn.getText().replaceAll("[^0-9]", "");
+				String content = baseIsbn;
+				if (text.length() >= 9) {
+					content += text.substring(7, 9) + "-" + (text.length() == 10 ? text.charAt(9) : "");
+				} else if (text.length() > 7) {
+					content += text.substring(7);
+				}
+				inputIsbn.setText(content);
 			}
 			inputIsbn.positionCaret(inputIsbn.getText().length());
 			checkToEnableButton();
 		});
+
+		inputIsbn.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+			if (keyEvent.getCode().equals(KeyCode.DELETE) || keyEvent.getCode().equals(KeyCode.BACK_SPACE)) {
+				inputIsbn.setText(baseIsbn);
+				inputIsbn.positionCaret(inputIsbn.getText().length());
+			}
+			keyEvent.consume();
+		});
+
 		// You can not enter more than 500 characters in the text area for the summary
 		inputSummary.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputSummary.setText(inputSummary.getText().replaceAll("[^0-9a-zA-Z.,;!?() \\-/]", ""));
+			inputSummary.setText(inputSummary.getText().replaceAll("[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?() \\-/]", ""));
 			if (inputSummary.getText().length() > MAX_SUMMARY) {
 				event.consume();
 				display(String.format("Vous avez atteint la limite de %d caractères pour le résumé", MAX_SUMMARY));
 			}
-//			} else {
-//				final int MAX_ROWS = 8;
-//				final int actualRows = inputSummary.getPrefRowCount();
-//				double rowsNeeded = (inputSummary.getText().length() * inputSummary.getFont().getSize()) / inputSummary.getWidth();
-//				if (actualRows < MAX_ROWS && rowsNeeded > 1) {
-//					inputSummary.setPrefRowCount((int) (Math.floor(rowsNeeded) + 1));
-//				}
-//			}
 			inputSummary.positionCaret(inputSummary.getText().length());
 			checkToEnableButton();
 		});
@@ -125,8 +126,8 @@ public class CreateBookView implements ViewInterface {
 	 * Enables or disables the create book button depending on the state of the form (if all fields are filled and under the limit)
 	 */
 	private void checkToEnableButton() {
-		createBookButton.setDisable(inputTitle.getText().length() <= 0 || inputIsbn.getText().length() <= 0 ||
-				inputSummary.getText().length() <= 0 || inputTitle.getText().length() > MAX_TITLE ||
+		createBookButton.setDisable(inputTitle.getText().length() == 0 || inputIsbn.getText().length() == 0 ||
+				inputSummary.getText().length() == 0 || inputTitle.getText().length() > MAX_TITLE ||
 				inputIsbn.getText().length() > MAX_ISBN || inputSummary.getText().length() > MAX_SUMMARY);
 	}
 
@@ -134,7 +135,7 @@ public class CreateBookView implements ViewInterface {
 		Label viewTitle = new Label("Créez votre livre");
 		viewTitle.getStyleClass().add("title");
 		topPane.setCenter(viewTitle);
-		authorName.getStyleClass().add("author_name");
+		authorName.getStyleClass().add("author-name");
 		topPane.setRight(authorName);
 
 		centerGrid.setAlignment(Pos.CENTER);
@@ -189,7 +190,6 @@ public class CreateBookView implements ViewInterface {
 		centerGrid.setVgap(10);
 		mainPane.setCenter(centerGrid);
 		mainPane.setTop(topPane);
-		refresh();
 	}
 
 	@Override
@@ -214,16 +214,24 @@ public class CreateBookView implements ViewInterface {
 
 	@Override
 	public void refresh() {
-		inputTitle.setText("");
-		inputIsbn.setText("");
-		inputSummary.setText("");
+		presenter.askISBN();
 		presenter.askAuthorName();
+		inputTitle.setText("");
+		inputSummary.setText("");
 		checkToEnableButton();
 	}
 
 	@Override
 	public void setAuthorName(String authorName) {
 		this.authorName.setText(authorName);
+	}
+
+	@Override
+	public void presetISBN(int[] baseIsbn) {
+		if (baseIsbn.length == 2) {
+			this.baseIsbn = String.format("%d-%d-", baseIsbn[0], baseIsbn[1]);
+			inputIsbn.setText(this.baseIsbn);
+		}
 	}
 
 	private void createBook(String title, String isbn, String summary) {
@@ -241,7 +249,7 @@ public class CreateBookView implements ViewInterface {
 			answer += "Le résumé ne doit pas dépasser 500 caractères.\n";
 		}
 		if (answer.isBlank()) {
-			presenter.createBook(title, isbn, summary, imageChosen.getAbsolutePath());
+			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		} else {
 			display(answer);
 		}

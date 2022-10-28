@@ -92,6 +92,10 @@ public class ConnexionView implements ViewInterface {
 		mainPane.getChildren().addAll(titlePane, centerGrid);
 	}
 
+	/**
+	 * Constructor of the ConnexionView
+	 * @param presenter the presenter of the view
+	 */
 	public ConnexionView(ConnexionPresenter presenter) {
 		this.presenter = presenter;
 		presenter.setView(this);

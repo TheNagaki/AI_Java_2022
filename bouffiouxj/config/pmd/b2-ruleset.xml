@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
     <description>
-        Ensemble de règles à valider pour le labo 5 de POO.
+        Ensemble de règles à valider pour l'Activité Intégrative.
     </description>
 
     <!-- Your rules will come here -->
@@ -23,6 +23,12 @@
         </properties>
     </rule>
     <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+    
+    <rule ref="category/java/design.xml/CouplingBetweenObjects">
+        <properties>
+            <property name="threshold" value="20" />
+        </properties>
+    </rule>
     <rule ref="category/java/bestpractices.xml/MethodReturnsInternalArray" />
     <rule ref="category/java/bestpractices.xml/MissingOverride" />
     <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine" />
@@ -54,7 +60,7 @@
     <rule ref="category/java/codestyle.xml/PrematureDeclaration" />
     <rule ref="category/java/codestyle.xml/ShortClassName">
         <properties>
-            <property name="minimum" value="4" />
+            <property name="minimum" value="3" />
         </properties>
     </rule>
     <rule ref="category/java/codestyle.xml/UnnecessaryLocalBeforeReturn" />
@@ -86,18 +92,12 @@
             <property name="ncssOptions" value="" />
         </properties>
     </rule>
-    <rule ref="category/java/design.xml/LawOfDemeter" />
     <rule ref="category/java/design.xml/SimplifyBooleanReturns" />
     <rule ref="category/java/design.xml/SimplifyConditional" />
     <rule ref="category/java/design.xml/SingularField" />
     <rule ref="category/java/design.xml/TooManyFields">
         <properties>
             <property name="maxfields" value="5" />
-        </properties>
-    </rule>
-    <rule ref="category/java/design.xml/TooManyMethods">
-        <properties>
-            <property name="maxmethods" value="15" />
         </properties>
     </rule>
     <rule ref="category/java/documentation.xml/CommentRequired">
@@ -119,4 +119,9 @@
         </properties>
     </rule>
     <rule ref="category/java/performance.xml/InefficientEmptyStringCheck" />
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="DataflowAnomalyAnalysis"  />
+        <exclude name="BeanMembersShouldSerialize" />
+        <exclude name="MissingSerialVersionUID" />
+    </rule>   
 </ruleset>

@@ -3,6 +3,7 @@ module org.helmo {
 	requires java.desktop;
 	requires javafx.graphics;
 	requires com.google.gson;
+	opens org.helmo.gbeditor.repositories to com.google.gson;
 	opens org.helmo.gbeditor.models to com.google.gson;
 	exports org.helmo.gbeditor;
 }

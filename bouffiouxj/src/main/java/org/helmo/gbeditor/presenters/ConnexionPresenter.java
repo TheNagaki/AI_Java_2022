@@ -1,16 +1,35 @@
 package org.helmo.gbeditor.presenters;
 
-public class ConnexionPresenter extends Presenter {
+import org.helmo.gbeditor.views.ConnexionView;
+
+public class ConnexionPresenter implements Presenter {
+
+	private final GBEInterface engine;
+	private ConnexionView view;
 
 	public ConnexionPresenter(GBEInterface engine) {
-		super(engine);
+		this.engine = engine;
 	}
 
 	public void connect(String name, String firstName) {
-		if (getEngine().connect(name, firstName)) {
-			getView().changeView(ViewsEnum.MAIN);
+		if (engine.connect(name, firstName)) {
+			view.changeView(ViewsEnum.MAIN);
 		} else {
-			getView().display("Erreur de connexion");
+			view.display("Erreur de connexion");
 		}
+	}
+
+	public void setView(ConnexionView connexionView) {
+		this.view = connexionView;
+	}
+
+	@Override
+	public GBEInterface getEngine() {
+		return engine;
+	}
+
+	@Override
+	public ViewInterface getView() {
+		return view;
 	}
 }
