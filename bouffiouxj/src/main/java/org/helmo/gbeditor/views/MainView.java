@@ -34,6 +34,7 @@ public class MainView implements ViewInterface {
 
 	/**
 	 * Constructor of the MainView class
+	 *
 	 * @param mainPresenter the presenter of the view
 	 */
 	public MainView(MainPresenter mainPresenter) {
@@ -151,6 +152,7 @@ public class MainView implements ViewInterface {
 	public void refresh() {
 		gridPane.getChildren().clear();
 		initView();
+		display("");
 	}
 
 	@Override

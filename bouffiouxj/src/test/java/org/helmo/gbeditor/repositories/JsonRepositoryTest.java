@@ -17,6 +17,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * This class is a test class for the JsonRepository class
+ */
 class JsonRepositoryTest {
 	private final String pathRes = ("src/test/resources/repositories/resFiles");
 	private final String pathTest = ("src/test/resources/repositories/testedFiles");
@@ -25,7 +28,7 @@ class JsonRepositoryTest {
 	private final Path pathSaveBooks = Path.of(pathTest + "/saveBooks.json");
 	private final Path pathAddBook = Path.of(pathTest + "/addBook.json");
 	private Set<Book> bookSet;
-	private HashSet<Author> authorSet;
+	private Set<Author> authorSet;
 	private Book bookA;
 
 	@BeforeEach
@@ -125,7 +128,7 @@ class JsonRepositoryTest {
 	void moveImage() {
 		try {
 			JsonRepository jsonRepository = new JsonRepository(null, Path.of(pathTest));
-			jsonRepository.moveImage(pathRes + "/testImage.png");
+			jsonRepository.copyImage(pathRes + "/testImage.png");
 			Path imageDestination = Path.of(pathTest + "/testImage.png");
 			assertTrue(Files.exists(imageDestination));
 		} catch (Exception e) {

@@ -49,10 +49,11 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 
 	/**
 	 * Constructor of the CreateBookView class
-	 * @param createBookPresenter the presenter of the view
+	 *
+	 * @param crBkPresenter the presenter of the view
 	 */
-	public CreateBookView(CreateBookPresenter createBookPresenter) {
-		this.presenter = createBookPresenter;
+	public CreateBookView(CreateBookPresenter crBkPresenter) {
+		this.presenter = crBkPresenter;
 		this.presenter.setView(this);
 		initView();
 	}
@@ -80,6 +81,8 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 			checkToEnableButton();
 		});
 
+		final int ISBN_SECOND_DASH = 7;
+		final int ISBN_LAST_DASH = 9;
 //		 You can not enter more than 13 in the text field for the isbn
 		inputIsbn.addEventHandler(KeyEvent.KEY_TYPED, keyEvent -> {
 			if (inputIsbn.getText().length() >= MAX_ISBN) {
@@ -91,10 +94,10 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 				}
 				String text = inputIsbn.getText().replaceAll("[^0-9]", "");
 				String content = baseIsbn;
-				if (text.length() >= 9) {
-					content += text.substring(7, 9) + "-" + (text.length() == 10 ? text.charAt(9) : "");
-				} else if (text.length() > 7) {
-					content += text.substring(7);
+				if (text.length() >= ISBN_LAST_DASH) {
+					content += text.substring(ISBN_SECOND_DASH, ISBN_LAST_DASH) + "-" + (text.length() == 10 ? text.charAt(9) : "");
+				} else if (text.length() > ISBN_SECOND_DASH) {
+					content += text.substring(ISBN_SECOND_DASH);
 				}
 				inputIsbn.setText(content);
 			}
@@ -171,8 +174,8 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 		Label title = new Label("Titre :");
 		Label isbn = new Label("ISBN :");
 		Label summary = new Label("Résumé :");
-		Button cancelCreationButton = new Button("Annuler");
-		cancelCreationButton.setOnAction(action -> changeView(ViewsEnum.MAIN));
+		Button cancelButton = new Button("Annuler");
+		cancelButton.setOnAction(action -> changeView(ViewsEnum.MAIN));
 		centerGrid.setAlignment(Pos.CENTER);
 		createBookButton = new Button("Valider");
 		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), inputIsbn.getText().strip(), inputSummary.getText().strip()));
@@ -185,7 +188,7 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 		centerGrid.add(imageLabel, 0, 3, 2, 1);
 		centerGrid.add(imageBox, 1, 3, 2, 2);
 		centerGrid.add(createBookButton, 0, 8);
-		centerGrid.add(cancelCreationButton, 1, 8);
+		centerGrid.add(cancelButton, 1, 8);
 		centerGrid.setHgap(10);
 		centerGrid.setVgap(10);
 		mainPane.setCenter(centerGrid);
@@ -219,6 +222,7 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 		inputTitle.setText("");
 		inputSummary.setText("");
 		checkToEnableButton();
+		display("");
 	}
 
 	@Override
@@ -228,30 +232,14 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 
 	@Override
 	public void presetISBN(int[] baseIsbn) {
-		if (baseIsbn.length == 2) {
+		final int NUMBER_OF_PARAMS = 2;
+		if (baseIsbn.length == NUMBER_OF_PARAMS) {
 			this.baseIsbn = String.format("%d-%d-", baseIsbn[0], baseIsbn[1]);
 			inputIsbn.setText(this.baseIsbn);
 		}
 	}
 
 	private void createBook(String title, String isbn, String summary) {
-		String answer = "";
-		if (title.isBlank() || isbn.isBlank() || summary.isBlank()) {
-			answer += "Veuillez remplir tous les champs.\n";
-		}
-		if (title.length() > 150) {
-			answer += "Le titre ne doit pas dépasser 150 caractères.\n";
-		}
-		if (!isbn.isBlank() && isbn.length() != 13) {
-			answer += "L'ISBN doit contenir 13 caractères.\n";
-		}
-		if (summary.length() > 500) {
-			answer += "Le résumé ne doit pas dépasser 500 caractères.\n";
-		}
-		if (answer.isBlank()) {
-			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
-		} else {
-			display(answer);
-		}
+		presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 	}
 }

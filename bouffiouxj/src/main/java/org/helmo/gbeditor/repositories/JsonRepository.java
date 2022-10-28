@@ -11,6 +11,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+/**
+ * JsonRepository is a class that implements the Repository interface.
+ * It is used to load and save books from a json file.
+ */
 public class JsonRepository implements Repository {
 
 	private static final byte[] JPG_BYTES = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
@@ -19,11 +23,18 @@ public class JsonRepository implements Repository {
 
 	private final Gson gson = new Gson();
 	private final Path bookPath;
-	private final Path imageDirectoryPath;
+	private final Path imgDirPath;
 
-	public JsonRepository(Path bookPath, Path imageDirectoryPath) {
+	/**
+	 * Constructor of the JsonRepository class.
+	 * It takes the path of the json file and the path of the image directory.
+	 *
+	 * @param bookPath   The path of the json file.
+	 * @param imgDirPath The path of the image directory to save the image it copies.
+	 */
+	public JsonRepository(Path bookPath, Path imgDirPath) {
 		this.bookPath = bookPath;
-		this.imageDirectoryPath = imageDirectoryPath;
+		this.imgDirPath = imgDirPath;
 	}
 
 	@Override
@@ -108,21 +119,19 @@ public class JsonRepository implements Repository {
 	 * @return le chemin de l'image dans le dossier d'images, null si l'image n'a pas pu être déplacée
 	 */
 	@Override
-	public String moveImage(String imagePath) {
+	public String copyImage(String imagePath) {
 		Path imageStored = Path.of(imagePath);
-		Path imageDestination = imageDirectoryPath.resolve(imageStored.getFileName());
+		Path imageDestination = imgDirPath.resolve(imageStored.getFileName());
 		try (InputStream inputStream = new FileInputStream(imageStored.toFile());
 		     OutputStream outputStream = new FileOutputStream(imageDestination.toFile())) {
 			if (!imageTrueExtension(imagePath)) {
-				throw new IllegalImageExtensionException("Image extension does not correspond to the image content");
+				throw new IllegalImageExtensionException();
 			}
 			byte[] buf = new byte[1024];
-			int length;
-			while ((length = inputStream.read(buf)) > 0) {
+			int length = inputStream.read(buf);
+			do {
 				outputStream.write(buf, 0, length);
-			}
-//			inputStream.close();
-//			outputStream.close();
+			} while ((length = inputStream.read(buf)) > 0);
 			return imageDestination.toString();
 		} catch (IOException e) {
 			return "";
@@ -137,24 +146,23 @@ public class JsonRepository implements Repository {
 	 * @return true si l'extension correspond au contenu, false sinon
 	 */
 	private static boolean imageTrueExtension(String imagePath) throws IOException {
-		switch (imagePath.substring(imagePath.lastIndexOf('.')).toLowerCase()) {
+		switch (imagePath.substring(imagePath.lastIndexOf('.')).toLowerCase(Locale.FRENCH)) {
 			case ".jpg":
-				try (InputStream inputStream = new FileInputStream(imagePath)) {
-					byte[] buf = new byte[3];
-					inputStream.read(buf);
-					return Arrays.equals(buf, JPG_BYTES);
-				} catch (IOException e) {
-					return false;
-				}
+				return checkImage(imagePath, 3, JPG_BYTES);
 			case ".png":
-				try (InputStream inputStream = new FileInputStream(imagePath)) {
-					byte[] buf = new byte[8];
-					inputStream.read(buf);
-					return Arrays.equals(buf, PNG_BYTES);
-				} catch (IOException e) {
-					return false;
-				}
+				return checkImage(imagePath, 8, PNG_BYTES);
+			default:
+				return false;
 		}
-		return false;
+	}
+
+	private static boolean checkImage(String imagePath, int x, byte[] jpgBytes) {
+		try (InputStream inputStream = new FileInputStream(imagePath)) {
+			byte[] buf = new byte[x];
+			inputStream.read(buf);
+			return Arrays.equals(buf, jpgBytes);
+		} catch (IOException e) {
+			return false;
+		}
 	}
 }

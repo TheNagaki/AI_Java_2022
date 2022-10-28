@@ -2,42 +2,61 @@ package org.helmo.gbeditor.models;
 
 import java.util.Objects;
 
+/**
+ * Author class which represents an author in the GBEditor
+ */
 public class Author {
 	private final String name;
 	private final String firstName;
 	private final int matricule;
 
+	private static final int MATRICULE_LENGTH = 6;
+
+	/**
+	 * Constructor of the Author class
+	 *
+	 * @param name      the name of the author
+	 * @param firstName the first name of the author
+	 */
 	public Author(String name, String firstName) {
-		if (name == null || firstName == null) {
-			throw new IllegalArgumentException("Name and firstName must not be null");
-		}
-		if (name.isEmpty() || firstName.isEmpty()) {
-			throw new IllegalArgumentException("Name and firstName must not be empty");
-		}
+		checkValidity(name, firstName);
 		this.name = name;
 		this.firstName = firstName;
 		this.matricule = computeMatricule();
+	}
+
+	private static void checkValidity(String name, String firstName) {
+		if (name == null || firstName == null || name.isBlank() || firstName.isBlank()) {
+			throw new IllegalAuthorNames();
+		}
 	}
 
 	private int computeMatricule() {
 		return (int) (Math.random() * 1000000);
 	}
 
+	/**
+	 * Constructor of the Author class with a matricule
+	 *
+	 * @param name      the name of the author
+	 * @param firstName the first name of the author
+	 * @param matricule the matricule of the author
+	 */
 	public Author(String name, String firstName, int matricule) {
-		if (name.isBlank()) {
-			throw new IllegalArgumentException("Name must not be null or empty");
-		}
+		checkValidity(name, firstName);
 		this.name = name;
-		if (firstName.isBlank()) {
-			throw new IllegalArgumentException("First name must not be null or empty");
-		}
 		this.firstName = firstName;
-		if ((String.format("%d", matricule)).length() != 6) {
+		if ((String.format("%d", matricule)).length() != MATRICULE_LENGTH) {
 			throw new IllegalArgumentException("Matricule must be 6 digits");
 		}
 		this.matricule = matricule;
 	}
 
+	/**
+	 * Getter for the name of the author
+	 *
+	 * @return the full name of the author
+	 */
 	public String getFullName() {
 		return firstName + " " + name;
 	}

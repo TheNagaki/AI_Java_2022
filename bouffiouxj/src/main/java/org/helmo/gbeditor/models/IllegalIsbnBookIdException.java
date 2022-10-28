@@ -1,7 +1,13 @@
 package org.helmo.gbeditor.models;
 
+/**
+ * Exception thrown when the id of the book in the ISBN is not valid.
+ */
 public class IllegalIsbnBookIdException extends IllegalArgumentException {
-	public IllegalIsbnBookIdException(String message) {
-		super(message);
+	/**
+	 * Constructor of the exception.
+	 */
+	public IllegalIsbnBookIdException() {
+		super("L'isbn du livre est invalide ou déjà utilisée");
 	}
 }

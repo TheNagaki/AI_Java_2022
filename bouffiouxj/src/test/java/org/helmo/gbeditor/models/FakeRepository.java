@@ -5,9 +5,16 @@ import org.helmo.gbeditor.repositories.Repository;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * This class is a fake repository for testing purpose
+ */
 public class FakeRepository implements Repository {
 	private final Set<Book> bookCollection;
 
+	/**
+	 * Constructor
+	 * @param bookCollection the collection of books that will be used
+	 */
 	public FakeRepository(Set<Book> bookCollection) {
 		this.bookCollection = bookCollection;
 	}
@@ -50,7 +57,7 @@ public class FakeRepository implements Repository {
 	}
 
 	@Override
-	public String moveImage(String title) {
+	public String copyImage(String imagePath) {
 		return "image moved";
 	}
 }

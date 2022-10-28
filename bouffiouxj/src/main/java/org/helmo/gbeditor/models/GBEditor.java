@@ -1,19 +1,27 @@
 package org.helmo.gbeditor.models;
 
 import org.helmo.gbeditor.presenters.GBEInterface;
-import org.helmo.gbeditor.repositories.IllegalImageExtensionException;
 import org.helmo.gbeditor.repositories.Repository;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * This class is the model of the application. It is the link between the presenter, the repository and the model.
+ * It is the only class that can access the repository.
+ */
 public class GBEditor implements GBEInterface {
-	private final int LINGUISTIC_GROUP = 2;
+	private static final int LINGUISTIC_GROUP = 2;
 	private final Set<Author> authors;
 	private Author currentAuthor;
 	private final Set<Book> books;
 	private final Repository repository;
 
+	/**
+	 * Constructor of the model. It initializes the repository and the sets of authors and books from it.
+	 *
+	 * @param repository The repository to use.
+	 */
 	public GBEditor(Repository repository) {
 		this.repository = repository;
 		this.authors = repository.loadAuthors();
@@ -46,26 +54,14 @@ public class GBEditor implements GBEInterface {
 		try {
 			Book book = new Book(title, currentAuthor, summary, isbn, ""); //check isbn in constructor
 			if (!books.contains(book)) {
-				String path2Image = repository.moveImage(imagePath);
+				String path2Image = repository.copyImage(imagePath);
 				book = new Book(title, currentAuthor, summary, isbn, path2Image);
 				books.add(book);
 				repository.saveBook(book);
 				return "Votre livre a bien été enregistré";
 			}
-		} catch (IllegalBookSummaryException e) {
-			return "Le résumé du livre doit avoir une taille comprise entre 1 et 500 caractères";
-		} catch (IllegalBookTitleException e) {
-			return "Le titre du livre doit avoir une taille comprise entre 1 et 150 caractères";
-		} catch (IllegalIsbnBookIdException e) {
-			return "L'isbn du livre est invalide ou déjà utilisée";
-		} catch (IllegalIsbnFormatException e) {
-			return "L'isbn du livre est invalide";
-		} catch (IllegalIsbnChecksumException e) {
-			return String.format("La valeur de contrôle de l'isbn est invalide (%d attendue)", e.getExpectedChecksum());
 		} catch (IllegalIsbnLinguisticIdException e) {
 			return String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP);
-		} catch (IllegalImageExtensionException e) {
-			return "L'extension de l'image choisie ne correspond pas à son contenu";
 		} catch (IllegalArgumentException e) {
 			return e.getMessage();
 		}

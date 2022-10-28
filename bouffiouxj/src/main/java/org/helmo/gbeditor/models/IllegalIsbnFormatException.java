@@ -1,7 +1,13 @@
 package org.helmo.gbeditor.models;
 
+/**
+ * Exception thrown when the format of the ISBN is not valid.
+ */
 public class IllegalIsbnFormatException extends IllegalArgumentException {
-	public IllegalIsbnFormatException(String message) {
-		super(message);
+	/**
+	 * Constructs of the exception.
+	 */
+	public IllegalIsbnFormatException() {
+		super("L'isbn du livre est invalide");
 	}
 }

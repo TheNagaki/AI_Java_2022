@@ -12,7 +12,12 @@ import org.helmo.gbeditor.presenters.ConnexionPresenter;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
+/**
+ * View for the connection of an author
+ * It displays a form to fill in order to connect to the application (name, first name)
+ */
 public class ConnexionView implements ViewInterface {
+	private static final int MAX_NAME = 20;
 	private final ConnexionPresenter presenter;
 	private ViewInterface baseView;
 	private final ImageView refreshImage = new ImageView(new Image(getClass().getResource("/refresh-page.png").toExternalForm()));
@@ -50,11 +55,11 @@ public class ConnexionView implements ViewInterface {
 	}
 
 	private void handleNewValue(String newValue, TextField textField) {
-		newValue = newValue.replaceAll("[^a-zA-Z- ]", "");
-		if (newValue.length() >= 20) {
-			newValue = newValue.substring(0, 20);
+		String textEntered = newValue.replaceAll("[^a-zA-Z- ]", "");
+		if (textEntered.length() >= MAX_NAME) {
+			textEntered = textEntered.substring(0, MAX_NAME);
 		}
-		textField.setText(newValue);
+		textField.setText(textEntered);
 		textField.positionCaret(textField.getText().length());
 		validerButton.setDisable(checkDisableButton());
 	}
@@ -94,6 +99,7 @@ public class ConnexionView implements ViewInterface {
 
 	/**
 	 * Constructor of the ConnexionView
+	 *
 	 * @param presenter the presenter of the view
 	 */
 	public ConnexionView(ConnexionPresenter presenter) {

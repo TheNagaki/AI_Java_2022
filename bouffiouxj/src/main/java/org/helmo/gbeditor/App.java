@@ -17,34 +17,46 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * This class launches the application.
+ */
 public class App extends Application {
 
+	/**
+	 * Starts the application.
+	 * @param args The arguments to pass to the application.
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	private Map<ViewsEnum, ViewInterface> initViews(GBEInterface editor) {
-		ConnexionPresenter connexionPresenter = new ConnexionPresenter(editor);
-		ConnexionView connexionView = new ConnexionView(connexionPresenter);
-		MainPresenter mainPresenter = new MainPresenter(editor);
-		MainView mainView = new MainView(mainPresenter);
-		CreateBookPresenter createBookPresenter = new CreateBookPresenter(editor);
-		CreateBookView createBookView = new CreateBookView(createBookPresenter);
+		ConnexionPresenter connexionPr = new ConnexionPresenter(editor);
+		ConnexionView connexionVw = new ConnexionView(connexionPr);
+		MainPresenter mainPr = new MainPresenter(editor);
+		MainView mainVw = new MainView(mainPr);
+		CreateBookPresenter createBookPr = new CreateBookPresenter(editor);
+		CreateBookView createBookVw = new CreateBookView(createBookPr);
 		return new HashMap<>() {
 			{
-				put(ViewsEnum.CONNEXION, connexionView);
-				put(ViewsEnum.MAIN, mainView);
-				put(ViewsEnum.CREATE_BOOK, createBookView);
+				put(ViewsEnum.CONNEXION, connexionVw);
+				put(ViewsEnum.MAIN, mainVw);
+				put(ViewsEnum.CREATE_BOOK, createBookVw);
 			}
 		};
 	}
 
+	/**
+	 * This method is called when the application is launched.
+	 * It initializes the views and the presenter and displays the first view.
+	 *
+	 * @param primaryStage the stage of the application
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
-		Path imageDirectoryPath = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
-		Repository repo = new JsonRepository(bookPath, imageDirectoryPath);
+		Path imgDirPath = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
+		Repository repo = new JsonRepository(bookPath, imgDirPath);
 		GBEInterface editor = new GBEditor(repo);
 		ViewInterface mainView = new BaseView(initViews(editor));
 		Parent root = mainView.getRoot();

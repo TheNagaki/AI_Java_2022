@@ -10,6 +10,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * This class is a test class for the GBEditor class
+ */
 class GBEditorTest {
 	private Author authorA;
 	private Set<Book> booksFromAuthorA;
