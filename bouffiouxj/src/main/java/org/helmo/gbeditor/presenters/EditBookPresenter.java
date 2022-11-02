@@ -1,19 +1,21 @@
 package org.helmo.gbeditor.presenters;
 
+import org.helmo.gbeditor.models.Book;
+
 /**
  * The CreateBookPresenter is the presenter for the CreateBookView.
  * It is used to create a new book in the model.
  * It is also used to edit an existing book. //TODO: implement the edit feature
  */
-public class CreateBookPresenter implements Presenter {
+public class EditBookPresenter implements Presenter {
 	private final GBEInterface engine;
-	private CreateBookViewInterface view;
+	private EditBookViewInterface view;
 
 	/**
 	 * Constructor of the presenter with the engine
 	 * @param editor the logic of the application
 	 */
-	public CreateBookPresenter(GBEInterface editor) {
+	public EditBookPresenter(GBEInterface editor) {
 		this.engine = editor;
 	}
 
@@ -41,7 +43,7 @@ public class CreateBookPresenter implements Presenter {
 	 *
 	 * @param view the view to set
 	 */
-	public void setView(CreateBookViewInterface view) {
+	public void setView(EditBookViewInterface view) {
 		this.view = view;
 	}
 
@@ -60,5 +62,16 @@ public class CreateBookPresenter implements Presenter {
 	 */
 	public void askISBN() {
 		view.presetISBN(engine.presetISBN());
+	}
+
+	/**
+	 * Asks the engine if there is a book to edit
+	 */
+	public void askBookToEdit() {
+		view.setBookToEdit(engine.getBookToEdit());
+	}
+
+	public void editBook(Book book, String title, String summary, String imagePath) {
+		engine.updateBook(book, title, summary, imagePath);
 	}
 }

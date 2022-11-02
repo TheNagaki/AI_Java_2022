@@ -16,6 +16,7 @@ public class GBEditor implements GBEInterface {
 	private Author currentAuthor;
 	private final Set<Book> books;
 	private final Repository repository;
+	private Book bookToEdit;
 
 	/**
 	 * Constructor of the model. It initializes the repository and the sets of authors and books from it.
@@ -74,10 +75,17 @@ public class GBEditor implements GBEInterface {
 	}
 
 	@Override
-	public boolean updateBook(Book book, String title, String summary) {
+	public void updateBook(Book book, String title, String summary, String imagePath) {
 		book.setTitle(title);
 		book.setSummary(summary);
-		return books.add(book) && repository.saveBook(book);
+		if (imagePath != null && !imagePath.isEmpty()) {
+			String path2Image = repository.copyImage(imagePath);
+			book.setImagePath(path2Image);
+		}
+		if (books.remove(book)) {
+			books.add(book);
+			repository.saveBook(book);
+		}
 	}
 
 	@Override
@@ -104,5 +112,15 @@ public class GBEditor implements GBEInterface {
 	@Override
 	public int[] presetISBN() {
 		return currentAuthor != null ? new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()} : new int[0];
+	}
+
+	@Override
+	public void setBookToEdit(Book book) {
+		this.bookToEdit = book;
+	}
+
+	@Override
+	public Book getBookToEdit() {
+		return bookToEdit;
 	}
 }

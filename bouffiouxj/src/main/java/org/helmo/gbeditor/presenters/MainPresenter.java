@@ -11,10 +11,11 @@ import java.util.Set;
  */
 public class MainPresenter implements Presenter {
 	private final GBEInterface engine;
-	private ViewInterface view;
+	private MainViewInterface view;
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
+	 *
 	 * @param gbEditor the logic of the application
 	 */
 	public MainPresenter(GBEInterface gbEditor) {
@@ -23,6 +24,7 @@ public class MainPresenter implements Presenter {
 
 	/**
 	 * This method is used to get all the books created by the author
+	 *
 	 * @return a set of books
 	 */
 	public Set<Book> getBooksFromAuthor() {
@@ -36,7 +38,7 @@ public class MainPresenter implements Presenter {
 		view.setAuthorName(engine.getAuthorName());
 	}
 
-	public void setView(ViewInterface view) {
+	public void setView(MainViewInterface view) {
 		this.view = view;
 	}
 
@@ -58,5 +60,13 @@ public class MainPresenter implements Presenter {
 	 */
 	public boolean deleteBook(Book b) {
 		return engine.deleteBook(b);
+	}
+
+	public void bookClicked(Book b) {
+		view.displayBookDetails(b);
+	}
+
+	public void setBookToEdit(Book book) {
+		engine.setBookToEdit(book);
 	}
 }

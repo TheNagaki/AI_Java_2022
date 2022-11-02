@@ -3,6 +3,7 @@ package org.helmo.gbeditor.views;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Window;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
@@ -72,5 +73,10 @@ public class BaseView implements ViewInterface {
 	@Override
 	public void setAuthorName(String authorName) {
 		//Do nothing because this view is not used in this context
+	}
+
+	@Override
+	public Window getStage() {
+		return principalPane.getScene().getWindow();
 	}
 }

@@ -45,9 +45,10 @@ public interface GBEInterface {
 	 * @param book    the book to edit
 	 * @param title   the new title
 	 * @param summary the new summary
-	 * @return true if the book was edited, false otherwise
+	 * @param imagePath the new image path
+	 *                  (if it is empty, the image is not changed)
 	 */
-	boolean updateBook(Book book, String title, String summary);
+	void updateBook(Book book, String title, String summary, String imagePath);
 
 	/**
 	 * Gets all the books from the repository
@@ -76,4 +77,8 @@ public interface GBEInterface {
 	 * @return an int array [linguisticGroup, author's id]
 	 */
 	int[] presetISBN();
+
+	void setBookToEdit(Book book);
+
+	Book getBookToEdit();
 }

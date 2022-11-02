@@ -2,6 +2,7 @@ package org.helmo.gbeditor.views;
 
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,8 +11,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.presenters.MainPresenter;
+import org.helmo.gbeditor.presenters.MainViewInterface;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
@@ -22,9 +27,11 @@ import java.util.Set;
 /**
  * Main view of the application
  * It displays all the books of the current author and allows to create a new one
- * It also allows to delete a book and to edit it //TODO: implement the edit
+ * It displays the book details in a popup when the user clicks on a book
+ * In this popup, the user can edit the book or delete it //TODO: implement the edition of a book
+ * It also allows the user to add pages to the book //TODO: implement the addition of pages
  */
-public class MainView implements ViewInterface {
+public class MainView implements MainViewInterface {
 
 	private final MainPresenter presenter;
 	private ViewInterface baseView;
@@ -57,12 +64,7 @@ public class MainView implements ViewInterface {
 				title.getStyleClass().add("thumbnail-title");
 				title.setAlignment(Pos.CENTER);
 				box.setTop(title);
-				ImageView iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-				if (b.getImage() != null && !b.getImage().isEmpty()) {
-					iv = new ImageView(new Image(b.getImage()));
-				}
-				iv.setFitWidth(75);
-				iv.setPreserveRatio(true);
+				ImageView iv = setBookImage(b, 75);
 				box.setCenter(iv);
 
 				var bottomBox = new VBox();
@@ -70,31 +72,13 @@ public class MainView implements ViewInterface {
 				var isbn = new Label(b.getIsbn());
 				isbn.getStyleClass().add("thumbnail-isbn");
 				bottomBox.getChildren().add(isbn);
-				var deleteBtn = new Button("❌");
-				deleteBtn.setOnAction(e -> {
-					if (presenter.deleteBook(b)) {
-						changeView(ViewsEnum.MAIN);
-					} else {
-						display(String.format("Error: can not delete book %s", b.getTitle()));
-					}
-				});
-				var editBtn = new Button("✏");
-				editBtn.setOnAction(e -> {
-					display("This feature is not implemented yet");
-//					presenter.setBookToEdit(b);
-//					changeView(ViewsEnum.EDIT);
-				});
-				var buttonPane = new GridPane();
-				buttonPane.add(editBtn, 0, 0);
-				buttonPane.add(deleteBtn, 1, 0);
-				bottomBox.getChildren().add(buttonPane);
-
 				box.setBottom(bottomBox);
 
 				box.setMaxWidth((gridPane.getWidth() - 5) / ITEMS_PER_ROW);
 				box.setMaxHeight((gridPane.getHeight() - 5) / NUMBER_OF_ROWS);
 				final int x = i % ITEMS_PER_ROW;
 				final int y = i / ITEMS_PER_ROW;
+				box.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> presenter.bookClicked(b));
 				gridPane.add(box, BOOK_BOX_SIZE * x, BOOK_BOX_SIZE * y, BOOK_BOX_SIZE, BOOK_BOX_SIZE);
 			}
 		} else {
@@ -115,7 +99,10 @@ public class MainView implements ViewInterface {
 		topPane.setCenter(viewTitle);
 
 		Button b = new Button("Créer un livre");
-		b.setOnAction(action -> baseView.changeView(ViewsEnum.CREATE_BOOK));
+		b.setOnAction(action -> {
+			presenter.setBookToEdit(null);
+			baseView.changeView(ViewsEnum.EDIT_BOOK);
+		});
 		b.setAlignment(Pos.BOTTOM_CENTER);
 		VBox buttonBox = new VBox();
 		buttonBox.getChildren().add(b);
@@ -160,5 +147,83 @@ public class MainView implements ViewInterface {
 		Label viewAuthorName = new Label(name);
 		viewAuthorName.getStyleClass().add("author-name");
 		topPane.setRight(viewAuthorName);
+	}
+
+	@Override
+	public Window getStage() {
+		return baseView.getStage();
+	}
+
+	@Override
+	public void displayBookDetails(Book book) {
+		final int WIDTH = 400;
+		final int HEIGHT = 400;
+		Stage stage = new Stage();
+		stage.setTitle(book.getTitle());
+		stage.initModality(Modality.APPLICATION_MODAL); //Sets the window so that it appears on top and blocks events from being delivered to any other application window.
+		stage.initOwner(baseView.getStage());
+		stage.setResizable(false);
+		stage.setWidth(WIDTH);
+		stage.setHeight(HEIGHT);
+
+		BorderPane root = new BorderPane();
+		root.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
+
+		ImageView iv = setBookImage(book, 100);
+		VBox imageBox = new VBox();
+		imageBox.getChildren().add(iv);
+		imageBox.setAlignment(Pos.CENTER);
+		root.setTop(imageBox);
+
+		VBox centerBox = new VBox();
+		centerBox.setSpacing(10);
+		centerBox.setAlignment(Pos.CENTER);
+		centerBox.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
+		centerBox.getChildren().add(new Label(book.getTitle()));
+		centerBox.getChildren().add(new Label(book.getIsbn()));
+		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
+		centerBox.getChildren().add(new Label(book.getSummary()));
+		root.setCenter(centerBox);
+
+		var deleteBtn = new Button("Supprimer ❌");
+		deleteBtn.setOnAction(e -> {
+			if (presenter.deleteBook(book)) {
+				changeView(ViewsEnum.MAIN);
+				stage.close();
+			} else {
+				display(String.format("Error: can not delete book %s", book.getTitle()));
+			}
+		});
+		var editBtn = new Button("Éditer ✏");
+		editBtn.setOnAction(e -> {
+			presenter.setBookToEdit(book);
+			changeView(ViewsEnum.EDIT_BOOK);
+			stage.close();
+		});
+		//TODO:Add exit emoji to close button
+		var closeBtn = new Button("Fermer ✖");
+		closeBtn.setOnAction(action -> stage.close());
+
+		var buttonPane = new GridPane();
+		buttonPane.setAlignment(Pos.CENTER);
+		buttonPane.add(editBtn, 0, 0);
+		buttonPane.add(deleteBtn, 1, 0);
+		buttonPane.add(closeBtn, 2, 0);
+		root.setBottom(buttonPane);
+
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
+		stage.setScene(scene);
+		stage.show();
+	}
+
+	private ImageView setBookImage(Book book, int width) {
+		ImageView iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
+		if (book.getImage() != null && !book.getImage().isEmpty()) {
+			iv = new ImageView(new Image(book.getImage()));
+		}
+		iv.setFitWidth(width);
+		iv.setPreserveRatio(true);
+		return iv;
 	}
 }

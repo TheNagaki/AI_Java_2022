@@ -14,8 +14,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import org.helmo.gbeditor.presenters.CreateBookPresenter;
-import org.helmo.gbeditor.presenters.CreateBookViewInterface;
+import javafx.stage.Window;
+import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.presenters.EditBookPresenter;
+import org.helmo.gbeditor.presenters.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
@@ -27,12 +29,13 @@ import java.util.Objects;
  * It displays a form to fill in order to create a new book (title, summary, ISBN, image)
  * It also allows to cancel the creation of the book and to go back to the main view
  */
-public class CreateBookView implements ViewInterface, CreateBookViewInterface {
+public class EditBookView implements ViewInterface, EditBookViewInterface {
 
 	private static final int MAX_TITLE = 150;
 	private static final int MAX_ISBN = 13;
 	private static final int MAX_SUMMARY = 500;
-	private final CreateBookPresenter presenter;
+	private final EditBookPresenter presenter;
+	private boolean bookCreation;
 	private ViewInterface baseView;
 	private final BorderPane mainPane = new BorderPane();
 	private Button createBookButton;
@@ -46,15 +49,25 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 	private final TextArea inputSummary = new TextArea();
 	private final Label authorName = new Label("");
 	private String baseIsbn;
+	private Book bookEdited;
 
 	/**
 	 * Constructor of the CreateBookView class
 	 *
 	 * @param crBkPresenter the presenter of the view
 	 */
-	public CreateBookView(CreateBookPresenter crBkPresenter) {
+	public EditBookView(EditBookPresenter crBkPresenter) {
 		this.presenter = crBkPresenter;
 		this.presenter.setView(this);
+		this.bookCreation = true;
+		initView();
+	}
+
+	public void setBookToEdit(Book book) {
+		if (book != null) {
+			this.bookCreation = false;
+			this.bookEdited = book;
+		}
 		initView();
 	}
 
@@ -179,6 +192,7 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 		centerGrid.setAlignment(Pos.CENTER);
 		createBookButton = new Button("Valider");
 		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), inputIsbn.getText().strip(), inputSummary.getText().strip()));
+		centerGrid.getChildren().clear();
 		centerGrid.add(title, 0, 0);
 		centerGrid.add(inputTitle, 1, 0);
 		centerGrid.add(isbn, 0, 1);
@@ -193,6 +207,19 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 		centerGrid.setVgap(10);
 		mainPane.setCenter(centerGrid);
 		mainPane.setTop(topPane);
+		if (!bookCreation) {
+			viewTitle = new Label("Modifiez votre livre");
+			topPane.setCenter(viewTitle);
+
+			var image = bookEdited.getImage();
+			if(image != null && !image.isEmpty()) {
+				imageView = new ImageView(new Image(image));
+				imageView.setFitWidth(80);
+				imageView.setFitHeight(80);
+				imageView.setPreserveRatio(true);
+				imageBox.setCenter(imageView);
+			}
+		}
 	}
 
 	@Override
@@ -212,15 +239,23 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 
 	@Override
 	public void changeView(ViewsEnum viewName) {
+		bookCreation = true;
 		baseView.changeView(viewName);
 	}
 
 	@Override
 	public void refresh() {
-		presenter.askISBN();
+		presenter.askBookToEdit();
+		if (bookCreation) {
+			inputTitle.setText("");
+			presenter.askISBN();
+			inputSummary.setText("");
+		} else {
+			inputTitle.setText(bookEdited.getTitle());
+			inputIsbn.setText(bookEdited.getIsbn());
+			inputSummary.setText(bookEdited.getSummary());
+		}
 		presenter.askAuthorName();
-		inputTitle.setText("");
-		inputSummary.setText("");
 		checkToEnableButton();
 		display("");
 	}
@@ -228,6 +263,11 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 	@Override
 	public void setAuthorName(String authorName) {
 		this.authorName.setText(authorName);
+	}
+
+	@Override
+	public Window getStage() {
+		return baseView.getStage();
 	}
 
 	@Override
@@ -240,6 +280,10 @@ public class CreateBookView implements ViewInterface, CreateBookViewInterface {
 	}
 
 	private void createBook(String title, String isbn, String summary) {
-		presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+		if (bookCreation) {
+			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+		} else {
+			presenter.editBook(bookEdited, title, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+		}
 	}
 }

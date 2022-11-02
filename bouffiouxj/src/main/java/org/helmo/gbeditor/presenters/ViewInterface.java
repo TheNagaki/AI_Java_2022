@@ -1,6 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import javafx.scene.Parent;
+import javafx.stage.Window;
 
 /**
  * This interface is used to define the methods that a view must implement
@@ -45,4 +46,6 @@ public interface ViewInterface {
 	 * @param authorName the full name (firstName Name) of the author
 	 */
 	void setAuthorName(String authorName);
+
+	Window getStage();
 }

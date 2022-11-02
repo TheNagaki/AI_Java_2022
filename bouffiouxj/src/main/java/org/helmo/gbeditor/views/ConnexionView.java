@@ -8,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import org.helmo.gbeditor.presenters.ConnexionPresenter;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
@@ -140,6 +141,11 @@ public class ConnexionView implements ViewInterface {
 	@Override
 	public void setAuthorName(String authorName) {
 		//Do nothing because this view is not used in this context
+	}
+
+	@Override
+	public Window getStage() {
+		return baseView.getStage();
 	}
 
 	private void handleEnter() {

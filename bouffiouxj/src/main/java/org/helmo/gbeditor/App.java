@@ -10,7 +10,7 @@ import org.helmo.gbeditor.repositories.JsonRepository;
 import org.helmo.gbeditor.repositories.Repository;
 import org.helmo.gbeditor.views.ConnexionView;
 import org.helmo.gbeditor.views.BaseView;
-import org.helmo.gbeditor.views.CreateBookView;
+import org.helmo.gbeditor.views.EditBookView;
 import org.helmo.gbeditor.views.MainView;
 
 import java.nio.file.Path;
@@ -35,13 +35,13 @@ public class App extends Application {
 		ConnexionView connexionVw = new ConnexionView(connexionPr);
 		MainPresenter mainPr = new MainPresenter(editor);
 		MainView mainVw = new MainView(mainPr);
-		CreateBookPresenter createBookPr = new CreateBookPresenter(editor);
-		CreateBookView createBookVw = new CreateBookView(createBookPr);
+		EditBookPresenter createBookPr = new EditBookPresenter(editor);
+		EditBookView createBookVw = new EditBookView(createBookPr);
 		return new HashMap<>() {
 			{
 				put(ViewsEnum.CONNEXION, connexionVw);
 				put(ViewsEnum.MAIN, mainVw);
-				put(ViewsEnum.CREATE_BOOK, createBookVw);
+				put(ViewsEnum.EDIT_BOOK, createBookVw);
 			}
 		};
 	}

@@ -10,7 +10,7 @@ public class Book {
 	private final Author author;
 	private final ISBN isbn;
 	private String summary;
-	private final String imagePath;
+	private String imagePath;
 
 	private static final int MAX_SUMMARY = 500;
 	private static final int MAX_TITLE = 150;
@@ -149,5 +149,9 @@ public class Book {
 	 */
 	public String getImage() {
 		return imagePath;
+	}
+
+	public void setImagePath(String path2Image) {
+		this.imagePath = path2Image;
 	}
 }
