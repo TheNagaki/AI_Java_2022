@@ -167,23 +167,39 @@ public class MainView implements MainViewInterface {
 		stage.setHeight(HEIGHT);
 
 		BorderPane root = new BorderPane();
-		root.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
-
-		ImageView iv = setBookImage(book, 100);
-		VBox imageBox = new VBox();
-		imageBox.getChildren().add(iv);
-		imageBox.setAlignment(Pos.CENTER);
-		root.setTop(imageBox);
+		root.setPadding(new javafx.geometry.Insets(5));
 
 		VBox centerBox = new VBox();
 		centerBox.setSpacing(10);
 		centerBox.setAlignment(Pos.CENTER);
 		centerBox.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
-		centerBox.getChildren().add(new Label(book.getTitle()));
+
+		Label title = new Label(book.getTitle());
+		title.getStyleClass().add("details-title");
+		title.setWrapText(true);
+		title.setAlignment(Pos.CENTER);
+		title.setPrefWidth(WIDTH - 20);
+		root.setTop(title);
+
+		ImageView iv = setBookImage(book, 100);
+		VBox imageBox = new VBox();
+		imageBox.getChildren().add(iv);
+		imageBox.setAlignment(Pos.CENTER);
+		centerBox.getChildren().add(imageBox);
+
 		centerBox.getChildren().add(new Label(book.getIsbn()));
-		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
-		centerBox.getChildren().add(new Label(book.getSummary()));
-		root.setCenter(centerBox);
+
+//		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
+//		L'utilisateur ne pouvant voir QUE ses livres, on ne l'affiche donc pas
+
+		Label summary = new Label(book.getSummary());
+		summary.setWrapText(true);
+		centerBox.getChildren().add(summary);
+
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setContent(centerBox);
+		scrollPane.setFitToWidth(true);
+		root.setCenter(scrollPane);
 
 		var deleteBtn = new Button("Supprimer ❌");
 		deleteBtn.setOnAction(e -> {

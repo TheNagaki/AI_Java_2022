@@ -23,3 +23,11 @@
     -fx-text-fill: #242424;
     -fx-font-style: italic;
 }
+
+.details-title {
+    -fx-font-size: 13px;
+    -fx-text-fill: #000000;
+    -fx-alignment: center;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
