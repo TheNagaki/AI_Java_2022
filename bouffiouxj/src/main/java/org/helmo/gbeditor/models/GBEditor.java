@@ -123,4 +123,27 @@ public class GBEditor implements GBEInterface {
 	public Book getBookToEdit() {
 		return bookToEdit;
 	}
+
+	@Override
+	public void addPage(Book book, Page page) {
+		book.addPage(page);
+		repository.saveBook(book);
+	}
+
+	@Override
+	public void removePage(Book book, Page page) {
+		book.removePage(page);
+		repository.saveBook(book);
+	}
+
+	@Override
+	public void updatePage(Book book, Page page) {
+		book.updatePage(page);
+		repository.saveBook(book);
+	}
+
+	@Override
+	public Set<Page> getPages(Book book) {
+		return book.getPages();
+	}
 }

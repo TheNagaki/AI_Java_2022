@@ -47,5 +47,12 @@ public interface ViewInterface {
 	 */
 	void setAuthorName(String authorName);
 
+	/**
+	 * Get the stage of the view
+	 *
+	 * @return the stage of the view
+	 */
 	Window getStage();
+
+	void close();
 }

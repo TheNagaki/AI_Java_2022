@@ -74,4 +74,8 @@ public class EditBookPresenter implements Presenter {
 	public void editBook(Book book, String title, String summary, String imagePath) {
 		engine.updateBook(book, title, summary, imagePath);
 	}
+
+	public void onQuit_Clicked() {
+		view.close();
+	}
 }

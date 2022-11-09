@@ -1,6 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.Page;
 
 import java.util.Set;
 
@@ -42,9 +43,9 @@ public interface GBEInterface {
 	/**
 	 * Edits a book with the given parameters and saves it in the repository
 	 *
-	 * @param book    the book to edit
-	 * @param title   the new title
-	 * @param summary the new summary
+	 * @param book      the book to edit
+	 * @param title     the new title
+	 * @param summary   the new summary
 	 * @param imagePath the new image path
 	 *                  (if it is empty, the image is not changed)
 	 */
@@ -78,7 +79,49 @@ public interface GBEInterface {
 	 */
 	int[] presetISBN();
 
+	/**
+	 * Sets the book to edit
+	 *
+	 * @param book the book to edit
+	 */
 	void setBookToEdit(Book book);
 
+	/**
+	 * Gets the book to edit
+	 *
+	 * @return the book to edit
+	 */
 	Book getBookToEdit();
+
+	/**
+	 * Creates a new page with the given parameters and adds it to the database and the book
+	 *
+	 * @param book the book to add the page to
+	 * @param page the page to add
+	 */
+	void addPage(Book book, Page page);
+
+	/**
+	 * Deletes a page from the repository and the book
+	 *
+	 * @param book the book to delete the page from
+	 * @param page the page to delete
+	 */
+	void removePage(Book book, Page page);
+
+	/**
+	 * Updates a page with the given parameters and saves it in the repository and the book
+	 *
+	 * @param book the book to update the page in
+	 * @param page the page to update
+	 */
+	void updatePage(Book book, Page page);
+
+	/**
+	 * Gets all the pages of a book
+	 *
+	 * @param book the book to get the pages from
+	 * @return a set of pages
+	 */
+	Set<Page> getPages(Book book);
 }

@@ -105,8 +105,8 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 				if (!keyEvent.getCharacter().matches("[0-9X]")) {
 					keyEvent.consume();
 				}
-				String text = inputIsbn.getText().replaceAll("[^0-9]", "");
-				String content = baseIsbn;
+				var text = inputIsbn.getText().replaceAll("[^0-9]", "");
+				var content = baseIsbn;
 				if (text.length() >= ISBN_LAST_DASH) {
 					content += text.substring(ISBN_SECOND_DASH, ISBN_LAST_DASH) + "-" + (text.length() == 10 ? text.charAt(9) : "");
 				} else if (text.length() > ISBN_SECOND_DASH) {
@@ -148,7 +148,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 	}
 
 	private void initView() {
-		Label viewTitle = new Label("Créez votre livre");
+		var viewTitle = new Label("Créez votre livre");
 		viewTitle.getStyleClass().add("title");
 		topPane.setCenter(viewTitle);
 		authorName.getStyleClass().add("author-name");
@@ -157,21 +157,21 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		centerGrid.setAlignment(Pos.CENTER);
 		centerGrid.setHgap(10);
 		centerGrid.setVgap(10);
-		Label imageLabel = new Label("Image :");
-		BorderPane imageBox = new BorderPane();
+		var imageLabel = new Label("Image :");
+		var imageBox = new BorderPane();
 		imageBox.setMaxWidth(60);
 		imageBox.setMaxHeight(60);
-		ImageView imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
+		var imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
 		imageView.setFitWidth(60);
 		imageView.setFitHeight(60);
 		imageView.setPreserveRatio(true);
 		imageBox.setCenter(imageView);
-		Button fileChooserButton = new Button("Choisir une image");
+		var fileChooserButton = new Button("Choisir une image");
 		fileChooserButton.setOnAction(action -> {
 			baseView.getRoot().setDisable(true);
-			File file = fileChooser.showOpenDialog(this.baseView.getRoot().getScene().getWindow());
+			var file = fileChooser.showOpenDialog(this.baseView.getRoot().getScene().getWindow());
 			if (file != null) {
-				ImageView newImageView = new ImageView(new Image(file.toURI().toString()));
+				var newImageView = new ImageView(new Image(file.toURI().toString()));
 				newImageView.setFitWidth(80);
 				newImageView.setFitHeight(80);
 				newImageView.setPreserveRatio(true);
@@ -181,14 +181,16 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 			baseView.getRoot().setDisable(false);
 		});
 		imageBox.setCenter(imageView);
-		VBox buttonBox = new VBox(fileChooserButton);
+		var buttonBox = new VBox(fileChooserButton);
 		buttonBox.setAlignment(Pos.CENTER);
 		imageBox.setRight(buttonBox);
-		Label title = new Label("Titre :");
-		Label isbn = new Label("ISBN :");
-		Label summary = new Label("Résumé :");
-		Button cancelButton = new Button("Annuler");
+		var title = new Label("Titre :");
+		var isbn = new Label("ISBN :");
+		var summary = new Label("Résumé :");
+		var cancelButton = new Button("Annuler");
 		cancelButton.setOnAction(action -> changeView(ViewsEnum.MAIN));
+		var quitButton = new Button("Quitter");
+		quitButton.setOnAction(action -> presenter.onQuit_Clicked());
 		centerGrid.setAlignment(Pos.CENTER);
 		createBookButton = new Button("Valider");
 		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), inputIsbn.getText().strip(), inputSummary.getText().strip()));
@@ -203,6 +205,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		centerGrid.add(imageBox, 1, 3, 2, 2);
 		centerGrid.add(createBookButton, 0, 8);
 		centerGrid.add(cancelButton, 1, 8);
+		centerGrid.add(quitButton, 2, 8);
 		centerGrid.setHgap(10);
 		centerGrid.setVgap(10);
 		mainPane.setCenter(centerGrid);
@@ -210,9 +213,8 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);
-
 			var image = bookEdited.getImage();
-			if(image != null && !image.isEmpty()) {
+			if (image != null && !image.isEmpty()) {
 				imageView = new ImageView(new Image(image));
 				imageView.setFitWidth(80);
 				imageView.setFitHeight(80);
@@ -268,6 +270,11 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 	@Override
 	public Window getStage() {
 		return baseView.getStage();
+	}
+
+	@Override
+	public void close() {
+		baseView.close();
 	}
 
 	@Override

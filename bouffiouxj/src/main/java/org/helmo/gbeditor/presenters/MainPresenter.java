@@ -1,8 +1,9 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.views.BookDetailsView;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Set;
 public class MainPresenter implements Presenter {
 	private final GBEInterface engine;
 	private MainViewInterface view;
+
+	private final Set<Book> booksShown = new LinkedHashSet<>();
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
@@ -24,11 +27,11 @@ public class MainPresenter implements Presenter {
 
 	/**
 	 * This method is used to get all the books created by the author
-	 *
-	 * @return a set of books
 	 */
-	public Set<Book> getBooksFromAuthor() {
-		return engine.getBooksFromCurrentAuthor() != null ? engine.getBooksFromCurrentAuthor() : new HashSet<>();
+	public void askBooksFromAuthor() {
+		if (engine.getBooksFromCurrentAuthor() != null) {
+			view.setBooksFromAuthor(engine.getBooksFromCurrentAuthor());
+		}
 	}
 
 	/**
@@ -53,20 +56,39 @@ public class MainPresenter implements Presenter {
 	}
 
 	/**
-	 * This method is used to delete a book from the current author
+	 * This method is used to display the details of a book when the user clicks on its thumbnail
 	 *
-	 * @param b the book to delete
-	 * @return true if the book has been deleted, false otherwise
+	 * @param b the book to display
 	 */
-	public boolean deleteBook(Book b) {
-		return engine.deleteBook(b);
-	}
-
 	public void bookClicked(Book b) {
-		view.displayBookDetails(b);
+		if (!booksShown.contains(b)) {
+			var presenter = new BookDetailsPresenter(engine, this);
+			var detailsView = new BookDetailsView(presenter);
+			detailsView.setBaseView(view);
+			presenter.displayBook(b);
+			booksShown.add(b);
+		}
 	}
 
+	/**
+	 * This method is used to know when the book details view is closed
+	 *
+	 * @param b the book to remove from the list of books shown
+	 */
+	public void BookDetailsClosed(Book b) {
+		booksShown.remove(b);
+	}
+
+	/**
+	 * This method is used to create a new book or to edit an existing one
+	 *
+	 * @param book the book to edit, null if the user wants to create a new book
+	 */
 	public void setBookToEdit(Book book) {
 		engine.setBookToEdit(book);
+	}
+
+	public void quitBtnClicked() {
+		view.close();
 	}
 }

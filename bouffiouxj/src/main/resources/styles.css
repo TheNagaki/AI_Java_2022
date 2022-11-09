@@ -18,7 +18,7 @@
     -fx-alignment: center;
 }
 
-.thumbnail-isbn{
+.thumbnail-isbn {
     -fx-font-size: 11px;
     -fx-text-fill: #242424;
     -fx-font-style: italic;
@@ -30,4 +30,12 @@
     -fx-alignment: center;
     -fx-font-weight: bold;
     -fx-padding: 0 0 5 0;
+}
+
+.popup-confirmation {
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
 }

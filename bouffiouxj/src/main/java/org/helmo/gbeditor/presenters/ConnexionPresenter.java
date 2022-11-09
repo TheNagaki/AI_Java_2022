@@ -48,4 +48,8 @@ public class ConnexionPresenter implements Presenter {
 	public ViewInterface getView() {
 		return view;
 	}
+
+	public void OnQuit_Click() {
+		view.close();
+	}
 }

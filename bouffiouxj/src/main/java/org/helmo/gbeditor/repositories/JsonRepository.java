@@ -3,6 +3,7 @@ package org.helmo.gbeditor.repositories;
 import com.google.gson.Gson;
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.ISBN;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +42,7 @@ public class JsonRepository implements Repository {
 	public Set<Book> loadBooks() {
 		if (Files.exists(bookPath)) {
 			try (BufferedReader reader = Files.newBufferedReader(bookPath)) {
-				Set<Book> bookSet = new LinkedHashSet<>();
+				List<Book> bookList = new LinkedList<>();
 				gson.newJsonReader(reader);
 				Arrays.asList(gson.fromJson(reader, BookDto[].class)).forEach(bookDto -> {
 					Book book;
@@ -50,9 +51,13 @@ public class JsonRepository implements Repository {
 					} catch (IllegalArgumentException e) {
 						book = new Book(bookDto.title, bookDto.author, bookDto.summary);
 					}
-					bookSet.add(book);
+					while (bookList.contains(book)) {
+						var author = book.getAuthor();
+						book = new Book(bookDto.title, author, bookDto.summary, ISBN.createNewISBN(Book.LINGUISTIC_GROUP, author.getMatricule()).toString(), bookDto.imagePath);
+					}
+					bookList.add(book);
 				});
-				return bookSet;
+				return new LinkedHashSet<>(bookList);
 			} catch (IOException e) {
 				return new LinkedHashSet<>();
 			}

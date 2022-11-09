@@ -13,6 +13,8 @@ import org.helmo.gbeditor.presenters.ConnexionPresenter;
 import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
+import java.util.Objects;
+
 /**
  * View for the connection of an author
  * It displays a form to fill in order to connect to the application (name, first name)
@@ -21,7 +23,7 @@ public class ConnexionView implements ViewInterface {
 	private static final int MAX_NAME = 20;
 	private final ConnexionPresenter presenter;
 	private ViewInterface baseView;
-	private final ImageView refreshImage = new ImageView(new Image(getClass().getResource("/refresh-page.png").toExternalForm()));
+	private final ImageView refreshImage = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/refresh-page.png")).toExternalForm()));
 
 	{
 		refreshImage.setFitWidth(20);
@@ -37,7 +39,7 @@ public class ConnexionView implements ViewInterface {
 		titlePane.getChildren().add(title);
 	}
 
-	private final ImageView iv = new ImageView(new Image(getClass().getResource("/couverture-app.jpg").toExternalForm()));
+	private final ImageView iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/couverture-app.jpg")).toExternalForm()));
 
 	{
 		iv.setPreserveRatio(true);
@@ -106,6 +108,10 @@ public class ConnexionView implements ViewInterface {
 	public ConnexionView(ConnexionPresenter presenter) {
 		this.presenter = presenter;
 		presenter.setView(this);
+
+		var quitButton = new Button("Quitter");
+		quitButton.setOnAction(action -> presenter.OnQuit_Click());
+		centerGrid.add(quitButton, 1, 3);
 	}
 
 	@Override
@@ -146,6 +152,11 @@ public class ConnexionView implements ViewInterface {
 	@Override
 	public Window getStage() {
 		return baseView.getStage();
+	}
+
+	@Override
+	public void close() {
+		baseView.close();
 	}
 
 	private void handleEnter() {

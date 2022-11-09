@@ -79,4 +79,9 @@ public class BaseView implements ViewInterface {
 	public Window getStage() {
 		return principalPane.getScene().getWindow();
 	}
+
+	@Override
+	public void close() {
+		getStage().hide();
+	}
 }

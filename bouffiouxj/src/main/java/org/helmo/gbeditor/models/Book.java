@@ -1,6 +1,11 @@
 package org.helmo.gbeditor.models;
 
-import java.util.Objects;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.TableColumn;
+import javafx.util.Callback;
+
+import java.util.*;
 
 /**
  * Book class which represents a book in the GBEditor
@@ -11,9 +16,11 @@ public class Book {
 	private final ISBN isbn;
 	private String summary;
 	private String imagePath;
-
+	private final Set<Page> pages = new LinkedHashSet<>();
 	private static final int MAX_SUMMARY = 500;
 	private static final int MAX_TITLE = 150;
+	public static final int LINGUISTIC_GROUP = 2;
+	private ArrayList<Page> sortedPages;
 
 	/**
 	 * Constructor of the Book class (computes the ISBN later)
@@ -52,7 +59,7 @@ public class Book {
 		checkSummary(summary);
 		this.title = title;
 		this.author = author;
-		this.isbn = isbn.isBlank() ? ISBN.createNewISBN(2, author.getMatricule()) : new ISBN(isbn);
+		this.isbn = isbn.isBlank() ? ISBN.createNewISBN(LINGUISTIC_GROUP, author.getMatricule()) : new ISBN(isbn);
 		this.summary = summary;
 		this.imagePath = imagePath;
 	}
@@ -151,7 +158,91 @@ public class Book {
 		return imagePath;
 	}
 
+	/**
+	 * Setter for the image path of the book
+	 *
+	 * @param path2Image the new image path of the book
+	 */
 	public void setImagePath(String path2Image) {
 		this.imagePath = path2Image;
+	}
+
+	/**
+	 * Adds a page to the book (if it is not already in the book)
+	 *
+	 * @param page the page to add
+	 */
+	public void addPage(Page page) {
+		pages.add(page);
+		orderPages();
+	}
+
+	/**
+	 * Removes a page from the book (if it is in the book)
+	 */
+	public void removePage(Page page) {
+		pages.remove(page);
+		removeChoicesToPage(page);
+		orderPages();
+	}
+
+	/**
+	 * Getter for the pages of the book
+	 *
+	 * @return the pages of the book
+	 */
+	public Set<Page> getPages() {
+		return pages;
+	}
+
+	/**
+	 * This method is used to get a c representation of the book (as a string)
+	 *
+	 * @return the string representation of the book
+	 */
+	@Override
+	public String toString() {
+		return String.format("Book{title='%s',\n author=%s,\n isbn=%s,\n summary='%s',\n imagePath='%s',\n" + " pages=%s}",
+				title, author, isbn, summary, imagePath, pages);
+	}
+
+	/**
+	 * This method is used to set a new value for the page of the book
+	 *
+	 * @param page the page to set
+	 */
+	public void updatePage(Page page) {
+		pages.remove(page);
+		removeChoicesToPage(page);
+		pages.add(page);
+		orderPages();
+	}
+
+	private void removeChoicesToPage(Page page) {
+		pages.forEach(p -> {
+			if (p.getChoices().containsValue(page)) {
+				p.getChoices().forEach((k, v) -> {
+					if (v.equals(page)) {
+						p.removeChoice(k);
+					}
+				});
+			}
+		});
+	}
+
+	public Callback<TableColumn.CellDataFeatures<Page, String>, ObservableValue<String>> getPageNumberFactory() {
+		return param -> new SimpleStringProperty(String.valueOf(getPageNumber(param.getValue())));
+	}
+
+	private void orderPages() {
+		sortedPages = new ArrayList<>();
+		sortedPages.addAll(pages);
+		sortedPages.sort(Comparator.comparing(page -> page.toString().length()));
+	}
+
+	public int getPageNumber(Page page) {
+		//TODO: remettre le tri
+//		return sortedPages.indexOf(page);
+		return 1;
 	}
 }
