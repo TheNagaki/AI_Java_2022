@@ -48,7 +48,7 @@ public class BookDetailsPresenter implements Presenter {
 	 * This method is used to close the view
 	 */
 	public void closeView() {
-		mainPresenter.BookDetailsClosed(bookDisplayed);
+		mainPresenter.BookDetailsClosed();
 		view.close();
 	}
 

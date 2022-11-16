@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -203,13 +204,15 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		centerGrid.add(inputSummary, 1, 2);
 		centerGrid.add(imageLabel, 0, 3, 2, 1);
 		centerGrid.add(imageBox, 1, 3, 2, 2);
-		centerGrid.add(createBookButton, 0, 8);
-		centerGrid.add(cancelButton, 1, 8);
-		centerGrid.add(quitButton, 2, 8);
 		centerGrid.setHgap(10);
 		centerGrid.setVgap(10);
 		mainPane.setCenter(centerGrid);
 		mainPane.setTop(topPane);
+
+		var bottomPane = new HBox(createBookButton, cancelButton, quitButton);
+		bottomPane.setSpacing(10);
+		bottomPane.setAlignment(Pos.CENTER);
+		mainPane.setBottom(bottomPane);
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);

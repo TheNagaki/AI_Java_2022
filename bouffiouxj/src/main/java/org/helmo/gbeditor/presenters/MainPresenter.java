@@ -3,9 +3,6 @@ package org.helmo.gbeditor.presenters;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.views.BookDetailsView;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /**
  * The MainPresenter is the presenter of the main view
  * It is used to manage the books of one author
@@ -14,7 +11,9 @@ public class MainPresenter implements Presenter {
 	private final GBEInterface engine;
 	private MainViewInterface view;
 
-	private final Set<Book> booksShown = new LinkedHashSet<>();
+	private Book bookShown = null;
+
+	private BookDetailsPresenter bookDetailsPresenter = null;
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
@@ -58,25 +57,29 @@ public class MainPresenter implements Presenter {
 	/**
 	 * This method is used to display the details of a book when the user clicks on its thumbnail
 	 *
-	 * @param b the book to display
+	 * @param book the book to display
 	 */
-	public void bookClicked(Book b) {
-		if (!booksShown.contains(b)) {
-			var presenter = new BookDetailsPresenter(engine, this);
-			var detailsView = new BookDetailsView(presenter);
-			detailsView.setBaseView(view);
-			presenter.displayBook(b);
-			booksShown.add(b);
+	public void bookClicked(Book book) {
+		if (bookShown == null || bookShown != book) {
+			if (bookDetailsPresenter == null) {
+				var presenter = new BookDetailsPresenter(engine, this);
+				var detailsView = new BookDetailsView(presenter);
+				detailsView.setBaseView(view);
+				presenter.displayBook(book);
+				bookDetailsPresenter = presenter;
+			} else {
+				bookDetailsPresenter.displayBook(book);
+			}
+			bookShown = book;
 		}
 	}
 
 	/**
 	 * This method is used to know when the book details view is closed
-	 *
-	 * @param b the book to remove from the list of books shown
 	 */
-	public void BookDetailsClosed(Book b) {
-		booksShown.remove(b);
+	public void BookDetailsClosed() {
+		bookShown = null;
+		bookDetailsPresenter = null;
 	}
 
 	/**
