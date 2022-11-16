@@ -8,6 +8,8 @@ import java.util.Set;
 /**
  * Repository interface is used to define the methods that will be used to save and load data from any kind of storage.
  * It is used by the GBEInterface.
+ * <hr>
+ * Je n'ai pas à présenter le cours de Structure de Données, c'est pourquoi mes méthodes sont assez concises.
  */
 public interface RepositoryInterface {
 
