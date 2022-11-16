@@ -3,36 +3,40 @@
     "title": "title A1",
     "author": {
       "name": "name A",
-      "firstName": "firstName A"
+      "firstName": "firstName A",
+      "matricule": 961380
     },
-    "isbn": 1,
+    "isbn": "2-961380-61-X",
     "summary": "summary A1"
   },
   {
     "title": "title A2",
     "author": {
       "name": "name A",
-      "firstName": "firstName A"
+      "firstName": "firstName A",
+      "matricule": 961380
     },
-    "isbn": 2,
+    "isbn": "2-961380-59-8",
     "summary": "summary A2"
   },
   {
     "title": "title B1",
     "author": {
       "name": "name B",
-      "firstName": "firstName B"
+      "firstName": "firstName B",
+      "matricule": 123456
     },
-    "isbn": 3,
+    "isbn": "2-123456-12-6",
     "summary": "summary B1"
   },
   {
     "title": "title B2",
     "author": {
       "name": "name B",
-      "firstName": "firstName B"
+      "firstName": "firstName B",
+      "matricule": 123456
     },
-    "isbn": 4,
+    "isbn": "2-123456-13-7",
     "summary": "summary B2"
   }
 ]
