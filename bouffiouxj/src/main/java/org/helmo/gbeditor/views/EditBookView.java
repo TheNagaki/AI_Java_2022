@@ -72,6 +72,9 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		initView();
 	}
 
+	public static final String INPUT_SUMMARY = "[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?()'\"_<> \\n\\-/]";
+	public static final String INPUT_TITLE = "[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?()'\"_<> \\-/]";
+
 	{
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
 
@@ -85,9 +88,9 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		inputSummary.setWrapText(true);
 
 		// You can not enter more than 150 in the text area for the title
-		inputTitle.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputTitle.setText(inputTitle.getText().replaceAll("[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?() \\-/]", ""));
-			if (inputTitle.getText().length() > MAX_TITLE) {
+		inputTitle.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+			inputTitle.setText(inputTitle.getText().replaceAll(INPUT_TITLE, ""));
+			if (inputTitle.getText().length() > MAX_TITLE && event.getCode() != KeyCode.BACK_SPACE) {
 				event.consume();
 				display(String.format("Vous avez atteint la limite de %d caractères pour le titre", MAX_TITLE));
 			}
@@ -128,9 +131,9 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		});
 
 		// You can not enter more than 500 characters in the text area for the summary
-		inputSummary.addEventHandler(KeyEvent.KEY_TYPED, event -> {
-			inputSummary.setText(inputSummary.getText().replaceAll("[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?() \\-/]", ""));
-			if (inputSummary.getText().length() > MAX_SUMMARY) {
+		inputSummary.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+			inputSummary.setText(inputSummary.getText().replaceAll(INPUT_SUMMARY, ""));
+			if (inputSummary.getText().length() > MAX_SUMMARY && event.getCode() != KeyCode.BACK_SPACE) {
 				event.consume();
 				display(String.format("Vous avez atteint la limite de %d caractères pour le résumé", MAX_SUMMARY));
 			}

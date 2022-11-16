@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class GBEditorTest {
 	private Author authorA;
 	private Set<Book> booksFromAuthorA;
-
 	private GBEInterface gbe;
+	RepositoryInterface repo;
 
 	@BeforeEach
 	void setUp() {
@@ -35,7 +35,7 @@ class GBEditorTest {
 				add(new Book("title3", authorB, "summary B1"));
 			}
 		};
-		RepositoryInterface repo = new FakeRepository(bookCollection);
+		repo = new FakeRepository(bookCollection);
 		gbe = new GBEditor(repo);
 	}
 
@@ -68,6 +68,7 @@ class GBEditorTest {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		assertEquals("Le titre du livre doit avoir une taille comprise entre 1 et 150 caractères", gbe.createBook("", "aaaa", "", ""));
 	}
+
 	@Test
 	void createBookReturnsExceptionMessageOnEmptySummary() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
@@ -76,25 +77,93 @@ class GBEditorTest {
 
 	@Test
 	void deleteBook() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		gbe.deleteBook(booksFromAuthorA.iterator().next());
+		assertEquals(1, gbe.getBooksFromCurrentAuthor().size());
+	}
+
+	@Test
+	void deleteBookReturnsFalseOnNull() {
+		assertFalse(gbe.deleteBook(null));
+	}
+
+	@Test
+	void deleteBookReturnsFalseOnEmpty() {
+		repo = new FakeRepository(new LinkedHashSet<>());
+		gbe = new GBEditor(repo);
+		assertFalse(gbe.deleteBook(new Book("new book", authorA, "summary")));
+	}
+
+	@Test
+	void deleteBookReturnsFalseOnNotExistingBook() {
+		assertFalse(gbe.deleteBook(new Book("new book", authorA, "summary")));
 	}
 
 	@Test
 	void updateBook() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		Book book = booksFromAuthorA.iterator().next();
+		gbe.updateBook(book, "new title", "new summary", "");
+		assertEquals("new title", book.getTitle());
+		assertEquals("new summary", book.getSummary());
+	}
+
+	@Test
+	void updateBookReturnsExceptionMessageOnEmptyTitle() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		Book book = booksFromAuthorA.iterator().next();
+		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "", "new summary", ""));
+	}
+	@Test
+	void updateBookReturnsExceptionMessageOnEmptySummary() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		Book book = booksFromAuthorA.iterator().next();
+		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "new title", "", ""));
 	}
 
 	@Test
 	void getAllBooks() {
+		assertEquals(3, gbe.getAllBooks().size());
+	}
+
+	@Test
+	void getAllBooksReturnsEmptySetOnEmptyRepository() {
+		repo = new FakeRepository(new LinkedHashSet<>());
+		gbe = new GBEditor(repo);
+		assertEquals(0, gbe.getAllBooks().size());
 	}
 
 	@Test
 	void getBooksFromCurrentAuthor() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		assertEquals(booksFromAuthorA, gbe.getBooksFromCurrentAuthor());
+	}
+
+	@Test
+	void getBooksFromCurrentAuthorReturnsEmptySetOnNull() {
+		gbe.connect(null, null);
+		assertEquals(new LinkedHashSet<Book>(), gbe.getBooksFromCurrentAuthor());
 	}
 
 	@Test
 	void getAuthorName() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		assertEquals(authorA.getFullName(), gbe.getAuthorName());
+	}
+
+	@Test
+	void getAuthorNameReturnsNullOnNull() {
+		assertNull(gbe.getAuthorName());
 	}
 
 	@Test
 	void presetISBN() {
+		gbe.connect(authorA.getName(), authorA.getFirstName());
+		assertEquals(String.format("2-%d-", authorA.getMatricule()), String.format("2-%d-", gbe.presetISBN()[1]));
+	}
+
+	@Test
+	void presetISBNReturnsNullOnNull() {
+		assertNull(gbe.presetISBN());
 	}
 }

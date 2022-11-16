@@ -27,7 +27,7 @@ public class Author {
 
 	private static void checkValidity(String name, String firstName) {
 		if (name == null || firstName == null || name.isBlank() || firstName.isBlank()) {
-			throw new IllegalAuthorNames();
+			throw new IllegalAuthorNameException();
 		}
 	}
 

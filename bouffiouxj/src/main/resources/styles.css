@@ -32,7 +32,7 @@
     -fx-padding: 0 0 5 0;
 }
 
-.popup-confirmation {
+.popup {
     -fx-background-color: white;
     -fx-border-color: black;
     -fx-border-width: 1px;

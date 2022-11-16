@@ -174,7 +174,7 @@ public class Book {
 	 */
 	public void addPage(Page page) {
 		pages.add(page);
-		orderPages();
+//		orderPages();
 	}
 
 	/**
@@ -183,7 +183,7 @@ public class Book {
 	public void removePage(Page page) {
 		pages.remove(page);
 		removeChoicesToPage(page);
-		orderPages();
+//		orderPages();
 	}
 
 	/**
@@ -230,6 +230,11 @@ public class Book {
 		});
 	}
 
+	/**
+	 * This method is used to define how the pages of the book are ordered
+	 *
+	 * @return a lambda expression that defines how to get a page's number
+	 */
 	public Callback<TableColumn.CellDataFeatures<Page, String>, ObservableValue<String>> getPageNumberFactory() {
 		return param -> new SimpleStringProperty(String.valueOf(getPageNumber(param.getValue())));
 	}
@@ -240,9 +245,14 @@ public class Book {
 		sortedPages.sort(Comparator.comparing(page -> page.toString().length()));
 	}
 
+	/**
+	 * This method is used to get the number of a page in the book
+	 *
+	 * @param page the page to get the number of
+	 * @return the number of the page
+	 */
 	public int getPageNumber(Page page) {
-		//TODO: remettre le tri
-//		return sortedPages.indexOf(page);
-		return 1;
+		orderPages();
+		return sortedPages.indexOf(page);
 	}
 }

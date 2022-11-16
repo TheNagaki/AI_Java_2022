@@ -4,6 +4,7 @@ import org.helmo.gbeditor.presenters.GBEInterface;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -90,7 +91,7 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public Set<Book> getAllBooks() {
-		return books;
+		return new LinkedHashSet<>(books);
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public int[] presetISBN() {
-		return currentAuthor != null ? new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()} : new int[0];
+		return currentAuthor != null ? new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()} : null;
 	}
 
 	@Override
