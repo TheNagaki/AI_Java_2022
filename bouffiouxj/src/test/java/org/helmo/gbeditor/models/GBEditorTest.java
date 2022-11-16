@@ -1,7 +1,7 @@
 package org.helmo.gbeditor.models;
 
 import org.helmo.gbeditor.presenters.GBEInterface;
-import org.helmo.gbeditor.repositories.Repository;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ class GBEditorTest {
 				add(new Book("title3", authorB, "summary B1"));
 			}
 		};
-		Repository repo = new FakeRepository(bookCollection);
+		RepositoryInterface repo = new FakeRepository(bookCollection);
 		gbe = new GBEditor(repo);
 	}
 

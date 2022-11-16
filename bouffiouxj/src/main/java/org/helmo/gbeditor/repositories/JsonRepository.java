@@ -16,7 +16,7 @@ import java.util.*;
  * JsonRepository is a class that implements the Repository interface.
  * It is used to load and save books from a json file.
  */
-public class JsonRepository implements Repository {
+public class JsonRepository implements RepositoryInterface {
 
 	private static final byte[] JPG_BYTES = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
 	private static final byte[] PNG_BYTES = new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47,

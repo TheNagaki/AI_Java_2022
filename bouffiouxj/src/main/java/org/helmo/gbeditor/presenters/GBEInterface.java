@@ -97,9 +97,9 @@ public interface GBEInterface {
 	 * Creates a new page with the given parameters and adds it to the database and the book
 	 *
 	 * @param book the book to add the page to
-	 * @param page the page to add
+	 * @param text the content of the new page
 	 */
-	void addPage(Book book, Page page);
+	void addPage(Book book, String text);
 
 	/**
 	 * Deletes a page from the repository and the book

@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 import org.helmo.gbeditor.models.GBEditor;
 import org.helmo.gbeditor.presenters.*;
 import org.helmo.gbeditor.repositories.JsonRepository;
-import org.helmo.gbeditor.repositories.Repository;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.helmo.gbeditor.views.ConnexionView;
 import org.helmo.gbeditor.views.BaseView;
 import org.helmo.gbeditor.views.EditBookView;
@@ -16,6 +16,7 @@ import org.helmo.gbeditor.views.MainView;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class launches the application.
@@ -56,12 +57,12 @@ public class App extends Application {
 	public void start(Stage primaryStage) {
 		Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
 		Path imgDirPath = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
-		Repository repo = new JsonRepository(bookPath, imgDirPath);
+		RepositoryInterface repo = new JsonRepository(bookPath, imgDirPath);
 		GBEInterface editor = new GBEditor(repo);
 		ViewInterface mainView = new BaseView(initViews(editor));
 		Parent root = mainView.getRoot();
 		Scene scene = new Scene(root, 400, 500);
-		scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 		primaryStage.setTitle("Gamebook Editor");
 		primaryStage.setScene(scene);
 		primaryStage.show();

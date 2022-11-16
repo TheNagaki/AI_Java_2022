@@ -1,6 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.Page;
 
 public class BookDetailsPresenter implements Presenter {
 	private final MainPresenter mainPresenter;
@@ -30,7 +31,7 @@ public class BookDetailsPresenter implements Presenter {
 	 */
 	public void setView(BookDetailsViewInterface view) {
 		this.view = view;
-		view.getStage().setOnCloseRequest(event -> mainPresenter.BookDetailsClosed(bookDisplayed));
+		view.getStage().setOnCloseRequest(event -> closeView());
 	}
 
 	/**
@@ -66,21 +67,27 @@ public class BookDetailsPresenter implements Presenter {
 	 */
 	public void editBook() {
 		mainPresenter.setBookToEdit(bookDisplayed);
-		mainPresenter.BookDetailsClosed(bookDisplayed);
 		view.changeView(ViewsEnum.EDIT_BOOK);
-		view.close();
+		closeView();
 	}
 
-	public void addPage() {
+	public void addPage(String text) {
+		engine.addPage(bookDisplayed, text);
+		view.refresh();
 	}
 
-	public void removePage() {
+	public void removePage(Page selectedPage) {
+		engine.removePage(bookDisplayed, selectedPage);
+		view.refresh();
 	}
 
-	public void movePageUp() {
-	}
-
-	public void movePageDown() {
-
-	}
+//	public void movePageUp(Page selectedPage) {
+//		engine.movePageUp(bookDisplayed, selectedPage);
+//		view.refresh();
+//	}
+//
+//	public void movePageDown(Page selectedPage) {
+//		engine.movePageDown(bookDisplayed, selectedPage);
+//		view.refresh();
+//	}
 }

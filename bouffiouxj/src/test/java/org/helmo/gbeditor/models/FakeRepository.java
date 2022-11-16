@@ -1,6 +1,6 @@
 package org.helmo.gbeditor.models;
 
-import org.helmo.gbeditor.repositories.Repository;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * This class is a fake repository for testing purpose
  */
-public class FakeRepository implements Repository {
+public class FakeRepository implements RepositoryInterface {
 	private final Set<Book> bookCollection;
 
 	/**

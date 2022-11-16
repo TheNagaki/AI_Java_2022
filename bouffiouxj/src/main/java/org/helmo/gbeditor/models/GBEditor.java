@@ -1,7 +1,7 @@
 package org.helmo.gbeditor.models;
 
 import org.helmo.gbeditor.presenters.GBEInterface;
-import org.helmo.gbeditor.repositories.Repository;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +15,7 @@ public class GBEditor implements GBEInterface {
 	private final Set<Author> authors;
 	private Author currentAuthor;
 	private final Set<Book> books;
-	private final Repository repository;
+	private final RepositoryInterface repository;
 	private Book bookToEdit;
 
 	/**
@@ -23,7 +23,7 @@ public class GBEditor implements GBEInterface {
 	 *
 	 * @param repository The repository to use.
 	 */
-	public GBEditor(Repository repository) {
+	public GBEditor(RepositoryInterface repository) {
 		this.repository = repository;
 		this.authors = repository.loadAuthors();
 		this.books = repository.loadBooks();
@@ -125,8 +125,8 @@ public class GBEditor implements GBEInterface {
 	}
 
 	@Override
-	public void addPage(Book book, Page page) {
-		book.addPage(page);
+	public void addPage(Book book, String content) {
+		book.addPage(new Page(content));
 		repository.saveBook(book);
 	}
 
