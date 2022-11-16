@@ -2,8 +2,10 @@ package org.helmo.gbeditor.views;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -23,19 +25,24 @@ import org.helmo.gbeditor.presenters.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class BookDetailsView implements BookDetailsViewInterface {
 	private final BookDetailsPresenter presenter;
+	private static final int GLIMPSE_SIZE = 10;
 	private ViewInterface baseView;
 
 	private final Stage stage = new Stage();
 	private final BorderPane mainPane = new BorderPane();
-	private final int WIDTH = 400;
-	private final int HEIGHT = 400;
-	private final int SMALL_SPACING = 5;
-	private final int BIG_SPACING = 10;
+	private static final int WIDTH = 400;
+	private static final int HEIGHT = 400;
+	private static final int SMALL_SPACING = 5;
+	private static final int BIG_SPACING = 10;
+	private Book bookOnDisplay;
+	private ObservableList<Page> pages;
 
 	public BookDetailsView(BookDetailsPresenter presenter) {
 		this.presenter = presenter;
@@ -63,6 +70,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	@Override
 	public void setBaseView(ViewInterface baseView) {
 		this.baseView = baseView;
+		launchStage();
 	}
 
 	@Override
@@ -72,7 +80,8 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 	@Override
 	public void refresh() {
-		//Nothing to do here
+		mainPane.getChildren().clear();
+		displayBook(bookOnDisplay);
 	}
 
 	@Override
@@ -88,16 +97,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	@Override
 	public void displayBook(Book book) {
 		stage.setTitle(book.getTitle());
-		stage.initModality(Modality.NONE);
-		// This is a choice I made to allow the user to interact with the main window while the popup is open and
-		// therefore open multiple popups at the same time.
-		// The reason for this choice is that the only advantage of using a popup is to have a smaller window NOT in the
-		// main window so that the user can interact with both at the same time.
-		stage.initOwner(baseView.getStage());
-		stage.setResizable(false);
-		stage.setWidth(WIDTH);
-		stage.setHeight(HEIGHT);
-
+		this.bookOnDisplay = book;
 		var insets = new Insets(SMALL_SPACING);
 
 		var centerBox = new VBox();
@@ -162,7 +162,8 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		BorderPane.setMargin(bottomPane, insets);
 
 		var rightPane = new BorderPane();
-		rightPane.setCenter(fillPagesTable(book));
+		var tableView = fillPagesTable(book);
+		rightPane.setCenter(tableView);
 
 		var pageInputs = new VBox();
 		pageInputs.setSpacing(SMALL_SPACING);
@@ -178,14 +179,15 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		buttonBox.setSpacing(BIG_SPACING);
 		buttonBox.setAlignment(Pos.CENTER);
 		var addPageBtn = new Button("➕");
-		addPageBtn.setOnAction(e -> presenter.addPage());
+		addPageBtn.setOnAction(e -> presenter.addPage(contentInput.getText()));
 		var removePageBtn = new Button("➖");
-		removePageBtn.setOnAction(e -> presenter.removePage());
-		var pageUpBtn = new Button("⬆");
-		pageUpBtn.setOnAction(e -> presenter.movePageUp());
-		var pageDownBtn = new Button("⬇");
-		pageDownBtn.setOnAction(e -> presenter.movePageDown());
-		buttonBox.getChildren().addAll(addPageBtn, removePageBtn, pageUpBtn, pageDownBtn);
+		removePageBtn.setOnAction(e -> presenter.removePage(tableView.getSelectionModel().getSelectedItem()));
+//		var pageUpBtn = new Button("⬆");
+//		pageUpBtn.setOnAction(e -> presenter.movePageUp(tableView.getSelectionModel().getSelectedItem()));
+//		var pageDownBtn = new Button("⬇");
+//		pageDownBtn.setOnAction(e -> presenter.movePageDown(tableView.getSelectionModel().getSelectedItem()));
+//		buttonBox.getChildren().addAll(addPageBtn, removePageBtn, pageUpBtn, pageDownBtn);
+		buttonBox.getChildren().addAll(addPageBtn, removePageBtn);
 
 		pageInputs.getChildren().addAll(fieldsInputs, buttonBox);
 		rightPane.setBottom(pageInputs);
@@ -193,7 +195,17 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		rightPane.setMaxSize(WIDTH / 2 - 5, HEIGHT);
 		mainPane.setRight(rightPane);
 		BorderPane.setMargin(rightPane, insets);
+	}
 
+	private void launchStage() {
+		stage.initModality(Modality.NONE);
+		// This is a choice I made to allow the user to interact with the main window while the popup is open and vice versa.
+		// The reason for this choice is that the only advantage of using a popup is to have a smaller window NOT in the
+		// main window so that the user can interact with both at the same time.
+		stage.initOwner(baseView.getStage());
+		stage.setResizable(false);
+		stage.setWidth(WIDTH);
+		stage.setHeight(HEIGHT);
 		var scene = new Scene(mainPane);
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 		stage.setScene(scene);
@@ -205,7 +217,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		//Avec l'aide de https://docs.oracle.com/javafx/2/ui_controls/table-view.htm
 
 		var pagesView = new TableView<Page>();
-		pagesView.setEditable(true);
+		pagesView.setEditable(false);
 		pagesView.setMaxWidth(WIDTH / 2 - 5);
 		pagesView.setMaxHeight(HEIGHT);
 		pagesView.setPlaceholder(new Label("Aucune page"));
@@ -214,9 +226,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			var row = new TableRow<Page>();
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (!row.isEmpty())) {
-					//TODO: faire un truc ici
-//					presenter.editPage(row.getItem());
-					//?
+					popupEditPage(row.getItem());
 				}
 			});
 			return row;
@@ -255,17 +265,21 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 		secondPage.addChoice("Choix 1", fourthPage);
 		secondPage.addChoice("Choix 2", thirdPage);
-		pagesView.setItems(FXCollections.observableArrayList(firstPage, secondPage, thirdPage, fourthPage));
+		this.pages = FXCollections.observableArrayList(firstPage, secondPage, thirdPage, fourthPage);
+		pagesView.setItems(pages);
 
+		pagesView.requestFocus();
+		pagesView.getFocusModel().focus(0);
+		pagesView.getSelectionModel().selectFirst();
 		return pagesView;
 	}
 
 	private void popupConfirmDeletion() {
 		//Inspired by https://www.geeksforgeeks.org/javafx-popup-class/ and https://docs.oracle.com/javase/8/javafx/api/javafx/stage/Popup.html
-		var confirmPopup = new Popup();
+		var popup = new Popup();
 		var yesBtn = new Button("Oui");
 		yesBtn.setOnAction(e2 -> {
-			confirmPopup.hide();
+			popup.hide();
 			if (presenter.deleteBook()) {
 				changeView(ViewsEnum.MAIN);
 			} else {
@@ -274,9 +288,9 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			presenter.closeView();
 		});
 		var noBtn = new Button("Non");
-		noBtn.setOnAction(e2 -> confirmPopup.hide());
+		noBtn.setOnAction(e2 -> popup.hide());
 		var popupRoot = new VBox();
-		popupRoot.setSpacing(BIG_SPACING);
+		popupRoot.setSpacing(SMALL_SPACING);
 		popupRoot.setAlignment(Pos.CENTER);
 		popupRoot.getChildren().add(new Label("Êtes-vous sûr de vouloir supprimer ce livre ?"));
 		var buttonsBox = new HBox();
@@ -284,15 +298,88 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		buttonsBox.setSpacing(BIG_SPACING);
 		buttonsBox.setAlignment(Pos.BOTTOM_CENTER);
 		popupRoot.getChildren().add(buttonsBox);
-		popupRoot.getStyleClass().add("popup-confirmation");
-		confirmPopup.getContent().add(popupRoot);
-		confirmPopup.setAutoHide(true);
-		confirmPopup.show(stage);
-		//Apparemment, les propriétés height et width ne sont définies qu'après le show() lorsqu'on utilise un Popup
-		confirmPopup.setX(stage.getX() + stage.getWidth() / 2 - confirmPopup.getWidth() / 2);
-		confirmPopup.setY(stage.getY() + stage.getHeight() / 2 - confirmPopup.getHeight() / 2);
+		fillAndPlacePopup(popup, popupRoot);
 	}
 
+	private void popupEditPage(Page selected) {
+		var popup = new Popup();
+		var popupRoot = new VBox();
+		popupRoot.setSpacing(SMALL_SPACING);
+		popupRoot.setAlignment(Pos.CENTER);
+		var contentField = new TextField(selected.getContent());
+		contentField.setPromptText("Contenu de la page");
+		var choicesBox = new VBox();
+		choicesBox.setSpacing(SMALL_SPACING);
+		choicesBox.setAlignment(Pos.CENTER);
+		var choices = selected.getChoices();
+		for (var choice : choices.keySet()) {
+			var choiceBox = new HBox();
+			choiceBox.setSpacing(SMALL_SPACING);
+			choiceBox.setAlignment(Pos.CENTER);
+			var choiceField = new TextField(choice);
+			choiceField.setPromptText("Choix");
+			var destinationField = selectPageChoice(selected);
+			addCurrentChoiceToMenu(choices, choice, destinationField);
+			choiceBox.getChildren().addAll(choiceField, destinationField);
+			choicesBox.getChildren().add(choiceBox);
+		}
+		var addChoiceBtn = new Button("Ajouter un choix");
+		addChoiceBtn.setOnAction(e -> {
+			var choiceBox = new HBox();
+			choiceBox.setSpacing(SMALL_SPACING);
+			choiceBox.setAlignment(Pos.CENTER);
+			var choiceField = new TextField();
+			choiceField.setPromptText("Choix");
+			var destinationField = selectPageChoice(selected);
+			choiceBox.getChildren().addAll(choiceField, destinationField);
+			choicesBox.getChildren().add(choiceBox);
+		});
+		var saveBtn = new Button("💾");
+		saveBtn.setOnAction(e -> presenter.closeView());
+		var cancelBtn = new Button();
+		var closeIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/emergency-exit.png"))));
+		closeIcon.setFitHeight(15);
+		closeIcon.setPreserveRatio(true);
+		cancelBtn.setGraphic(closeIcon);
+		cancelBtn.setOnAction(e -> popup.hide());
+		var buttonsBox = new HBox();
+		buttonsBox.getChildren().addAll(saveBtn, cancelBtn);
+		buttonsBox.setSpacing(BIG_SPACING);
+		buttonsBox.setAlignment(Pos.BOTTOM_CENTER);
+		popupRoot.getChildren().addAll(contentField, choicesBox, buttonsBox);
+		fillAndPlacePopup(popup, popupRoot);
+	}
+
+	private MenuButton selectPageChoice(Page selected) {
+		var destinationField = new MenuButton("Page cible");
+		destinationField.getItems().addAll(pages.stream()
+				.filter(page -> !page.equals(selected) && !selected.getChoices().containsValue(page) &&
+						!page.getChoices().containsValue(selected))
+				.map(page -> {
+					final var content = page.getContent();
+					var item = new MenuItem(bookOnDisplay.getPageNumber(page) + ") " + content.substring(0, Math.min(GLIMPSE_SIZE, content.length())));
+					item.setOnAction(e -> destinationField.setText(item.getText()));
+					return item;
+				}).collect(Collectors.toList()));
+		return destinationField;
+	}
+
+	private void addCurrentChoiceToMenu(Map<String, Page> choices, String choice, MenuButton menu) {
+		var choicePageContent = choices.get(choice).getContent();
+		var item = new MenuItem("* " + bookOnDisplay.getPageNumber(choices.get(choice)) + ") " + choicePageContent.substring(0, Math.min(GLIMPSE_SIZE, choicePageContent.length())));
+		item.setOnAction(e -> menu.setText(item.getText()));
+		menu.getItems().add(0, item);
+		menu.setText(menu.getItems().get(0).getText());
+	}
+
+	private void fillAndPlacePopup(Popup popup, Node popupRoot) {
+		popup.getContent().add(popupRoot);
+		popup.setAutoHide(true);
+		popup.show(stage);
+		//Apparemment, les propriétés height et width ne sont définies qu'après le show() lorsqu'on utilise un Popup
+		popup.setX(stage.getX() + stage.getWidth() / 2 - popup.getWidth() / 2);
+		popup.setY(stage.getY() + stage.getHeight() / 2 - popup.getHeight() / 2);
+	}
 
 	@Override
 	public void close() {
