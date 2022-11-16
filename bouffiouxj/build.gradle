@@ -27,7 +27,6 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
 
-    testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'org.assertj:assertj-core:3.20.2'
     //Use derby as test database
     testImplementation 'org.apache.derby:derby:10.14.2.0'
@@ -35,12 +34,7 @@ dependencies {
     // This dependency is used by the application.
     // https://mavenlibs.com/maven/dependency/com.google.code.gson/gson
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
-    implementation 'com.google.guava:guava:30.1-jre'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    implementation 'org.apache.commons:commons-text:1.9'
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.25'
 }
 
 tasks.named('test') {
