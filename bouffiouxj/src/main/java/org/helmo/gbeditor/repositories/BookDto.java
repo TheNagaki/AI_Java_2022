@@ -21,7 +21,7 @@ public class BookDto {
 	public BookDto(Book book) {
 		this.title = book.getTitle();
 		this.author = book.getAuthor();
-		this.isbn = book.getIsbn();
+		this.isbn = book.getIsbn().toString();
 		this.summary = book.getSummary();
 		this.imagePath = book.getImage();
 	}

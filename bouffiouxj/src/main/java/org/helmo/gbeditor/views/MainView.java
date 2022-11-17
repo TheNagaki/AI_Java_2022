@@ -65,7 +65,7 @@ public class MainView implements MainViewInterface {
 
 				var bottomBox = new HBox();
 				bottomBox.setAlignment(Pos.CENTER);
-				var isbn = new Label(b.getIsbn());
+				var isbn = new Label(b.getIsbn().toString());
 				isbn.getStyleClass().add("thumbnail-isbn");
 				bottomBox.getChildren().add(isbn);
 				box.setBottom(bottomBox);

@@ -127,7 +127,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		imageBox.setAlignment(Pos.CENTER);
 		centerBox.getChildren().add(imageBox);
 
-		centerBox.getChildren().add(new Label(book.getIsbn()));
+		centerBox.getChildren().add(new Label(book.getIsbn().toString()));
 
 //		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
 //		L'utilisateur ne pouvant voir QUE ses livres, on ne l'affiche donc pas
