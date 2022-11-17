@@ -134,4 +134,26 @@ class JsonRepositoryTest {
 			fail(e.getMessage());
 		}
 	}
+
+	@Test
+	void copyFakeImageThrowsException() {
+		try {
+			JsonRepository jsonRepository = new JsonRepository(null, Path.of(pathTest));
+			assertThrows(IllegalArgumentException.class, () -> jsonRepository.copyImage(pathRes + "/fakeImage.jpg"));
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
+	@Test
+	void copyNonExistingImageReturnsFalse() {
+		try {
+			JsonRepository jsonRepository = new JsonRepository(null, Path.of(pathTest));
+			jsonRepository.copyImage(pathRes + "/nonExistingImage.jpg");
+			Path imageDestination = Path.of(pathTest + "/nonExistingImage.jpg");
+			assertFalse(Files.exists(imageDestination));
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
 }
