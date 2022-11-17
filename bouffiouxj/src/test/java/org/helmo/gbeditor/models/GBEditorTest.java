@@ -103,7 +103,7 @@ class GBEditorTest {
 	void updateBook() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
-		gbe.updateBook(book, "new title", "new summary", "");
+		gbe.updateBook(book, "new title", "new summary", "", "");
 		assertEquals("new title", book.getTitle());
 		assertEquals("new summary", book.getSummary());
 	}
@@ -112,13 +112,14 @@ class GBEditorTest {
 	void updateBookReturnsExceptionMessageOnEmptyTitle() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
-		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "", "new summary", ""));
+		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "", "new summary", "", ""));
 	}
+
 	@Test
 	void updateBookReturnsExceptionMessageOnEmptySummary() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
-		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "new title", "", ""));
+		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "new title", "", "", ""));
 	}
 
 	@Test

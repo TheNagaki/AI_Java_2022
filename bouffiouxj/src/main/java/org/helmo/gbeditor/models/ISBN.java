@@ -41,6 +41,27 @@ public class ISBN {
 		this.checkSum = checkSum;
 	}
 
+	/**
+	 * Computes the check sum of the ISBN for the given String prefix.
+	 *
+	 * @param isbn The prefix of the ISBN as a String (9-999-99 so without the checksum).
+	 * @return The check sum of the ISBN.
+	 */
+	public static String computeCheckSum(String isbn) {
+		var isbnWithoutControl = "\\d-?\\d{0,6}-?\\d{0,2}";
+		if (Pattern.matches(isbnWithoutControl, isbn)) {
+			var splittedS = isbn.split("-");
+			var splittedI = new int[3];
+			for (int i = 0; i < splittedS.length; i++) {
+				splittedI[i] = Integer.parseInt(splittedS[i]);
+			}
+			var checkSum = computeCheckSum(splittedI[0], splittedI[1], splittedI[2]);
+			return checkSum == 10 ? "X" : String.valueOf(checkSum);
+		} else {
+			throw new IllegalArgumentException(String.format("The ISBN %s is not valid.", isbn));
+		}
+	}
+
 	private void checkValidity(int linguisticGroup, int idAuthor, int idBook, int checkSum) {
 		verifyLinguisticGroup(linguisticGroup);
 		verifyAuthorId(idAuthor);

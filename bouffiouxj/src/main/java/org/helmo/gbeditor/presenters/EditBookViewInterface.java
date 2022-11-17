@@ -14,5 +14,17 @@ public interface EditBookViewInterface extends ViewInterface {
 	 */
 	void presetISBN(int[] isbn);
 
+	/**
+	 * Sets the book's information in the view
+	 *
+	 * @param bookToEdit the book to edit
+	 */
 	void setBookToEdit(Book bookToEdit);
+
+	/**
+	 * Sets the last number of the isbn in the view
+	 *
+	 * @param controlNumber the last number of the isbn
+	 */
+	void setIsbnControlNumber(String controlNumber);
 }

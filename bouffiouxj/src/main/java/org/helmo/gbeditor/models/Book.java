@@ -1,10 +1,5 @@
 package org.helmo.gbeditor.models;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TableColumn;
-import javafx.util.Callback;
-
 import java.util.*;
 
 /**
@@ -13,7 +8,7 @@ import java.util.*;
 public class Book {
 	private String title;
 	private final Author author;
-	private final ISBN isbn;
+	private ISBN isbn;
 	private String summary;
 	private String imagePath;
 	private final Set<Page> pages = new LinkedHashSet<>();
@@ -119,8 +114,8 @@ public class Book {
 	 *
 	 * @return the ISBN of the book
 	 */
-	public String getIsbn() {
-		return isbn.toString();
+	public ISBN getIsbn() {
+		return isbn;
 	}
 
 	/**
@@ -174,7 +169,6 @@ public class Book {
 	 */
 	public void addPage(Page page) {
 		pages.add(page);
-//		orderPages();
 	}
 
 	/**
@@ -183,7 +177,6 @@ public class Book {
 	public void removePage(Page page) {
 		pages.remove(page);
 		removeChoicesToPage(page);
-//		orderPages();
 	}
 
 	/**
@@ -230,15 +223,6 @@ public class Book {
 		});
 	}
 
-	/**
-	 * This method is used to define how the pages of the book are ordered
-	 *
-	 * @return a lambda expression that defines how to get a page's number
-	 */
-	public Callback<TableColumn.CellDataFeatures<Page, String>, ObservableValue<String>> getPageNumberFactory() {
-		return param -> new SimpleStringProperty(String.valueOf(getPageNumber(param.getValue())));
-	}
-
 	private void orderPages() {
 		sortedPages = new ArrayList<>();
 		sortedPages.addAll(pages);
@@ -254,5 +238,14 @@ public class Book {
 	public int getPageNumber(Page page) {
 		orderPages();
 		return sortedPages.indexOf(page);
+	}
+
+	/**
+	 * Setter for the isbn of the book
+	 *
+	 * @param isbn the new isbn of the book
+	 */
+	public void setIsbn(String isbn) {
+		this.isbn = new ISBN(isbn);
 	}
 }

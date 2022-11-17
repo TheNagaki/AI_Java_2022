@@ -8,8 +8,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -33,7 +31,7 @@ import java.util.Objects;
 public class EditBookView implements ViewInterface, EditBookViewInterface {
 
 	private static final int MAX_TITLE = 150;
-	private static final int MAX_ISBN = 13;
+	private static final int MAX_BOOK_ID = 2;
 	private static final int MAX_SUMMARY = 500;
 	private final EditBookPresenter presenter;
 	private boolean bookCreation;
@@ -43,13 +41,13 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 	private File imageChosen;
 	private final BorderPane topPane = new BorderPane();
 	private final FileChooser fileChooser = new FileChooser();
-
 	private final GridPane centerGrid = new GridPane();
 	private final TextArea inputTitle = new TextArea();
 	private final TextField inputIsbn = new TextField();
 	private final TextArea inputSummary = new TextArea();
 	private final Label authorName = new Label("");
-	private String baseIsbn;
+	private final Label baseIsbnLabel = new Label("9-999999-");
+	private final Label isbnControlLabel = new Label("-?");
 	private Book bookEdited;
 
 	/**
@@ -72,74 +70,9 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		initView();
 	}
 
-	public static final String INPUT_SUMMARY = "[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?()'\"_<> \\n\\-/]";
-	public static final String INPUT_TITLE = "[^0-9a-zA-Zéèàâêûùîçäïüë.,;!?()'\"_<> \\-/]";
-
-	{
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
-
-		inputTitle.setPrefColumnCount(25);
-		inputTitle.setPrefRowCount(4);
-
-		inputSummary.setPrefColumnCount(20);
-		inputSummary.setPrefRowCount(10);
-
-		inputTitle.setWrapText(true);
-		inputSummary.setWrapText(true);
-
-		// You can not enter more than 150 in the text area for the title
-		inputTitle.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-			inputTitle.setText(inputTitle.getText().replaceAll(INPUT_TITLE, ""));
-			if (inputTitle.getText().length() > MAX_TITLE && event.getCode() != KeyCode.BACK_SPACE) {
-				event.consume();
-				display(String.format("Vous avez atteint la limite de %d caractères pour le titre", MAX_TITLE));
-			}
-			inputTitle.positionCaret(inputTitle.getText().length());
-			checkToEnableButton();
-		});
-
-		final int ISBN_SECOND_DASH = 7;
-		final int ISBN_LAST_DASH = 9;
-//		 You can not enter more than 13 in the text field for the isbn
-		inputIsbn.addEventHandler(KeyEvent.KEY_TYPED, keyEvent -> {
-			if (inputIsbn.getText().length() >= MAX_ISBN) {
-				keyEvent.consume();
-				display(String.format("L'ISBN ne peut pas dépasser %d caractères", MAX_ISBN));
-			} else {
-				if (!keyEvent.getCharacter().matches("[0-9X]")) {
-					keyEvent.consume();
-				}
-				var text = inputIsbn.getText().replaceAll("[^0-9]", "");
-				var content = baseIsbn;
-				if (text.length() >= ISBN_LAST_DASH) {
-					content += text.substring(ISBN_SECOND_DASH, ISBN_LAST_DASH) + "-" + (text.length() == 10 ? text.charAt(9) : "");
-				} else if (text.length() > ISBN_SECOND_DASH) {
-					content += text.substring(ISBN_SECOND_DASH);
-				}
-				inputIsbn.setText(content);
-			}
-			inputIsbn.positionCaret(inputIsbn.getText().length());
-			checkToEnableButton();
-		});
-
-		inputIsbn.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-			if (keyEvent.getCode().equals(KeyCode.DELETE) || keyEvent.getCode().equals(KeyCode.BACK_SPACE)) {
-				inputIsbn.setText(baseIsbn);
-				inputIsbn.positionCaret(inputIsbn.getText().length());
-			}
-			keyEvent.consume();
-		});
-
-		// You can not enter more than 500 characters in the text area for the summary
-		inputSummary.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-			inputSummary.setText(inputSummary.getText().replaceAll(INPUT_SUMMARY, ""));
-			if (inputSummary.getText().length() > MAX_SUMMARY && event.getCode() != KeyCode.BACK_SPACE) {
-				event.consume();
-				display(String.format("Vous avez atteint la limite de %d caractères pour le résumé", MAX_SUMMARY));
-			}
-			inputSummary.positionCaret(inputSummary.getText().length());
-			checkToEnableButton();
-		});
+	@Override
+	public void setIsbnControlNumber(String controlNumber) {
+		this.isbnControlLabel.setText(String.format("-%s", controlNumber));
 	}
 
 	/**
@@ -148,7 +81,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 	private void checkToEnableButton() {
 		createBookButton.setDisable(inputTitle.getText().length() == 0 || inputIsbn.getText().length() == 0 ||
 				inputSummary.getText().length() == 0 || inputTitle.getText().length() > MAX_TITLE ||
-				inputIsbn.getText().length() > MAX_ISBN || inputSummary.getText().length() > MAX_SUMMARY);
+				inputIsbn.getText().length() > MAX_BOOK_ID || inputSummary.getText().length() > MAX_SUMMARY);
 	}
 
 	private void initView() {
@@ -170,6 +103,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		imageView.setFitHeight(60);
 		imageView.setPreserveRatio(true);
 		imageBox.setCenter(imageView);
+
 		var fileChooserButton = new Button("Choisir une image");
 		fileChooserButton.setOnAction(action -> {
 			baseView.getRoot().setDisable(true);
@@ -184,31 +118,41 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 			}
 			baseView.getRoot().setDisable(false);
 		});
-		imageBox.setCenter(imageView);
+
 		var buttonBox = new VBox(fileChooserButton);
 		buttonBox.setAlignment(Pos.CENTER);
 		imageBox.setRight(buttonBox);
+
 		var title = new Label("Titre :");
 		var isbn = new Label("ISBN :");
 		var summary = new Label("Résumé :");
+
 		var cancelButton = new Button("Annuler");
 		cancelButton.setOnAction(action -> changeView(ViewsEnum.MAIN));
+
 		var quitButton = new Button("Quitter");
 		quitButton.setOnAction(action -> presenter.onQuit_Clicked());
-		centerGrid.setAlignment(Pos.CENTER);
+
+		var isbnControlBox = new HBox(baseIsbnLabel, inputIsbn, isbnControlLabel);
+		isbnControlBox.setSpacing(2);
+		isbnControlBox.setAlignment(Pos.CENTER_LEFT);
+
 		createBookButton = new Button("Valider");
-		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), inputIsbn.getText().strip(), inputSummary.getText().strip()));
+		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), getFullIsbn(), inputSummary.getText().strip()));
+
+		centerGrid.setAlignment(Pos.CENTER);
 		centerGrid.getChildren().clear();
 		centerGrid.add(title, 0, 0);
 		centerGrid.add(inputTitle, 1, 0);
 		centerGrid.add(isbn, 0, 1);
-		centerGrid.add(inputIsbn, 1, 1);
+		centerGrid.add(isbnControlBox, 1, 1);
 		centerGrid.add(summary, 0, 2);
 		centerGrid.add(inputSummary, 1, 2);
 		centerGrid.add(imageLabel, 0, 3, 2, 1);
 		centerGrid.add(imageBox, 1, 3, 2, 2);
 		centerGrid.setHgap(10);
 		centerGrid.setVgap(10);
+
 		mainPane.setCenter(centerGrid);
 		mainPane.setTop(topPane);
 
@@ -216,6 +160,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		bottomPane.setSpacing(10);
 		bottomPane.setAlignment(Pos.CENTER);
 		mainPane.setBottom(bottomPane);
+
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);
@@ -228,6 +173,60 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 				imageBox.setCenter(imageView);
 			}
 		}
+
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
+
+		inputTitle.setPrefColumnCount(25);
+		inputTitle.setPrefRowCount(4);
+
+		inputSummary.setPrefColumnCount(20);
+		inputSummary.setPrefRowCount(10);
+
+		inputTitle.setWrapText(true);
+		inputSummary.setWrapText(true);
+
+		// You can not enter more than 150 in the text area for the title
+		inputTitle.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.length() > MAX_TITLE) {
+				inputTitle.setText(oldValue);
+				display(String.format("Vous avez atteint la limite de %d caractères pour le titre", MAX_TITLE));
+			} else {
+				display("");
+			}
+			inputTitle.positionCaret(inputTitle.getText().length());
+			checkToEnableButton();
+		});
+
+		inputIsbn.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.length() > MAX_BOOK_ID) {
+				inputIsbn.setText(oldValue);
+				display(String.format("Vous avez atteint la limite de %d caractères pour l'identifiant du livre.", MAX_BOOK_ID));
+			} else {
+				display("");
+				if (newValue.length() > 0) {
+					presenter.askIsbnControlNumber(baseIsbnLabel.getText() + newValue);
+				} else {
+					isbnControlLabel.setText("-?"); // If the isbn is empty, we display a question mark
+				}
+			}
+			inputIsbn.positionCaret(inputIsbn.getText().length());
+			checkToEnableButton();
+		});
+
+		inputIsbn.setMaxWidth(30);
+		inputIsbn.setMinWidth(30);
+
+		// You can not enter more than 500 characters in the text area for the summary
+		inputSummary.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue.length() > MAX_SUMMARY) {
+				inputSummary.setText(oldValue);
+				display(String.format("Vous avez atteint la limite de %d caractères pour le résumé", MAX_SUMMARY));
+			} else {
+				display("");
+			}
+			inputSummary.positionCaret(inputSummary.getText().length());
+			checkToEnableButton();
+		});
 	}
 
 	@Override
@@ -260,7 +259,8 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 			inputSummary.setText("");
 		} else {
 			inputTitle.setText(bookEdited.getTitle());
-			inputIsbn.setText(bookEdited.getIsbn());
+			baseIsbnLabel.setText(bookEdited.getIsbn().getLinguisticGroup() + "-" + bookEdited.getIsbn().getIdAuthor() + "-");
+			inputIsbn.setText(bookEdited.getIsbn().getIdBook() + "");
 			inputSummary.setText(bookEdited.getSummary());
 		}
 		presenter.askAuthorName();
@@ -287,8 +287,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 	public void presetISBN(int[] baseIsbn) {
 		final int NUMBER_OF_PARAMS = 2;
 		if (baseIsbn.length == NUMBER_OF_PARAMS) {
-			this.baseIsbn = String.format("%d-%d-", baseIsbn[0], baseIsbn[1]);
-			inputIsbn.setText(this.baseIsbn);
+			this.baseIsbnLabel.setText((String.format("%d-%d-", baseIsbn[0], baseIsbn[1])));
 		}
 	}
 
@@ -296,7 +295,11 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		if (bookCreation) {
 			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		} else {
-			presenter.editBook(bookEdited, title, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+			presenter.editBook(bookEdited, title, summary, isbn, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		}
+	}
+
+	private String getFullIsbn() {
+		return baseIsbnLabel.getText() + inputIsbn.getText() + isbnControlLabel.getText();
 	}
 }

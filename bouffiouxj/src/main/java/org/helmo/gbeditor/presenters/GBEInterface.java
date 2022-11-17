@@ -46,10 +46,11 @@ public interface GBEInterface {
 	 * @param book      the book to edit
 	 * @param title     the new title
 	 * @param summary   the new summary
+	 * @param isbn      the new isbn
 	 * @param imagePath the new image path
 	 *                  (if it is empty, the image is not changed)
 	 */
-	void updateBook(Book book, String title, String summary, String imagePath);
+	void updateBook(Book book, String title, String summary, String isbn, String imagePath);
 
 	/**
 	 * Gets all the books from the repository
@@ -124,4 +125,12 @@ public interface GBEInterface {
 	 * @return a set of pages
 	 */
 	Set<Page> getPages(Book book);
+
+	/**
+	 * Gets the control number of the ISBN
+	 *
+	 * @param isbn the first caracters of the isbn [linguisticGroup, author's id, book's id]
+	 * @return the control number of the ISBN
+	 */
+	String getIsbnControlNum(String isbn);
 }

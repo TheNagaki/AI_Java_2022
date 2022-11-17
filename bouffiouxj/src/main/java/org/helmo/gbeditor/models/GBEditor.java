@@ -76,14 +76,15 @@ public class GBEditor implements GBEInterface {
 	}
 
 	@Override
-	public void updateBook(Book book, String title, String summary, String imagePath) {
-		book.setTitle(title);
-		book.setSummary(summary);
+	public void updateBook(Book book, String title, String summary, String isbn, String imagePath) {
 		if (imagePath != null && !imagePath.isEmpty()) {
 			String path2Image = repository.copyImage(imagePath);
 			book.setImagePath(path2Image);
 		}
 		if (books.remove(book)) {
+			book.setTitle(title);
+			book.setSummary(summary);
+			book.setIsbn(isbn);
 			books.add(book);
 			repository.saveBook(book);
 		}
@@ -146,5 +147,10 @@ public class GBEditor implements GBEInterface {
 	@Override
 	public Set<Page> getPages(Book book) {
 		return book.getPages();
+	}
+
+	@Override
+	public String getIsbnControlNum(String isbn) {
+		return ISBN.computeCheckSum(isbn);
 	}
 }
