@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.models;
+package org.helmo.gbeditor.models.exceptions;
 
 /**
  * Exception thrown when the id of the book in the ISBN is not valid.

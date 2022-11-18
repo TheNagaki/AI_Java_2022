@@ -1,7 +1,8 @@
-package org.helmo.gbeditor.presenters;
+package org.helmo.gbeditor.presenters.interfaces;
 
 import javafx.scene.Parent;
 import javafx.stage.Window;
+import org.helmo.gbeditor.presenters.ViewsEnum;
 
 /**
  * This interface is used to define the methods that a view must implement

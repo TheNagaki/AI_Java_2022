@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.models;
+package org.helmo.gbeditor.models.exceptions;
 
 /**
  * Exception thrown when the linguistic group of the ISBN is not valid

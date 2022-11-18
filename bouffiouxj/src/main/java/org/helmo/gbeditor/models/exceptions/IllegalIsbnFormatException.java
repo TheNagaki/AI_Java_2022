@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.models;
+package org.helmo.gbeditor.models.exceptions;
 
 /**
  * Exception thrown when the format of the ISBN is not valid.

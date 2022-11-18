@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.presenters;
+package org.helmo.gbeditor.presenters.interfaces;
 
 /**
  * This interface is used to define the methods that a presenter should have

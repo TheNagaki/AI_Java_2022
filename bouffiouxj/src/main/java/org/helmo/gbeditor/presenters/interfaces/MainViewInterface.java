@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.presenters;
+package org.helmo.gbeditor.presenters.interfaces;
 
 import org.helmo.gbeditor.models.Book;
 
