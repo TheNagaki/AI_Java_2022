@@ -1,5 +1,10 @@
 package org.helmo.gbeditor.models;
 
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnBookIdException;
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnChecksumException;
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnFormatException;
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnLinguisticIdException;
+
 import java.util.regex.Pattern;
 
 /**
@@ -58,7 +63,7 @@ public class ISBN {
 			var checkSum = computeCheckSum(splittedI[0], splittedI[1], splittedI[2]);
 			return checkSum == 10 ? "X" : String.valueOf(checkSum);
 		} else {
-			throw new IllegalArgumentException(String.format("The ISBN %s is not valid.", isbn));
+			throw new IllegalIsbnFormatException();
 		}
 	}
 

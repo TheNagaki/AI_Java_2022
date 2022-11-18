@@ -1,5 +1,10 @@
 package org.helmo.gbeditor.models;
 
+import org.helmo.gbeditor.models.exceptions.IllegalAuthorException;
+import org.helmo.gbeditor.models.exceptions.IllegalBookSummaryException;
+import org.helmo.gbeditor.models.exceptions.IllegalBookTitleException;
+import org.helmo.gbeditor.models.exceptions.IllegalPageException;
+
 import java.util.*;
 
 /**
@@ -12,10 +17,9 @@ public class Book {
 	private String summary;
 	private String imagePath;
 	private final Set<Page> pages = new LinkedHashSet<>();
-	private static final int MAX_SUMMARY = 500;
-	private static final int MAX_TITLE = 150;
+	protected static final int MAX_SUMMARY = 500;
+	protected static final int MAX_TITLE = 150;
 	public static final int LINGUISTIC_GROUP = 2;
-	private ArrayList<Page> sortedPages;
 
 	/**
 	 * Constructor of the Book class (computes the ISBN later)
@@ -52,11 +56,18 @@ public class Book {
 	public Book(String title, Author author, String summary, String isbn, String imagePath) {
 		checkTitle(title);
 		checkSummary(summary);
+		checkAuthor(author);
 		this.title = title;
 		this.author = author;
 		this.isbn = isbn.isBlank() ? ISBN.createNewISBN(LINGUISTIC_GROUP, author.getMatricule()) : new ISBN(isbn);
 		this.summary = summary;
-		this.imagePath = imagePath;
+		this.imagePath = imagePath == null ? "" : imagePath;
+	}
+
+	private void checkAuthor(Author author) {
+		if (author == null) {
+			throw new IllegalAuthorException();
+		}
 	}
 
 	/**
@@ -70,7 +81,7 @@ public class Book {
 	}
 
 	private static void checkTitle(String title) {
-		if (title.length() > MAX_TITLE || title.length() < 1) {
+		if (title == null || title.length() > MAX_TITLE || title.length() < 1 || title.isBlank()) {
 			throw new IllegalBookTitleException();
 		}
 	}
@@ -86,7 +97,7 @@ public class Book {
 	}
 
 	private static void checkSummary(String summary) {
-		if (summary.length() > MAX_SUMMARY || summary.length() < 1) {
+		if (summary == null || summary.length() > MAX_SUMMARY || summary.length() < 1) {
 			throw new IllegalBookSummaryException();
 		}
 	}
@@ -149,7 +160,7 @@ public class Book {
 	 *
 	 * @return the image path of the book, or an empty string if there is no image
 	 */
-	public String getImage() {
+	public String getImagePath() {
 		return imagePath;
 	}
 
@@ -159,7 +170,7 @@ public class Book {
 	 * @param path2Image the new image path of the book
 	 */
 	public void setImagePath(String path2Image) {
-		this.imagePath = path2Image;
+		this.imagePath = path2Image == null ? "" : path2Image;
 	}
 
 	/**
@@ -168,7 +179,11 @@ public class Book {
 	 * @param page the page to add
 	 */
 	public void addPage(Page page) {
-		pages.add(page);
+		if (page != null) {
+			pages.add(page);
+		} else {
+			throw new IllegalPageException();
+		}
 	}
 
 	/**
@@ -205,10 +220,11 @@ public class Book {
 	 * @param page the page to set
 	 */
 	public void updatePage(Page page) {
-		pages.remove(page);
-		removeChoicesToPage(page);
-		pages.add(page);
-		orderPages();
+		if (pages.remove(page)) {
+			removeChoicesToPage(page);
+			pages.add(page);
+			orderPages();
+		}
 	}
 
 	private void removeChoicesToPage(Page page) {
@@ -223,21 +239,24 @@ public class Book {
 		});
 	}
 
-	private void orderPages() {
-		sortedPages = new ArrayList<>();
-		sortedPages.addAll(pages);
+	private List<Page> orderPages() {
+		var sortedPages = new ArrayList<>(pages);
 		sortedPages.sort(Comparator.comparing(page -> page.toString().length()));
+		return sortedPages;
 	}
 
 	/**
 	 * This method is used to get the number of a page in the book
 	 *
 	 * @param page the page to get the number of
-	 * @return the number of the page
+	 * @return the number of the page corresponding to its position in the book (starting at 1)
 	 */
 	public int getPageNumber(Page page) {
-		orderPages();
-		return sortedPages.indexOf(page);
+		if (pages.contains(page)) {
+			return orderPages().indexOf(page) + 1;
+		} else {
+			throw new IllegalPageException();
+		}
 	}
 
 	/**

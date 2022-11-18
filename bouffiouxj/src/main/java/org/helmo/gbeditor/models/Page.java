@@ -1,14 +1,15 @@
 package org.helmo.gbeditor.models;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import org.helmo.gbeditor.models.exceptions.IllegalPageException;
+
+import java.util.*;
 
 /**
  * This class is used to represent a page of a book
  */
 public class Page {
+
+	private final UUID id = UUID.randomUUID();
 	private String content;
 	private final Map<String, Page> choices = new HashMap<>();
 
@@ -18,6 +19,9 @@ public class Page {
 	 * @param content the content of the page
 	 */
 	public Page(String content) {
+		if (content == null || content.isBlank()) {
+			throw new IllegalPageException();
+		}
 		this.content = content;
 	}
 
@@ -28,15 +32,6 @@ public class Page {
 	 */
 	public String getContent() {
 		return content;
-	}
-
-	/**
-	 * This method is used to set the content of the page
-	 *
-	 * @param content the content to set
-	 */
-	public void setContent(String content) {
-		this.content = content;
 	}
 
 	/**
@@ -75,10 +70,14 @@ public class Page {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		Page page = (Page) o;
-		return content.equals(page.content);
+		return id.compareTo(page.id) == 0;
 	}
 
 	/**
@@ -103,5 +102,12 @@ public class Page {
 			sb.add(String.format("%s -> %s", choice, choices.get(choice).getContent()));
 		}
 		return String.format("Page{content='%s', choices={%s}}", content, sb);
+	}
+
+	public void setContent(String newContent) {
+		if (newContent == null || newContent.isBlank()) {
+			throw new IllegalPageException();
+		}
+		content = newContent;
 	}
 }
