@@ -49,6 +49,9 @@ public class ConnexionPresenter implements Presenter {
 		return view;
 	}
 
+	/**
+	 * This method is used to handle the quit action from the view
+	 */
 	public void OnQuit_Click() {
 		view.close();
 	}

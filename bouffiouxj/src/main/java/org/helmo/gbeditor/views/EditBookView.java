@@ -164,7 +164,7 @@ public class EditBookView implements ViewInterface, EditBookViewInterface {
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);
-			var image = bookEdited.getImage();
+			var image = bookEdited.getImagePath();
 			if (image != null && !image.isEmpty()) {
 				imageView = new ImageView(new Image(image));
 				imageView.setFitWidth(80);

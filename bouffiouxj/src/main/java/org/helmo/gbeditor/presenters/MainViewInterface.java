@@ -4,6 +4,10 @@ import org.helmo.gbeditor.models.Book;
 
 import java.util.Set;
 
+/**
+ * This interface is used to define the methods that the view must implement to interact with the presenter.
+ * It is used to display the books of one author.
+ */
 public interface MainViewInterface extends ViewInterface {
 
 	/**

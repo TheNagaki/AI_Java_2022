@@ -13,7 +13,7 @@ public class MainPresenter implements Presenter {
 
 	private Book bookShown = null;
 
-	private BookDetailsPresenter bookDetailsPresenter = null;
+	private BookDetailsPresenter detailsPresenter = null;
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
@@ -60,15 +60,15 @@ public class MainPresenter implements Presenter {
 	 * @param book the book to display
 	 */
 	public void bookClicked(Book book) {
-		if (bookShown == null || bookShown != book) {
-			if (bookDetailsPresenter == null) {
+		if (bookShown == null || !bookShown.equals(book)) {
+			if (detailsPresenter == null) {
 				var presenter = new BookDetailsPresenter(engine, this);
 				var detailsView = new BookDetailsView(presenter);
 				detailsView.setBaseView(view);
 				presenter.displayBook(book);
-				bookDetailsPresenter = presenter;
+				detailsPresenter = presenter;
 			} else {
-				bookDetailsPresenter.displayBook(book);
+				detailsPresenter.displayBook(book);
 			}
 			bookShown = book;
 		}
@@ -79,7 +79,7 @@ public class MainPresenter implements Presenter {
 	 */
 	public void BookDetailsClosed() {
 		bookShown = null;
-		bookDetailsPresenter = null;
+		detailsPresenter = null;
 	}
 
 	/**
@@ -91,7 +91,10 @@ public class MainPresenter implements Presenter {
 		engine.setBookToEdit(book);
 	}
 
-	public void quitBtnClicked() {
+	/**
+	 * This method is used to handle the quit action from the view
+	 */
+	public void onQuit_Click() {
 		view.close();
 	}
 }

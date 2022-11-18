@@ -17,7 +17,7 @@ class GBEditorTest {
 	private Author authorA;
 	private Set<Book> booksFromAuthorA;
 	private GBEInterface gbe;
-	RepositoryInterface repo;
+	private RepositoryInterface repo;
 
 	@BeforeEach
 	void setUp() {

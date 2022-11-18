@@ -54,5 +54,8 @@ public interface ViewInterface {
 	 */
 	Window getStage();
 
+	/**
+	 * Close the view
+	 */
 	void close();
 }

@@ -3,12 +3,22 @@ package org.helmo.gbeditor.presenters;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.Page;
 
+/**
+ * BookDetailsPresenter is the presenter for the book details view.
+ * It is used to display the details of a book.
+ */
 public class BookDetailsPresenter implements Presenter {
 	private final MainPresenter mainPresenter;
 	private BookDetailsViewInterface view;
 	private final GBEInterface engine;
 	private Book bookDisplayed;
 
+	/**
+	 * Constructor of the presenter with the engine and the main presenter
+	 *
+	 * @param engine        the logic of the application
+	 * @param mainPresenter the main presenter of the application
+	 */
 	public BookDetailsPresenter(GBEInterface engine, MainPresenter mainPresenter) {
 		this.engine = engine;
 		this.mainPresenter = mainPresenter;
@@ -71,11 +81,21 @@ public class BookDetailsPresenter implements Presenter {
 		closeView();
 	}
 
+	/**
+	 * This method is used to tell the MainPresenter to create a new page or edit an existing one
+	 *
+	 * @param text the text of the page
+	 */
 	public void addPage(String text) {
 		engine.addPage(bookDisplayed, text);
 		view.refresh();
 	}
 
+	/**
+	 * This method is used to delete a page from the current book
+	 *
+	 * @param selectedPage the page to delete
+	 */
 	public void removePage(Page selectedPage) {
 		engine.removePage(bookDisplayed, selectedPage);
 		view.refresh();

@@ -23,24 +23,7 @@ public class BookDto {
 		this.author = book.getAuthor();
 		this.isbn = book.getIsbn().toString();
 		this.summary = book.getSummary();
-		this.imagePath = book.getImage();
-	}
-
-	/**
-	 * BookDto constructor
-	 *
-	 * @param title     the title of the book
-	 * @param author    the author of the book
-	 * @param isbn      the isbn of the book
-	 * @param summary   the summary of the book
-	 * @param imagePath the path of the image of the book
-	 */
-	public BookDto(String title, Author author, String isbn, String summary, String imagePath) {
-		this.title = title;
-		this.author = author;
-		this.isbn = isbn;
-		this.summary = summary;
-		this.imagePath = imagePath;
+		this.imagePath = book.getImagePath();
 	}
 
 	/**

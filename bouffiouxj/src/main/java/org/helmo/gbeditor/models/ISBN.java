@@ -48,8 +48,8 @@ public class ISBN {
 	 * @return The check sum of the ISBN.
 	 */
 	public static String computeCheckSum(String isbn) {
-		var isbnWithoutControl = "\\d-?\\d{0,6}-?\\d{0,2}";
-		if (Pattern.matches(isbnWithoutControl, isbn)) {
+		var isbnWoutControl = "\\d-?\\d{0,6}-?\\d{0,2}";
+		if (Pattern.matches(isbnWoutControl, isbn)) {
 			var splittedS = isbn.split("-");
 			var splittedI = new int[3];
 			for (int i = 0; i < splittedS.length; i++) {

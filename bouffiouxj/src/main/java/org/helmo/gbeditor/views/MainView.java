@@ -23,8 +23,8 @@ import java.util.*;
  * Main view of the application
  * It displays all the books of the current author and allows to create a new one
  * It displays the book details in a popup when the user clicks on a book
- * In this popup, the user can edit the book or delete it //TODO: implement the edition of a book
- * It also allows the user to add pages to the book //TODO: implement the addition of pages
+ * In this popup, the user can edit the book or delete it
+ * It also allows the user to add pages to the book
  */
 public class MainView implements MainViewInterface {
 
@@ -100,7 +100,7 @@ public class MainView implements MainViewInterface {
 			baseView.changeView(ViewsEnum.EDIT_BOOK);
 		});
 		var quitBtn = new Button("Quitter");
-		quitBtn.setOnAction(action -> presenter.quitBtnClicked());
+		quitBtn.setOnAction(action -> presenter.onQuit_Click());
 		var buttonBox = new HBox();
 		buttonBox.setSpacing(10);
 		buttonBox.getChildren().addAll(createBookBtn, quitBtn);
@@ -155,8 +155,8 @@ public class MainView implements MainViewInterface {
 
 	private ImageView setBookImage(Book book, int width) {
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (book.getImage() != null && !book.getImage().isEmpty()) {
-			iv = new ImageView(new Image(book.getImage()));
+		if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+			iv = new ImageView(new Image(book.getImagePath()));
 		}
 		iv.setFitWidth(width);
 		iv.setPreserveRatio(true);
