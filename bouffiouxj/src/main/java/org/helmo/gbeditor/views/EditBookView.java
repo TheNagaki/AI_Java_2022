@@ -16,8 +16,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.presenters.EditBookPresenter;
-import org.helmo.gbeditor.presenters.EditBookViewInterface;
-import org.helmo.gbeditor.presenters.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.io.File;

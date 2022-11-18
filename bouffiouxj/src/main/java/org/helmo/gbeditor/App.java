@@ -6,6 +6,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.helmo.gbeditor.models.GBEditor;
 import org.helmo.gbeditor.presenters.*;
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.repositories.JsonRepository;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.helmo.gbeditor.views.ConnexionView;

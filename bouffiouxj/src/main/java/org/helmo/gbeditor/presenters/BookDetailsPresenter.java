@@ -2,6 +2,10 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.Page;
+import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 
 /**
  * BookDetailsPresenter is the presenter for the book details view.

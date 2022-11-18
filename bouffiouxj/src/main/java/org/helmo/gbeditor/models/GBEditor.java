@@ -1,18 +1,20 @@
 package org.helmo.gbeditor.models;
 
-import org.helmo.gbeditor.presenters.GBEInterface;
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnLinguisticIdException;
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.helmo.gbeditor.models.Book.LINGUISTIC_GROUP;
+
 /**
  * This class is the model of the application. It is the link between the presenter, the repository and the model.
  * It is the only class that can access the repository.
  */
 public class GBEditor implements GBEInterface {
-	private static final int LINGUISTIC_GROUP = 2;
 	private final Set<Author> authors;
 	private Author currentAuthor;
 	private final Set<Book> books;

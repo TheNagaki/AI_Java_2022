@@ -1,5 +1,8 @@
 package org.helmo.gbeditor.presenters;
 
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.views.ConnexionView;
 
 /**

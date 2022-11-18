@@ -13,8 +13,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Window;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.presenters.MainPresenter;
-import org.helmo.gbeditor.presenters.MainViewInterface;
-import org.helmo.gbeditor.presenters.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.*;

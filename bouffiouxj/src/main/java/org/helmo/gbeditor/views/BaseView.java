@@ -4,7 +4,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Window;
-import org.helmo.gbeditor.presenters.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.Map;

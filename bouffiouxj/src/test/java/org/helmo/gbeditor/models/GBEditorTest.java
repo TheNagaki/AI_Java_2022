@@ -1,6 +1,6 @@
 package org.helmo.gbeditor.models;
 
-import org.helmo.gbeditor.presenters.GBEInterface;
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

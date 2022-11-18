@@ -1,5 +1,7 @@
 package org.helmo.gbeditor.models;
 
+import org.helmo.gbeditor.models.exceptions.IllegalAuthorNameException;
+
 import java.util.Objects;
 
 /**

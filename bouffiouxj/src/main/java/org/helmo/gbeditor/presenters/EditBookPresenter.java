@@ -1,6 +1,10 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 
 /**
  * The CreateBookPresenter is the presenter for the CreateBookView.

@@ -20,8 +20,8 @@ import javafx.stage.*;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.BookDetailsPresenter;
-import org.helmo.gbeditor.presenters.BookDetailsViewInterface;
-import org.helmo.gbeditor.presenters.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	private final Stage stage = new Stage();
 	private final BorderPane mainPane = new BorderPane();
 	private static final int WIDTH = 400;
-	private static final int HEIGHT = 400;
+	private static final int HEIGHT = 800;
 	private static final int SMALL_SPACING = 5;
 	private static final int BIG_SPACING = 10;
 	private Book bookOnDisplay;
@@ -59,12 +59,26 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		baseView.display(message);
 	}
 
-	private void setRandomPositionInbound(Stage stage) {
-		var screenBounds = Screen.getPrimary().getBounds();
-		var x = (int) (Math.random() * (screenBounds.getWidth() - stage.getWidth()));
-		var y = (int) (Math.random() * (screenBounds.getHeight() - stage.getHeight()));
-		stage.setX(x);
-		stage.setY(y);
+	private void setPosition(Stage stage) {
+
+		var baseX = baseView.getStage().getX();
+		var baseY = baseView.getStage().getY();
+		var computedX = baseX + baseView.getStage().getWidth() / 2 + BIG_SPACING + stage.getWidth() / 2;
+		var computedY = baseY + baseView.getStage().getHeight() / 2 - stage.getHeight() / 2;
+		//Si la fenêtre dépasse à droite, on la place à gauche
+		if (computedX + stage.getWidth() / 2 > Screen.getPrimary().getBounds().getMaxX()) {
+			computedX = baseX - baseView.getStage().getWidth() / 2 - BIG_SPACING - stage.getWidth() / 2;
+			if (computedX - stage.getWidth() / 2 < Screen.getPrimary().getBounds().getMinX()) {
+				computedX = baseX;
+			}
+		}
+		//Si la fenêtre dépasse en bas, on la place en haut TODO: CA MARCHE PAS
+		if (computedY + stage.getHeight() / 2 > Screen.getPrimary().getBounds().getMaxY()) {
+			System.out.println("dépassement Y");
+			computedY = baseY - baseView.getStage().getHeight() / 2 + stage.getHeight() / 2;
+		}
+		stage.setX(computedX);
+		stage.setY(computedY);
 	}
 
 	@Override
@@ -116,8 +130,8 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		BorderPane.setMargin(title, insets);
 
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (book.getImage() != null && !book.getImage().isEmpty()) {
-			iv = new ImageView(new Image(book.getImage()));
+		if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+			iv = new ImageView(new Image(book.getImagePath()));
 		}
 		iv.setFitWidth(100);
 		iv.setPreserveRatio(true);
@@ -146,7 +160,6 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		editBtn.setOnAction(e -> presenter.editBook());
 		var deleteBtn = new Button("❌ Supprimer");
 		deleteBtn.setOnAction(e -> popupConfirmDeletion());
-		//TODO:Add exit emoji to close button
 		var closeBtn = new Button("Fermer");
 		closeBtn.setOnAction(action -> presenter.closeView());
 		var closeIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/emergency-exit.png"))));
@@ -209,7 +222,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		var scene = new Scene(mainPane);
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 		stage.setScene(scene);
-		setRandomPositionInbound(stage);
+		setPosition(stage);
 		stage.show();
 	}
 
@@ -225,7 +238,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		pagesView.setRowFactory(tv -> {
 			var row = new TableRow<Page>();
 			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!row.isEmpty())) {
+				if (event.getClickCount() == 2 && !row.isEmpty()) {
 					popupEditPage(row.getItem());
 				}
 			});
@@ -233,7 +246,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		});
 
 		var pageCol = new TableColumn<Page, String>("N°");
-		pageCol.setCellValueFactory(book.getPageNumberFactory());
+		pageCol.setCellValueFactory(param -> new SimpleStringProperty(String.format("%d", bookOnDisplay.getPageNumber(param.getValue()))));
 		pageCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		pageCol.setMaxWidth(20);
 		pageCol.setMinWidth(20);
@@ -304,6 +317,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	private void popupEditPage(Page selected) {
 		var popup = new Popup();
 		var popupRoot = new VBox();
+		popupRoot.paddingProperty().setValue(new Insets(BIG_SPACING));
 		popupRoot.setSpacing(SMALL_SPACING);
 		popupRoot.setAlignment(Pos.CENTER);
 		var contentField = new TextField(selected.getContent());

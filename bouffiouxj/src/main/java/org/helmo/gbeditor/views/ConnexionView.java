@@ -10,7 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 import org.helmo.gbeditor.presenters.ConnexionPresenter;
-import org.helmo.gbeditor.presenters.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.Objects;
