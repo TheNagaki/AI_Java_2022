@@ -71,11 +71,6 @@ public class BaseView implements ViewInterface {
 	}
 
 	@Override
-	public void setAuthorName(String authorName) {
-		//Do nothing because this view is not used in this context
-	}
-
-	@Override
 	public Window getStage() {
 		return principalPane.getScene().getWindow();
 	}

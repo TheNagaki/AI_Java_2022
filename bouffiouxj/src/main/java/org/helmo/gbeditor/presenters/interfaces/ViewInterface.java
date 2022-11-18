@@ -41,12 +41,6 @@ public interface ViewInterface {
 	 */
 	void refresh();
 
-	/**
-	 * Set the name of the author in the view
-	 *
-	 * @param authorName the full name (firstName Name) of the author
-	 */
-	void setAuthorName(String authorName);
 
 	/**
 	 * Get the stage of the view

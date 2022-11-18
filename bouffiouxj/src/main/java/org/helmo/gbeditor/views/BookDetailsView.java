@@ -99,11 +99,6 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	}
 
 	@Override
-	public void setAuthorName(String authorName) {
-		//Nothing to do here
-	}
-
-	@Override
 	public Window getStage() {
 		return stage;
 	}

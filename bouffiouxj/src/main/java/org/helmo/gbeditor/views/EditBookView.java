@@ -28,7 +28,7 @@ import java.util.Objects;
  * It displays a form to fill in order to create a new book (title, summary, ISBN, image)
  * It also allows to cancel the creation of the book and to go back to the main view
  */
-public class EditBookView implements ViewInterface, EditBookViewInterface {
+public class EditBookView implements EditBookViewInterface {
 
 	private static final int MAX_TITLE = 150;
 	private static final int MAX_BOOK_ID = 2;

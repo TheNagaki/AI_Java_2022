@@ -10,7 +10,7 @@
     </description>
 
     <exclude-pattern>.*/views/.*</exclude-pattern>
-    <exclude-pattern>.*/test/.*</exclude-pattern>
+    <exclude-pattern>.*/bouffiouxj/src/test/.*</exclude-pattern>
     <!-- Your rules will come here -->
     <rule ref="category/java/bestpractices.xml/ArrayIsStoredDirectly"/>
     <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables"/>

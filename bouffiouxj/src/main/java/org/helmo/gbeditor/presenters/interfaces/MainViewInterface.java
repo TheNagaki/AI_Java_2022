@@ -14,4 +14,10 @@ public interface MainViewInterface extends ViewInterface {
 	 * This method is used to display the list of books of the current author
 	 */
 	void setBooksFromAuthor(Set<Book> books);
+	/**
+	 * Set the name of the author in the view
+	 *
+	 * @param authorName the full name (firstName Name) of the author
+	 */
+	void setAuthorName(String authorName);
 }
