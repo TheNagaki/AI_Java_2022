@@ -5,6 +5,7 @@ import org.helmo.gbeditor.models.exceptions.IllegalIsbnChecksumException;
 import org.helmo.gbeditor.models.exceptions.IllegalIsbnFormatException;
 import org.helmo.gbeditor.models.exceptions.IllegalIsbnLinguisticIdException;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -203,5 +204,18 @@ public class ISBN {
 	@Override
 	public String toString() {
 		return String.format("%d-%06d-%02d-%s", linguisticGroup, idAuthor, idBook, checkSum == 10 ? "X" : checkSum);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ISBN isbn = (ISBN) o;
+		return linguisticGroup == isbn.linguisticGroup && idAuthor == isbn.idAuthor && idBook == isbn.idBook && checkSum == isbn.checkSum;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(linguisticGroup, idAuthor, idBook, checkSum);
 	}
 }

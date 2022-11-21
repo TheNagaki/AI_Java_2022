@@ -3,7 +3,7 @@ package org.helmo.gbeditor.repositories;
 import com.google.gson.Gson;
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.ISBN;
+import org.helmo.gbeditor.models.Page;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -22,8 +22,7 @@ import java.util.*;
 public class JsonRepository implements RepositoryInterface {
 
 	private static final byte[] JPG_BYTES = new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
-	private static final byte[] PNG_BYTES = new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47,
-			(byte) 0x0D, (byte) 0x0A, (byte) 0x1A, (byte) 0x0A}; // Avec l'autorisation de M. Hendrikx pour le cast
+	private static final byte[] PNG_BYTES = new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47, (byte) 0x0D, (byte) 0x0A, (byte) 0x1A, (byte) 0x0A}; // Avec l'autorisation de M. Hendrikx pour le cast
 
 	private final Gson gson = new Gson();
 	private final Path bookPath;
@@ -47,16 +46,18 @@ public class JsonRepository implements RepositoryInterface {
 			try (BufferedReader reader = Files.newBufferedReader(bookPath)) {
 				List<Book> bookList = new LinkedList<>();
 				gson.newJsonReader(reader);
-				Arrays.asList(gson.fromJson(reader, BookDto[].class)).forEach(bookDto -> {
+				Arrays.asList(gson.fromJson(reader, Book[].class)).forEach(bLoaded -> {
 					Book book;
 					try {
-						book = bookDto.toBook();
+						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary(), bLoaded.getIsbn().toString(), bLoaded.getImagePath());
 					} catch (IllegalArgumentException e) {
-						book = new Book(bookDto.title, bookDto.author, bookDto.summary);
+						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary());
 					}
 					while (bookList.contains(book)) {
-						var author = book.getAuthor();
-						book = new Book(bookDto.title, author, bookDto.summary, ISBN.createNewISBN(Book.LINGUISTIC_GROUP, author.getMatricule()).toString(), bookDto.imagePath);
+						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary(), "", bLoaded.getImagePath());
+					}
+					for (Page p : bLoaded.getPages()) {
+						book.addPage(p);
 					}
 					bookList.add(book);
 				});
@@ -77,11 +78,9 @@ public class JsonRepository implements RepositoryInterface {
 				return false;
 			}
 		}
-		try (BufferedWriter writer = Files.newBufferedWriter(bookPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
-				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-			Set<BookDto> bookDtos = new LinkedHashSet<>();
-			books.forEach(book -> bookDtos.add(new BookDto(book)));
-			gson.toJson(bookDtos, writer);
+		try (BufferedWriter writer = Files.newBufferedWriter(bookPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+			Set<Book> books2Save = new LinkedHashSet<>(books);
+			gson.toJson(books2Save, writer);
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -91,11 +90,9 @@ public class JsonRepository implements RepositoryInterface {
 	@Override
 	public boolean saveBook(Book book) {
 		Set<Book> books = loadBooks();
-		if (!books.contains(book)) {
-			books.add(book);
-			return saveBooks(new HashSet<>(books));
-		}
-		return true;
+		books.remove(book);
+		books.add(book);
+		return saveBooks(new HashSet<>(books));
 	}
 
 	@Override
@@ -130,8 +127,7 @@ public class JsonRepository implements RepositoryInterface {
 	public String copyImage(String imagePath) {
 		Path imageStored = Path.of(imagePath);
 		Path imageDestination = imgDirPath.resolve(imageStored.getFileName());
-		try (InputStream inputStream = new FileInputStream(imageStored.toFile());
-		     OutputStream outputStream = new FileOutputStream(imageDestination.toFile())) {
+		try (InputStream inputStream = new FileInputStream(imageStored.toFile()); OutputStream outputStream = new FileOutputStream(imageDestination.toFile())) {
 			if (!imageTrueExtension(imagePath)) {
 				throw new IllegalImageExtensionException();
 			}

@@ -147,7 +147,7 @@ public class Book {
 			return false;
 		}
 		Book book = (Book) o;
-		return Objects.equals(isbn.toString(), book.isbn.toString());
+		return isbn.equals(book.isbn);
 	}
 
 	@Override
@@ -241,7 +241,7 @@ public class Book {
 
 	private List<Page> orderPages() {
 		var sortedPages = new ArrayList<>(pages);
-		sortedPages.sort(Comparator.comparing(page -> page.toString().length()));
+		sortedPages.sort(Comparator.comparing(page -> page.toString().length())); //TODO: make a better comparator
 		return sortedPages;
 	}
 

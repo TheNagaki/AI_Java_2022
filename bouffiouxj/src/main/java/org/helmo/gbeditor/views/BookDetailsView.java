@@ -38,7 +38,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	private final Stage stage = new Stage();
 	private final BorderPane mainPane = new BorderPane();
 	private static final int WIDTH = 400;
-	private static final int HEIGHT = 800;
+	private static final int HEIGHT = 600;
 	private static final int SMALL_SPACING = 5;
 	private static final int BIG_SPACING = 10;
 	private Book bookOnDisplay;
@@ -264,16 +264,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 		pagesView.getColumns().addAll(Arrays.asList(pageCol, contentCol, choicesCol));
 
-		Page firstPage = new Page("Première page");
-		Page secondPage = new Page("Deuxième page");
-		Page thirdPage = new Page("Troisième page");
-		Page fourthPage = new Page("Quatrième page");
-		firstPage.addChoice("Choix 1", secondPage);
-		firstPage.addChoice("Choix 2", thirdPage);
-
-		secondPage.addChoice("Choix 1", fourthPage);
-		secondPage.addChoice("Choix 2", thirdPage);
-		this.pages = FXCollections.observableArrayList(firstPage, secondPage, thirdPage, fourthPage);
+		this.pages = FXCollections.observableArrayList(book.getPages());
 		pagesView.setItems(pages);
 
 		pagesView.requestFocus();
