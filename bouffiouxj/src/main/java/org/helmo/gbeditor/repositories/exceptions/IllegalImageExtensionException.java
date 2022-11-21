@@ -1,4 +1,4 @@
-package org.helmo.gbeditor.repositories;
+package org.helmo.gbeditor.repositories.exceptions;
 
 /**
  * This exception is thrown when the image extension does not match the allowed ones or does not correspond to its content

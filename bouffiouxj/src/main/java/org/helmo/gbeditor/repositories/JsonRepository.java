@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.Page;
+import org.helmo.gbeditor.repositories.exceptions.IllegalImageExtensionException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
