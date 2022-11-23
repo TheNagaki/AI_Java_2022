@@ -7,6 +7,9 @@ import org.helmo.gbeditor.models.exceptions.IllegalBookTitleException;
 
 import java.util.Objects;
 
+/**
+ * BookMetadata class which represents the metadata of a book
+ */
 public class BookMetadata {
 
 	protected static final int MAX_SUMMARY = 500;
@@ -19,6 +22,14 @@ public class BookMetadata {
 	private String summary;
 	private String imagePath;
 
+	/**
+	 * Constructor of the BookMetadata class
+	 * @param title the title of the book
+	 * @param author the author of the book
+	 * @param isbn the isbn of the book
+	 * @param summary the summary of the book
+	 * @param imagePath the path of the image of the book
+	 */
 	public BookMetadata(String title, Author author, String isbn, String summary, String imagePath) {
 		checkTitle(title);
 		this.title = title;

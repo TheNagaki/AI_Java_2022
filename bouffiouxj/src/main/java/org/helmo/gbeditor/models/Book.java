@@ -57,10 +57,21 @@ public class Book {
 		this.metadata.setField(field, value);
 	}
 
+	/**
+	 * Gets the value of a metadata field
+	 *
+	 * @param field the field to get (see BookDataFields)
+	 * @return the value of the field
+	 */
 	public String getMetadata(BookDataFields field) {
 		return this.metadata.getField(field);
 	}
 
+	/**
+	 * Gets the Author of the book
+	 *
+	 * @return the author of the book
+	 */
 	public Author getAuthor() {
 		return this.metadata.getAuthor();
 	}
