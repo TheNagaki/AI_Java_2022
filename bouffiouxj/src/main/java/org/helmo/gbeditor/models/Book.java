@@ -1,9 +1,6 @@
 package org.helmo.gbeditor.models;
 
-import org.helmo.gbeditor.models.exceptions.IllegalAuthorException;
-import org.helmo.gbeditor.models.exceptions.IllegalBookSummaryException;
-import org.helmo.gbeditor.models.exceptions.IllegalBookTitleException;
-import org.helmo.gbeditor.models.exceptions.IllegalPageException;
+import org.helmo.gbeditor.models.exceptions.*;
 
 import java.util.*;
 
@@ -11,15 +8,8 @@ import java.util.*;
  * Book class which represents a book in the GBEditor
  */
 public class Book {
-	private String title;
-	private final Author author;
-	private ISBN isbn;
-	private String summary;
-	private String imagePath;
+	private final BookMetadata metadata;
 	private final Set<Page> pages = new LinkedHashSet<>();
-	protected static final int MAX_SUMMARY = 500;
-	protected static final int MAX_TITLE = 150;
-	public static final int LINGUISTIC_GROUP = 2;
 
 	/**
 	 * Constructor of the Book class (computes the ISBN later)
@@ -54,88 +44,25 @@ public class Book {
 	 * @param imagePath the path of the image of the book
 	 */
 	public Book(String title, Author author, String summary, String isbn, String imagePath) {
-		checkTitle(title);
-		checkSummary(summary);
-		checkAuthor(author);
-		this.title = title;
-		this.author = author;
-		this.isbn = isbn.isBlank() ? ISBN.createNewISBN(LINGUISTIC_GROUP, author.getMatricule()) : new ISBN(isbn);
-		this.summary = summary;
-		this.imagePath = imagePath == null ? "" : imagePath;
-	}
-
-	private void checkAuthor(Author author) {
-		if (author == null) {
-			throw new IllegalAuthorException();
-		}
+		this.metadata = new BookMetadata(title, author, isbn, summary, imagePath);
 	}
 
 	/**
-	 * Setter for the title of the book
+	 * Sets a metadata field to the given value
 	 *
-	 * @param title the new title of the book
+	 * @param field the field to set
+	 * @param value the value to set
 	 */
-	public void setTitle(String title) {
-		checkTitle(title);
-		this.title = title;
+	public void setMetadata(BookDataFields field, String value) {
+		this.metadata.setField(field, value);
 	}
 
-	private static void checkTitle(String title) {
-		if (title == null || title.length() > MAX_TITLE || title.length() < 1 || title.isBlank()) {
-			throw new IllegalBookTitleException();
-		}
+	public String getMetadata(BookDataFields field) {
+		return this.metadata.getField(field);
 	}
 
-	/**
-	 * Setter for the summary of the book
-	 *
-	 * @param summary the new summary of the book
-	 */
-	public void setSummary(String summary) {
-		checkSummary(summary);
-		this.summary = summary;
-	}
-
-	private static void checkSummary(String summary) {
-		if (summary == null || summary.length() > MAX_SUMMARY || summary.length() < 1) {
-			throw new IllegalBookSummaryException();
-		}
-	}
-
-	/**
-	 * Getter for the title of the book
-	 *
-	 * @return the title of the book
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * Getter for the author of the book
-	 *
-	 * @return the author of the book
-	 */
 	public Author getAuthor() {
-		return author;
-	}
-
-	/**
-	 * Getter for the ISBN of the book
-	 *
-	 * @return the ISBN of the book
-	 */
-	public ISBN getIsbn() {
-		return isbn;
-	}
-
-	/**
-	 * Getter for the summary of the book
-	 *
-	 * @return the summary of the book
-	 */
-	public String getSummary() {
-		return summary;
+		return this.metadata.getAuthor();
 	}
 
 	@Override
@@ -147,30 +74,12 @@ public class Book {
 			return false;
 		}
 		Book book = (Book) o;
-		return isbn.equals(book.isbn);
+		return metadata.equals(book.metadata);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(isbn);
-	}
-
-	/**
-	 * Getter for the image path of the book
-	 *
-	 * @return the image path of the book, or an empty string if there is no image
-	 */
-	public String getImagePath() {
-		return imagePath;
-	}
-
-	/**
-	 * Setter for the image path of the book
-	 *
-	 * @param path2Image the new image path of the book
-	 */
-	public void setImagePath(String path2Image) {
-		this.imagePath = path2Image == null ? "" : path2Image;
+		return Objects.hash(metadata);
 	}
 
 	/**
@@ -200,7 +109,7 @@ public class Book {
 	 * @return the pages of the book
 	 */
 	public Set<Page> getPages() {
-		return pages;
+		return new LinkedHashSet<>(pages);
 	}
 
 	/**
@@ -210,8 +119,8 @@ public class Book {
 	 */
 	@Override
 	public String toString() {
-		return String.format("Book{title='%s',\n author=%s,\n isbn=%s,\n summary='%s',\n imagePath='%s',\n" + " pages=%s}",
-				title, author, isbn, summary, imagePath, pages);
+		return String.format("Book{%s" + " pages=%s}",
+				metadata, pages);
 	}
 
 	/**
@@ -220,23 +129,33 @@ public class Book {
 	 * @param page the page to set
 	 */
 	public void updatePage(Page page) {
-		if (pages.remove(page)) {
-			removeChoicesToPage(page);
-			pages.add(page);
-			orderPages();
+		var oldPages = new HashSet<>(pages);
+		for (Page p : oldPages) {
+			if (p.equals(page)) {
+				pages.remove(p);
+				pages.add(page);
+				updateChoicesToPage(page);
+				break;
+			}
 		}
 	}
 
 	private void removeChoicesToPage(Page page) {
-		pages.forEach(p -> {
-			if (p.getChoices().containsValue(page)) {
-				p.getChoices().forEach((k, v) -> {
+		pages.stream().filter(p -> p.getChoices().containsValue(page))
+				.forEach(p -> p.getChoices().forEach((k, v) -> {
 					if (v.equals(page)) {
 						p.removeChoice(k);
 					}
-				});
-			}
-		});
+				}));
+	}
+
+	private void updateChoicesToPage(Page page) {
+		pages.stream().filter(p -> p.getChoices().containsValue(page))
+				.forEach(p -> p.getChoices().forEach((k, v) -> {
+					if (v.equals(page)) {
+						p.updateChoice(k, page);
+					}
+				}));
 	}
 
 	private List<Page> orderPages() {
@@ -252,19 +171,36 @@ public class Book {
 	 * @return the number of the page corresponding to its position in the book (starting at 1)
 	 */
 	public int getPageNumber(Page page) {
-		if (pages.contains(page)) {
-			return orderPages().indexOf(page) + 1;
-		} else {
-			throw new IllegalPageException();
+		//Le contains fait planter mon app...
+		for (Page p : pages) {
+			if (p.equals(page)) {
+				return orderPages().indexOf(p) + 1;
+			}
 		}
+		throw new PageNotInBookException();
 	}
 
 	/**
-	 * Setter for the isbn of the book
+	 * Gets a page by its id
 	 *
-	 * @param isbn the new isbn of the book
+	 * @param id the id of the page
+	 * @return the page with the given id
 	 */
-	public void setIsbn(String isbn) {
-		this.isbn = new ISBN(isbn);
+	public Page getPageById(String id) {
+		for (var p : pages) {
+			if (Objects.equals(p.getId(), id)) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the isbn of the book
+	 *
+	 * @return the isbn of the book
+	 */
+	public ISBN getIsbn() {
+		return this.metadata.getIsbn();
 	}
 }

@@ -56,7 +56,7 @@ public class MainView implements MainViewInterface {
 			for (int i = 0; ite.hasNext() && i < booksFromAuthor.size(); i++) {
 				var b = ite.next();
 				var box = new BorderPane();
-				var title = new Label(b.getTitle());
+				var title = new Label(presenter.getTitle(b));
 				title.getStyleClass().add("thumbnail-title");
 				title.setAlignment(Pos.CENTER);
 				box.setTop(title);
@@ -65,7 +65,7 @@ public class MainView implements MainViewInterface {
 
 				var bottomBox = new HBox();
 				bottomBox.setAlignment(Pos.CENTER);
-				var isbn = new Label(b.getIsbn().toString());
+				var isbn = new Label(presenter.getIsbn(b));
 				isbn.getStyleClass().add("thumbnail-isbn");
 				bottomBox.getChildren().add(isbn);
 				box.setBottom(bottomBox);
@@ -155,8 +155,8 @@ public class MainView implements MainViewInterface {
 
 	private ImageView setBookImage(Book book, int width) {
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
-			iv = new ImageView(new Image(book.getImagePath()));
+		if (presenter.getImagePath(book) != null && !presenter.getImagePath(book).isEmpty()) {
+			iv = new ImageView(new Image(presenter.getImagePath(book)));
 		}
 		iv.setFitWidth(width);
 		iv.setPreserveRatio(true);

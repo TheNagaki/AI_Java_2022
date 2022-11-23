@@ -91,4 +91,13 @@ public class Author {
 	public String getFirstName() {
 		return firstName;
 	}
+
+	@Override
+	public String toString() {
+		return "Author{" +
+				"name='" + name + '\'' +
+				", firstName='" + firstName + '\'' +
+				", matricule=" + matricule +
+				'}';
+	}
 }

@@ -1,6 +1,8 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.BookDataFields;
+import org.helmo.gbeditor.models.ISBN;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.Presenter;
@@ -14,9 +16,11 @@ import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 public class EditBookPresenter implements Presenter {
 	private final GBEInterface engine;
 	private EditBookViewInterface view;
+	private Book bookEdited = null;
 
 	/**
 	 * Constructor of the presenter with the engine
+	 *
 	 * @param editor the logic of the application
 	 */
 	public EditBookPresenter(GBEInterface editor) {
@@ -72,18 +76,19 @@ public class EditBookPresenter implements Presenter {
 	 * Asks the engine if there is a book to edit
 	 */
 	public void askBookToEdit() {
-		view.setBookToEdit(engine.getBookToEdit());
+		this.bookEdited = engine.getBookToEdit();
+		view.setEditionMode(bookEdited != null);
 	}
 
 	/**
 	 * Asks the engine to update the book with the new information
-	 * @param book the book to update
-	 * @param title the new title
-	 * @param summary the new summary
+	 *
+	 * @param title     the new title
+	 * @param summary   the new summary
 	 * @param imagePath the new image path
 	 */
-	public void editBook(Book book, String title, String summary,String isbn, String imagePath) {
-		engine.updateBook(book, title, summary,isbn, imagePath);
+	public void editBook(String title, String summary, String isbn, String imagePath) {
+		view.display(engine.updateBook(bookEdited, title, summary, isbn, imagePath));
 	}
 
 	/**
@@ -100,5 +105,21 @@ public class EditBookPresenter implements Presenter {
 	 */
 	public void onQuit_Clicked() {
 		view.close();
+	}
+
+	public String getImagePath() {
+		return bookEdited.getMetadata(BookDataFields.IMAGE_PATH);
+	}
+
+	public String getTitle() {
+		return bookEdited.getMetadata(BookDataFields.TITLE);
+	}
+
+	public ISBN getIsbn() {
+		return bookEdited.getIsbn();
+	}
+
+	public String getSummary() {
+		return bookEdited.getMetadata(BookDataFields.SUMMARY);
 	}
 }

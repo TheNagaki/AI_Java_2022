@@ -77,7 +77,7 @@ public class Page {
 			return false;
 		}
 		Page page = (Page) o;
-		return id.compareTo(page.id) == 0;
+		return id.equals(page.id);
 	}
 
 	/**
@@ -99,15 +99,37 @@ public class Page {
 	public String toString() {
 		StringJoiner sb = new StringJoiner(",\n");
 		for (String choice : choices.keySet()) {
-			sb.add(String.format("%s -> %s", choice, choices.get(choice).getContent()));
+			sb.add(String.format("%s -> %s", choice, choices.get(choice)));
 		}
-		return String.format("Page{content='%s', choices={%s}}", content, sb);
+		return String.format("Page{content='%s', id={%s}, choices={%s}}", content, id, sb);
 	}
 
+	/**
+	 * This method sets the content of the page
+	 *
+	 * @param newContent the new content (can not be null or blank)
+	 */
 	public void setContent(String newContent) {
 		if (newContent == null || newContent.isBlank()) {
 			throw new IllegalPageException();
 		}
 		content = newContent;
+	}
+
+	/**
+	 * This method returns the UUID of the page as a String
+	 */
+	public String getId() {
+		return id.toString();
+	}
+
+	/**
+	 * This method is used to update the choice of the page based on the choice string
+	 *
+	 * @param k    the choice string
+	 * @param page the new page to go to
+	 */
+	public void updateChoice(String k, Page page) {
+		choices.put(k, page);
 	}
 }

@@ -29,14 +29,6 @@ public interface RepositoryInterface {
 	boolean saveBooks(Set<Book> books);
 
 	/**
-	 * Save a book in the repository
-	 *
-	 * @param book the book to save
-	 * @return true if the book has been saved, false otherwise
-	 */
-	boolean saveBook(Book book);
-
-	/**
 	 * Delete a book from the repository
 	 *
 	 * @param book the book to delete

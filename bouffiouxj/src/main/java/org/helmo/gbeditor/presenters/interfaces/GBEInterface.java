@@ -49,8 +49,9 @@ public interface GBEInterface {
 	 * @param isbn      the new isbn
 	 * @param imagePath the new image path
 	 *                  (if it is empty, the image is not changed)
+	 * @return A message indicating the result of the operation
 	 */
-	void updateBook(Book book, String title, String summary, String isbn, String imagePath);
+	String updateBook(Book book, String title, String summary, String isbn, String imagePath);
 
 	/**
 	 * Gets all the books from the repository
@@ -90,7 +91,7 @@ public interface GBEInterface {
 	/**
 	 * Gets the book to edit
 	 *
-	 * @return the book to edit
+	 * @return the book to edit, null if there is no book to edit
 	 */
 	Book getBookToEdit();
 
@@ -133,4 +134,13 @@ public interface GBEInterface {
 	 * @return the control number of the ISBN
 	 */
 	String getIsbnControlNum(String isbn);
+
+	/**
+	 *  This method is used to get the page number of a page in a book
+	 *
+	 * @param bookDisplayed the book in which the page is
+	 * @param value the page to get the number from
+	 * @return the page number of the page
+	 */
+	int getPageNumber(Book bookDisplayed, Page value);
 }

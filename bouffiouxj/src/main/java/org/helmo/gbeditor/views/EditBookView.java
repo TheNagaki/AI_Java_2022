@@ -14,7 +14,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.presenters.EditBookPresenter;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
@@ -48,7 +47,6 @@ public class EditBookView implements EditBookViewInterface {
 	private final Label authorName = new Label("");
 	private final Label baseIsbnLabel = new Label("9-999999-");
 	private final Label isbnControlLabel = new Label("-?");
-	private Book bookEdited;
 
 	/**
 	 * Constructor of the CreateBookView class
@@ -62,11 +60,9 @@ public class EditBookView implements EditBookViewInterface {
 		initView();
 	}
 
-	public void setBookToEdit(Book book) {
-		if (book != null) {
-			this.bookCreation = false;
-			this.bookEdited = book;
-		}
+	@Override
+	public void setEditionMode(boolean b) {
+		this.bookCreation = !b;
 		initView();
 	}
 
@@ -164,7 +160,7 @@ public class EditBookView implements EditBookViewInterface {
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);
-			var image = bookEdited.getImagePath();
+			var image = presenter.getImagePath();
 			if (image != null && !image.isEmpty()) {
 				imageView = new ImageView(new Image(image));
 				imageView.setFitWidth(80);
@@ -258,10 +254,10 @@ public class EditBookView implements EditBookViewInterface {
 			presenter.askISBN();
 			inputSummary.setText("");
 		} else {
-			inputTitle.setText(bookEdited.getTitle());
-			baseIsbnLabel.setText(bookEdited.getIsbn().getLinguisticGroup() + "-" + bookEdited.getIsbn().getIdAuthor() + "-");
-			inputIsbn.setText(bookEdited.getIsbn().getIdBook() + "");
-			inputSummary.setText(bookEdited.getSummary());
+			inputTitle.setText(presenter.getTitle());
+			baseIsbnLabel.setText(presenter.getIsbn().getLinguisticGroup() + "-" + presenter.getIsbn().getIdAuthor() + "-");
+			inputIsbn.setText(presenter.getIsbn().getIdBook() + "");
+			inputSummary.setText(presenter.getSummary());
 		}
 		presenter.askAuthorName();
 		checkToEnableButton();
@@ -295,7 +291,7 @@ public class EditBookView implements EditBookViewInterface {
 		if (bookCreation) {
 			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		} else {
-			presenter.editBook(bookEdited, title, summary, isbn, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+			presenter.editBook(title, summary, isbn, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		}
 	}
 

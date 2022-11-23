@@ -1,7 +1,5 @@
 package org.helmo.gbeditor.presenters.interfaces;
 
-import org.helmo.gbeditor.models.Book;
-
 /**
  * Interface for the CreateBookView
  */
@@ -15,11 +13,11 @@ public interface EditBookViewInterface extends ViewInterface {
 	void presetISBN(int[] isbn);
 
 	/**
-	 * Sets the book's information in the view
+	 * Sets the view in edition mode
 	 *
-	 * @param bookToEdit the book to edit
+	 * @param b the boolean which indicates if the view is in edition mode
 	 */
-	void setBookToEdit(Book bookToEdit);
+	void setEditionMode(boolean b);
 
 	/**
 	 * Sets the last number of the isbn in the view

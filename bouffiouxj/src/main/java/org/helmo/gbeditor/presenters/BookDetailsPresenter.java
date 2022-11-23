@@ -1,6 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
@@ -105,13 +106,48 @@ public class BookDetailsPresenter implements Presenter {
 		view.refresh();
 	}
 
-//	public void movePageUp(Page selectedPage) {
-//		engine.movePageUp(bookDisplayed, selectedPage);
-//		view.refresh();
-//	}
-//
-//	public void movePageDown(Page selectedPage) {
-//		engine.movePageDown(bookDisplayed, selectedPage);
-//		view.refresh();
-//	}
+	/**
+	 * This method is used to tell the view to display the popup to edit a Page
+	 *
+	 * @param selectedItem the page to edit
+	 */
+	public void editPage(Page selectedItem) {
+		view.editPage(selectedItem);
+	}
+
+	/**
+	 * This method is used to save a Page's state after modification.
+	 *
+	 * @param selected the page to save
+	 */
+	public void updatePage(Page selected) {
+		engine.updatePage(bookDisplayed, selected);
+		view.refresh();
+	}
+
+	/**
+	 * This method is used to ask the engine the number of a page
+	 *
+	 * @param value the page to get the number
+	 * @return the number of the page
+	 */
+	public int getPageNumber(Page value) {
+		return engine.getPageNumber(bookDisplayed, value);
+	}
+
+	public String getTitle() {
+		return bookDisplayed.getMetadata(BookDataFields.TITLE);
+	}
+
+	public String getImagePath() {
+		return bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH);
+	}
+
+	public String getIsbn() {
+		return bookDisplayed.getMetadata(BookDataFields.ISBN);
+	}
+
+	public String getSummary() {
+		return bookDisplayed.getMetadata(BookDataFields.SUMMARY);
+	}
 }

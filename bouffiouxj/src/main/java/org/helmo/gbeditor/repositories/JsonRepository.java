@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+import static org.helmo.gbeditor.models.BookDataFields.*;
+
 /**
  * JsonRepository is a class that implements the Repository interface.
  * It is used to load and save books from a json file.
@@ -43,25 +45,27 @@ public class JsonRepository implements RepositoryInterface {
 
 	@Override
 	public Set<Book> loadBooks() {
-		if (Files.exists(bookPath)) {
+		if (Files.exists(bookPath) && Files.isRegularFile(bookPath) && Files.isReadable(bookPath)) {
 			try (BufferedReader reader = Files.newBufferedReader(bookPath)) {
 				List<Book> bookList = new LinkedList<>();
 				gson.newJsonReader(reader);
-				Arrays.asList(gson.fromJson(reader, Book[].class)).forEach(bLoaded -> {
-					Book book;
-					try {
-						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary(), bLoaded.getIsbn().toString(), bLoaded.getImagePath());
-					} catch (IllegalArgumentException e) {
-						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary());
-					}
-					while (bookList.contains(book)) {
-						book = new Book(bLoaded.getTitle(), bLoaded.getAuthor(), bLoaded.getSummary(), "", bLoaded.getImagePath());
-					}
-					for (Page p : bLoaded.getPages()) {
-						book.addPage(p);
-					}
-					bookList.add(book);
-				});
+				if (reader.ready()) {
+					Arrays.asList(gson.fromJson(reader, Book[].class)).forEach(bLoaded -> {
+						Book book;
+						try {
+							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(ISBN), bLoaded.getMetadata(IMAGE_PATH));
+						} catch (IllegalArgumentException e) {
+							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(ISBN));
+						}
+						while (bookList.contains(book)) {
+							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), "", bLoaded.getMetadata(IMAGE_PATH));
+						}
+						for (Page p : bLoaded.getPages()) {
+							book.addPage(p);
+						}
+						bookList.add(book);
+					});
+				}
 				return new LinkedHashSet<>(bookList);
 			} catch (IOException e) {
 				return new LinkedHashSet<>();
@@ -86,14 +90,6 @@ public class JsonRepository implements RepositoryInterface {
 		} catch (IOException e) {
 			return false;
 		}
-	}
-
-	@Override
-	public boolean saveBook(Book book) {
-		Set<Book> books = loadBooks();
-		books.remove(book);
-		books.add(book);
-		return saveBooks(new HashSet<>(books));
 	}
 
 	@Override

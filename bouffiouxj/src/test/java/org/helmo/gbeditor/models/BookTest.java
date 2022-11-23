@@ -3,6 +3,9 @@ package org.helmo.gbeditor.models;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.helmo.gbeditor.models.BookDataFields.*;
+import static org.helmo.gbeditor.models.BookMetadata.MAX_SUMMARY;
+import static org.helmo.gbeditor.models.BookMetadata.MAX_TITLE;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -39,7 +42,7 @@ class BookTest {
 
 	@Test
 	void createBookWithTooBigTitleThrowsException() {
-		var title = "a".repeat(Book.MAX_TITLE + 1);
+		var title = "a".repeat(MAX_TITLE + 1);
 		assertThrows(IllegalArgumentException.class, () -> new Book(title, author, summary, "", imagePath));
 	}
 
@@ -60,57 +63,57 @@ class BookTest {
 
 	@Test
 	void createBookWithTooBigSummaryThrowsException() {
-		var summary = "a".repeat(Book.MAX_SUMMARY + 1);
+		var summary = "a".repeat(MAX_SUMMARY + 1);
 		assertThrows(IllegalArgumentException.class, () -> new Book(title, author, summary, "", imagePath));
 	}
 
 	@Test
 	void setTitle() {
-		book.setTitle("newTitle");
-		assertEquals("newTitle", book.getTitle());
+		book.setMetadata(TITLE, "newTitle");
+		assertEquals("newTitle", book.getMetadata(TITLE));
 	}
 
 	@Test
 	void setNullTitleThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.setTitle(null));
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(TITLE, null));
 	}
 
 	@Test
 	void setEmptyTitleThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.setTitle(""));
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(TITLE, ""));
 	}
 
 	@Test
 	void setTooBigTitleThrowsException() {
-		var tooBigTitle = "a".repeat(Book.MAX_TITLE + 1);
-		assertThrows(IllegalArgumentException.class, () -> book.setTitle(tooBigTitle));
+		var tooBigTitle = "a".repeat(MAX_TITLE + 1);
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(TITLE, tooBigTitle));
 	}
 
 	@Test
 	void setSummary() {
-		book.setSummary("newSummary");
-		assertEquals("newSummary", book.getSummary());
+		book.setMetadata(SUMMARY, "newSummary");
+		assertEquals("newSummary", book.getMetadata(SUMMARY));
 	}
 
 	@Test
 	void setNullSummaryThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.setSummary(null));
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(SUMMARY, null));
 	}
 
 	@Test
 	void setEmptySummaryThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.setSummary(""));
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(SUMMARY, ""));
 	}
 
 	@Test
 	void setTooBigSummaryThrowsException() {
-		var tooBigSummary = "a".repeat(Book.MAX_SUMMARY + 1);
-		assertThrows(IllegalArgumentException.class, () -> book.setSummary(tooBigSummary));
+		var tooBigSummary = "a".repeat(MAX_SUMMARY + 1);
+		assertThrows(IllegalArgumentException.class, () -> book.setMetadata(SUMMARY, tooBigSummary));
 	}
 
 	@Test
 	void getTitle() {
-		assertEquals(title, book.getTitle());
+		assertEquals(title, book.getMetadata(TITLE));
 	}
 
 	@Test
@@ -126,7 +129,7 @@ class BookTest {
 
 	@Test
 	void getSummary() {
-		assertEquals(summary, book.getSummary());
+		assertEquals(summary, book.getMetadata(SUMMARY));
 	}
 
 	@Test
@@ -149,14 +152,14 @@ class BookTest {
 
 	@Test
 	void setImagePath() {
-		book.setImagePath("newImagePath");
-		assertEquals("newImagePath", book.getImagePath());
+		book.setMetadata(IMAGE_PATH, "newImagePath");
+		assertEquals("newImagePath", book.getMetadata(IMAGE_PATH));
 	}
 
 	@Test
 	void setNullImagePathDoesNotThrowException() {
-		assertDoesNotThrow(() -> book.setImagePath(null));
-		assertEquals("", book.getImagePath());
+		assertDoesNotThrow(() -> book.setMetadata(IMAGE_PATH, null));
+		assertEquals("", book.getMetadata(IMAGE_PATH));
 	}
 
 	@Test

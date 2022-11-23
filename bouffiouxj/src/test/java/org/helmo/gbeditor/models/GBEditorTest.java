@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.helmo.gbeditor.models.BookDataFields.SUMMARY;
+import static org.helmo.gbeditor.models.BookDataFields.TITLE;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -104,8 +107,8 @@ class GBEditorTest {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
 		gbe.updateBook(book, "new title", "new summary", "", "");
-		assertEquals("new title", book.getTitle());
-		assertEquals("new summary", book.getSummary());
+		assertEquals("new title", book.getMetadata(TITLE));
+		assertEquals("new summary", book.getMetadata(SUMMARY));
 	}
 
 	@Test

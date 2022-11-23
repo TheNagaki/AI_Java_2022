@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.helmo.gbeditor.models.Book.LINGUISTIC_GROUP;
+import static org.helmo.gbeditor.models.BookMetadata.LINGUISTIC_GROUP;
 
 /**
  * This class is the model of the application. It is the link between the presenter, the repository and the model.
@@ -19,7 +19,7 @@ public class GBEditor implements GBEInterface {
 	private Author currentAuthor;
 	private final Set<Book> books;
 	private final RepositoryInterface repository;
-	private Book bookToEdit;
+	private Book bookToEdit = null;
 
 	/**
 	 * Constructor of the model. It initializes the repository and the sets of authors and books from it.
@@ -61,7 +61,7 @@ public class GBEditor implements GBEInterface {
 				String path2Image = repository.copyImage(imagePath);
 				book = new Book(title, currentAuthor, summary, isbn, path2Image);
 				books.add(book);
-				repository.saveBook(book);
+				repository.saveBooks(books);
 				return "Votre livre a bien été enregistré";
 			}
 		} catch (IllegalIsbnLinguisticIdException e) {
@@ -78,18 +78,25 @@ public class GBEditor implements GBEInterface {
 	}
 
 	@Override
-	public void updateBook(Book book, String title, String summary, String isbn, String imagePath) {
-		if (imagePath != null && !imagePath.isEmpty()) {
-			String path2Image = repository.copyImage(imagePath);
-			book.setImagePath(path2Image);
+	public String updateBook(Book book, String title, String summary, String isbn, String imagePath) {
+		try {
+			if (imagePath != null && !imagePath.isEmpty()) {
+				String path2Image = repository.copyImage(imagePath);
+				book.setMetadata(BookDataFields.IMAGE_PATH, path2Image);
+			}
+			if (books.remove(book)) {
+				book.setMetadata(BookDataFields.TITLE, title);
+				book.setMetadata(BookDataFields.SUMMARY, summary);
+				book.setMetadata(BookDataFields.ISBN, isbn);
+				books.add(book);
+				repository.saveBooks(books);
+			}
+		} catch (IllegalIsbnLinguisticIdException e) {
+			return String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP);
+		} catch (IllegalArgumentException e) {
+			return e.getMessage();
 		}
-		if (books.remove(book)) {
-			book.setTitle(title);
-			book.setSummary(summary);
-			book.setIsbn(isbn);
-			books.add(book);
-			repository.saveBook(book);
-		}
+		return "Votre livre a bien été mis à jour";
 	}
 
 	@Override
@@ -115,7 +122,7 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public int[] presetISBN() {
-		return currentAuthor != null ? new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()} : null;
+		return new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()};
 	}
 
 	@Override
@@ -130,20 +137,32 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public void addPage(Book book, String content) {
-		book.addPage(new Page(content));
-		repository.saveBook(book);
+		books.forEach(b -> {
+			if (b.equals(book)) {
+				b.addPage(new Page(content));
+			}
+		});
+		repository.saveBooks(books);
 	}
 
 	@Override
 	public void removePage(Book book, Page page) {
-		book.removePage(page);
-		repository.saveBook(book);
+		books.forEach(b -> {
+			if (b.equals(book)) {
+				b.removePage(page);
+			}
+		});
+		repository.saveBooks(books);
 	}
 
 	@Override
 	public void updatePage(Book book, Page page) {
-		book.updatePage(page);
-		repository.saveBook(book);
+		books.forEach(b -> {
+			if (b.equals(book)) {
+				b.updatePage(page);
+			}
+		});
+		repository.saveBooks(books);
 	}
 
 	@Override
@@ -154,5 +173,15 @@ public class GBEditor implements GBEInterface {
 	@Override
 	public String getIsbnControlNum(String isbn) {
 		return ISBN.computeCheckSum(isbn);
+	}
+
+	@Override
+	public int getPageNumber(Book bookDisplayed, Page value) {
+		for (Book book : books) {
+			if (book.equals(bookDisplayed)) {
+				return book.getPageNumber(value);
+			}
+		}
+		return bookDisplayed.getPageNumber(value);
 	}
 }

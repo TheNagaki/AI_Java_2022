@@ -20,12 +20,11 @@ import javafx.stage.*;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.BookDetailsPresenter;
+import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
-import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -105,7 +104,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 	@Override
 	public void displayBook(Book book) {
-		stage.setTitle(book.getTitle());
+		stage.setTitle(presenter.getTitle());
 		this.bookOnDisplay = book;
 		var insets = new Insets(SMALL_SPACING);
 
@@ -116,7 +115,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		centerBox.setFillWidth(true);
 		centerBox.setMaxWidth(WIDTH / 2 - 5);
 
-		var title = new Label(book.getTitle());
+		var title = new Label(presenter.getTitle());
 		title.getStyleClass().add("details-title");
 		title.setWrapText(true);
 		title.setAlignment(Pos.CENTER);
@@ -125,8 +124,8 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		BorderPane.setMargin(title, insets);
 
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
-			iv = new ImageView(new Image(book.getImagePath()));
+		if (presenter.getImagePath() != null && !presenter.getImagePath().isEmpty()) {
+			iv = new ImageView(new Image(presenter.getImagePath()));
 		}
 		iv.setFitWidth(100);
 		iv.setPreserveRatio(true);
@@ -136,12 +135,12 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		imageBox.setAlignment(Pos.CENTER);
 		centerBox.getChildren().add(imageBox);
 
-		centerBox.getChildren().add(new Label(book.getIsbn().toString()));
+		centerBox.getChildren().add(new Label(presenter.getIsbn()));
 
 //		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
 //		L'utilisateur ne pouvant voir QUE ses livres, on ne l'affiche donc pas
 
-		var summary = new Label(book.getSummary());
+		var summary = new Label(presenter.getSummary());
 		summary.setWrapText(true);
 		centerBox.getChildren().add(summary);
 
@@ -187,15 +186,17 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		buttonBox.setSpacing(BIG_SPACING);
 		buttonBox.setAlignment(Pos.CENTER);
 		var addPageBtn = new Button("➕");
-		addPageBtn.setOnAction(e -> presenter.addPage(contentInput.getText()));
+		addPageBtn.setOnAction(e -> {
+			if (!contentInput.getText().isEmpty()) {
+				presenter.addPage(contentInput.getText());
+				contentInput.clear();
+			}
+		});
+		var editPageBtn = new Button("✏");
+		editPageBtn.setOnAction(e -> presenter.editPage(tableView.getSelectionModel().getSelectedItem()));
 		var removePageBtn = new Button("➖");
 		removePageBtn.setOnAction(e -> presenter.removePage(tableView.getSelectionModel().getSelectedItem()));
-//		var pageUpBtn = new Button("⬆");
-//		pageUpBtn.setOnAction(e -> presenter.movePageUp(tableView.getSelectionModel().getSelectedItem()));
-//		var pageDownBtn = new Button("⬇");
-//		pageDownBtn.setOnAction(e -> presenter.movePageDown(tableView.getSelectionModel().getSelectedItem()));
-//		buttonBox.getChildren().addAll(addPageBtn, removePageBtn, pageUpBtn, pageDownBtn);
-		buttonBox.getChildren().addAll(addPageBtn, removePageBtn);
+		buttonBox.getChildren().addAll(addPageBtn, editPageBtn, removePageBtn);
 
 		pageInputs.getChildren().addAll(fieldsInputs, buttonBox);
 		rightPane.setBottom(pageInputs);
@@ -203,6 +204,11 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		rightPane.setMaxSize(WIDTH / 2 - 5, HEIGHT);
 		mainPane.setRight(rightPane);
 		BorderPane.setMargin(rightPane, insets);
+	}
+
+	@Override
+	public void editPage(Page selectedItem) {
+		popupEditPage(selectedItem);
 	}
 
 	private void launchStage() {
@@ -234,14 +240,14 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			var row = new TableRow<Page>();
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && !row.isEmpty()) {
-					popupEditPage(row.getItem());
+					presenter.editPage(row.getItem());
 				}
 			});
 			return row;
 		});
 
 		var pageCol = new TableColumn<Page, String>("N°");
-		pageCol.setCellValueFactory(param -> new SimpleStringProperty(String.format("%d", bookOnDisplay.getPageNumber(param.getValue()))));
+		pageCol.setCellValueFactory(param -> new SimpleStringProperty(String.format("%d", presenter.getPageNumber(param.getValue()))));
 		pageCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		pageCol.setMaxWidth(20);
 		pageCol.setMinWidth(20);
@@ -300,53 +306,77 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		fillAndPlacePopup(popup, popupRoot);
 	}
 
-	private void popupEditPage(Page selected) {
+	private void popupEditPage(Page selectedPage) {
 		var popup = new Popup();
 		var popupRoot = new VBox();
 		popupRoot.paddingProperty().setValue(new Insets(BIG_SPACING));
 		popupRoot.setSpacing(SMALL_SPACING);
 		popupRoot.setAlignment(Pos.CENTER);
-		var contentField = new TextField(selected.getContent());
+		var contentBox = new HBox();
+		var contentField = new TextField(selectedPage.getContent());
 		contentField.setPromptText("Contenu de la page");
+		var saveContentBtn = new Button("✔");
+		saveContentBtn.setOnAction(event -> {
+			if (!contentField.getText().isBlank()) {
+				selectedPage.setContent(contentField.getText());
+			}
+		});
+		contentBox.setSpacing(2);
+		contentBox.getChildren().setAll(contentField, saveContentBtn);
 		var choicesBox = new VBox();
 		choicesBox.setSpacing(SMALL_SPACING);
 		choicesBox.setAlignment(Pos.CENTER);
-		var choices = selected.getChoices();
+		var choices = selectedPage.getChoices();
 		for (var choice : choices.keySet()) {
 			var choiceBox = new HBox();
 			choiceBox.setSpacing(SMALL_SPACING);
 			choiceBox.setAlignment(Pos.CENTER);
-			var choiceField = new TextField(choice);
-			choiceField.setPromptText("Choix");
-			var destinationField = selectPageChoice(selected);
-			addCurrentChoiceToMenu(choices, choice, destinationField);
-			choiceBox.getChildren().addAll(choiceField, destinationField);
+			var choiceLabel = new Label(choice);
+			final var directionLabel = new Label("➡");
+			var destinationPage = choices.get(choice);
+			var content = destinationPage.getContent();
+			var destinationLabel = new Label(String.format("%d) %s", bookOnDisplay.getPageNumber(destinationPage), content.substring(0, Math.min(GLIMPSE_SIZE, content.length()))));
+			var deleteChoiceBtn = new Button("❌");
+			deleteChoiceBtn.setOnAction(event -> {
+				if (!choiceLabel.getText().isBlank() && !destinationLabel.getText().isBlank()) {
+					selectedPage.removeChoice(choiceLabel.getText());
+					refresh();
+				}
+			});
+			choiceBox.getChildren().addAll(choiceLabel, directionLabel, destinationLabel, deleteChoiceBtn);
 			choicesBox.getChildren().add(choiceBox);
 		}
-		var addChoiceBtn = new Button("Ajouter un choix");
+		var saveBtn = new Button("✔");
+		saveBtn.setOnAction(e -> {
+			presenter.updatePage(selectedPage);
+			popup.hide();
+		});
+		var addChoiceBtn = new Button("➕ choix");
 		addChoiceBtn.setOnAction(e -> {
 			var choiceBox = new HBox();
 			choiceBox.setSpacing(SMALL_SPACING);
 			choiceBox.setAlignment(Pos.CENTER);
 			var choiceField = new TextField();
 			choiceField.setPromptText("Choix");
-			var destinationField = selectPageChoice(selected);
-			choiceBox.getChildren().addAll(choiceField, destinationField);
+			var destinationField = selectPageChoice(selectedPage);
+			var saveChoiceBtn = new Button("💾");
+			saveChoiceBtn.setOnAction(event -> {
+				var item = destinationField.getItems().size() > 0 ? destinationField.getItems().get(0) : null;
+				if (!choiceField.getText().isBlank() && item != null) {
+					selectedPage.addChoice(choiceField.getText(), bookOnDisplay.getPageById(destinationField.getItems().get(0).getId()));
+					refresh();
+				}
+			});
+			choiceBox.getChildren().addAll(choiceField, destinationField, saveChoiceBtn);
 			choicesBox.getChildren().add(choiceBox);
 		});
-		var saveBtn = new Button("💾");
-		saveBtn.setOnAction(e -> presenter.closeView());
-		var cancelBtn = new Button();
-		var closeIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/emergency-exit.png"))));
-		closeIcon.setFitHeight(15);
-		closeIcon.setPreserveRatio(true);
-		cancelBtn.setGraphic(closeIcon);
+		var cancelBtn = new Button("✖");
 		cancelBtn.setOnAction(e -> popup.hide());
 		var buttonsBox = new HBox();
-		buttonsBox.getChildren().addAll(saveBtn, cancelBtn);
+		buttonsBox.getChildren().addAll(saveBtn, addChoiceBtn, cancelBtn);
 		buttonsBox.setSpacing(BIG_SPACING);
 		buttonsBox.setAlignment(Pos.BOTTOM_CENTER);
-		popupRoot.getChildren().addAll(contentField, choicesBox, buttonsBox);
+		popupRoot.getChildren().addAll(contentBox, choicesBox, buttonsBox);
 		fillAndPlacePopup(popup, popupRoot);
 	}
 
@@ -357,19 +387,12 @@ public class BookDetailsView implements BookDetailsViewInterface {
 						!page.getChoices().containsValue(selected))
 				.map(page -> {
 					final var content = page.getContent();
-					var item = new MenuItem(bookOnDisplay.getPageNumber(page) + ") " + content.substring(0, Math.min(GLIMPSE_SIZE, content.length())));
+					var item = new MenuItem(String.format("%d) %s", bookOnDisplay.getPageNumber(page), content.substring(0, Math.min(GLIMPSE_SIZE, content.length()))));
 					item.setOnAction(e -> destinationField.setText(item.getText()));
+					item.idProperty().setValue(page.getId());
 					return item;
 				}).collect(Collectors.toList()));
 		return destinationField;
-	}
-
-	private void addCurrentChoiceToMenu(Map<String, Page> choices, String choice, MenuButton menu) {
-		var choicePageContent = choices.get(choice).getContent();
-		var item = new MenuItem("* " + bookOnDisplay.getPageNumber(choices.get(choice)) + ") " + choicePageContent.substring(0, Math.min(GLIMPSE_SIZE, choicePageContent.length())));
-		item.setOnAction(e -> menu.setText(item.getText()));
-		menu.getItems().add(0, item);
-		menu.setText(menu.getItems().get(0).getText());
 	}
 
 	private void fillAndPlacePopup(Popup popup, Node popupRoot) {

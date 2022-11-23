@@ -1,6 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.Presenter;
@@ -100,5 +101,17 @@ public class MainPresenter implements Presenter {
 	 */
 	public void onQuit_Click() {
 		view.close();
+	}
+
+	public String getTitle(Book b) {
+		return b.getMetadata(BookDataFields.TITLE);
+	}
+
+	public String getIsbn(Book b) {
+		return b.getMetadata(BookDataFields.ISBN);
+	}
+
+	public String getImagePath(Book book) {
+		return book.getMetadata(BookDataFields.IMAGE_PATH);
 	}
 }
