@@ -5,7 +5,7 @@ import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.ISBN;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
-import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 
 /**
@@ -13,7 +13,7 @@ import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
  * It is used to create a new book in the model.
  * It is also used to edit an existing book.
  */
-public class EditBookPresenter implements Presenter {
+public class EditBookPresenter implements PresenterInterface {
 	private final GBEInterface engine;
 	private EditBookViewInterface view;
 	private Book bookEdited = null;
@@ -53,11 +53,6 @@ public class EditBookPresenter implements Presenter {
 	 */
 	public void setView(EditBookViewInterface view) {
 		this.view = view;
-	}
-
-	@Override
-	public GBEInterface getEngine() {
-		return engine;
 	}
 
 	@Override

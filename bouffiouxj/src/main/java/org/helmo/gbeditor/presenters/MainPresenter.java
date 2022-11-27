@@ -4,7 +4,7 @@ import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
-import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.views.BookDetailsView;
 
@@ -12,7 +12,7 @@ import org.helmo.gbeditor.views.BookDetailsView;
  * The MainPresenter is the presenter of the main view
  * It is used to manage the books of one author
  */
-public class MainPresenter implements Presenter {
+public class MainPresenter implements PresenterInterface {
 	private final GBEInterface engine;
 	private MainViewInterface view;
 
@@ -47,11 +47,6 @@ public class MainPresenter implements Presenter {
 
 	public void setView(MainViewInterface view) {
 		this.view = view;
-	}
-
-	@Override
-	public GBEInterface getEngine() {
-		return engine;
 	}
 
 	@Override

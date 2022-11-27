@@ -10,10 +10,7 @@ import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.repositories.JsonRepository;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
-import org.helmo.gbeditor.views.ConnexionView;
-import org.helmo.gbeditor.views.BaseView;
-import org.helmo.gbeditor.views.EditBookView;
-import org.helmo.gbeditor.views.MainView;
+import org.helmo.gbeditor.views.*;
 
 import java.nio.file.Path;
 import java.util.HashMap;

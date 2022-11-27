@@ -1,7 +1,7 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
-import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.views.ConnexionView;
 
@@ -10,7 +10,7 @@ import org.helmo.gbeditor.views.ConnexionView;
  * It is used to connect the user to the application.
  * It is also used to create a new user.
  */
-public class ConnexionPresenter implements Presenter {
+public class ConnexionPresenter implements PresenterInterface {
 
 	private final GBEInterface engine;
 	private ConnexionView view;
@@ -40,11 +40,6 @@ public class ConnexionPresenter implements Presenter {
 
 	public void setView(ConnexionView connexionView) {
 		this.view = connexionView;
-	}
-
-	@Override
-	public GBEInterface getEngine() {
-		return engine;
 	}
 
 	@Override

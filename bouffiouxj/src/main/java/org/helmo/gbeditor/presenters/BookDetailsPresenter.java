@@ -5,7 +5,7 @@ import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
-import org.helmo.gbeditor.presenters.interfaces.Presenter;
+import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 
 /**
@@ -27,11 +27,6 @@ public class BookDetailsPresenter implements Presenter {
 	public BookDetailsPresenter(GBEInterface engine, MainPresenter mainPresenter) {
 		this.engine = engine;
 		this.mainPresenter = mainPresenter;
-	}
-
-	@Override
-	public GBEInterface getEngine() {
-		return this.engine;
 	}
 
 	@Override
