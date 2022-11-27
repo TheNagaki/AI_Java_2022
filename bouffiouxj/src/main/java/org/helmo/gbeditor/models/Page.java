@@ -1,5 +1,6 @@
 package org.helmo.gbeditor.models;
 
+import org.helmo.gbeditor.models.exceptions.IllegalChoiceException;
 import org.helmo.gbeditor.models.exceptions.IllegalPageException;
 
 import java.util.*;
@@ -9,7 +10,7 @@ import java.util.*;
  */
 public class Page {
 
-	private final UUID id = UUID.randomUUID();
+	private UUID id = UUID.randomUUID();
 	private String content;
 	private final Map<String, Page> choices = new HashMap<>();
 
@@ -31,7 +32,7 @@ public class Page {
 	 * @return the content of the page
 	 */
 	public String getContent() {
-		return content;
+		return content + "";
 	}
 
 	/**
@@ -40,7 +41,7 @@ public class Page {
 	 * @return the choices of the page
 	 */
 	public Map<String, Page> getChoices() {
-		return choices;
+		return new HashMap<>(choices);
 	}
 
 	/**
@@ -50,7 +51,24 @@ public class Page {
 	 * @param page   the page to go to
 	 */
 	public void addChoice(String choice, Page page) {
+		checkChoice(choice);
+		checkPage(page);
+		if (choices.containsKey(choice)) {
+			throw new IllegalChoiceException();
+		}
 		choices.put(choice, page);
+	}
+
+	private void checkPage(Page page) {
+		if (page == null || page.equals(this)) {
+			throw new IllegalPageException();
+		}
+	}
+
+	private void checkChoice(String choice) {
+		if (choice == null || choice.isBlank()) {
+			throw new IllegalChoiceException();
+		}
 	}
 
 	/**
@@ -59,6 +77,9 @@ public class Page {
 	 * @param choice the choice to remove
 	 */
 	public void removeChoice(String choice) {
+		if (choice == null || choice.isBlank() || !choices.containsKey(choice)) {
+			throw new IllegalChoiceException();
+		}
 		choices.remove(choice);
 	}
 
@@ -130,6 +151,15 @@ public class Page {
 	 * @param page the new page to go to
 	 */
 	public void updateChoice(String k, Page page) {
+		checkChoice(k);
+		checkPage(page);
+		if (!choices.containsKey(k)) {
+			throw new IllegalChoiceException();
+		}
 		choices.put(k, page);
+	}
+
+	public void setId(String id) {
+		this.id = UUID.fromString(id);
 	}
 }
