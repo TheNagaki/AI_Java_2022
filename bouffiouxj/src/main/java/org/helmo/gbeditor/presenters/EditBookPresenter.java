@@ -2,7 +2,6 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
-import org.helmo.gbeditor.models.ISBN;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
@@ -35,7 +34,7 @@ public class EditBookPresenter implements PresenterInterface {
 	 * @param summary   the summary of the book
 	 * @param imagePath the path to the image of the book
 	 */
-	public void createBook(String title, String isbn, String summary, String imagePath) {
+	public void createBook(String title, String summary, String isbn, String imagePath) {
 		view.display(engine.createBook(title, summary, isbn, imagePath));
 	}
 
@@ -80,6 +79,7 @@ public class EditBookPresenter implements PresenterInterface {
 	 *
 	 * @param title     the new title
 	 * @param summary   the new summary
+	 * @param isbn      the new isbn
 	 * @param imagePath the new image path
 	 */
 	public void editBook(String title, String summary, String isbn, String imagePath) {
@@ -102,19 +102,33 @@ public class EditBookPresenter implements PresenterInterface {
 		view.close();
 	}
 
-	public String getImagePath() {
-		return bookEdited.getMetadata(BookDataFields.IMAGE_PATH);
+	/**
+	 * This method is used to ask the engine the title of the book
+	 */
+	public void askTitle() {
+		view.setTitle(bookEdited.getMetadata(BookDataFields.TITLE));
 	}
 
-	public String getTitle() {
-		return bookEdited.getMetadata(BookDataFields.TITLE);
+	/**
+	 * This method is used to ask the engine the path to the image of the book
+	 */
+	public void askImagePath() {
+		view.setImagePath(bookEdited.getMetadata(BookDataFields.IMAGE_PATH));
 	}
 
-	public ISBN getIsbn() {
-		return bookEdited.getIsbn();
+	/**
+	 * This method is used to communicate the Summary of the book in the view
+	 */
+	public void askSummary() {
+		view.setSummary(bookEdited.getMetadata(BookDataFields.SUMMARY));
 	}
 
-	public String getSummary() {
-		return bookEdited.getMetadata(BookDataFields.SUMMARY);
+	public void askBaseIsbn() {
+		var isbn = bookEdited.getIsbn();
+		view.setBaseIsbn(String.format("%d-%d-", isbn.getLinguisticGroup(), isbn.getIdAuthor()));
+	}
+
+	public void askBookId() {
+		view.setBookId(bookEdited.getIsbn().getIdBook());
 	}
 }

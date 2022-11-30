@@ -188,4 +188,24 @@ public class GBEditor implements GBEInterface {
 		}
 		return bookDisplayed.getPageNumber(value);
 	}
+
+	@Override
+	public Page getPageById(Book bookDisplayed, String id) {
+		for (Book book : books) {
+			if (book.equals(bookDisplayed)) {
+				return book.getPageById(id);
+			}
+		}
+		return bookDisplayed.getPageById(id);
+	}
+
+	@Override
+	public Book getBook(String isbn) {
+		for (Book book : books) {
+			if (book.getMetadata(BookDataFields.BOOK_ISBN).equals(isbn)) {
+				return book;
+			}
+		}
+		return null;
+	}
 }

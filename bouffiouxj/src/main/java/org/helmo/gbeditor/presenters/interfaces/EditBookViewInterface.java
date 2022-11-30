@@ -3,7 +3,7 @@ package org.helmo.gbeditor.presenters.interfaces;
 /**
  * Interface for the CreateBookView
  */
-public interface EditBookViewInterface extends ViewInterface {
+public interface EditBookViewInterface extends ViewInterface, DisplayBookViewInterface {
 
 	/**
 	 * Sets the first caracters of the isbn TextField in the view
@@ -32,4 +32,18 @@ public interface EditBookViewInterface extends ViewInterface {
 	 * @param authorName the full name (firstName Name) of the author
 	 */
 	void setAuthorName(String authorName);
+
+	/**
+	 * Sets the base isbn in the view
+	 *
+	 * @param baseIsbn the base isbn
+	 */
+	void setBaseIsbn(String baseIsbn);
+
+	/**
+	 * Sets the id of the book in the view
+	 *
+	 * @param idBook the id of the book
+	 */
+	void setBookId(int idBook);
 }

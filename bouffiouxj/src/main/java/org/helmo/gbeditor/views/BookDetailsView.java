@@ -17,14 +17,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.*;
-import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.BookDetailsPresenter;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -33,19 +33,23 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	private final BookDetailsPresenter presenter;
 	private static final int GLIMPSE_SIZE = 10;
 	private ViewInterface baseView;
-
 	private final Stage stage = new Stage();
 	private final BorderPane mainPane = new BorderPane();
-	private static final int WIDTH = 400;
-	private static final int HEIGHT = 600;
+	private static final int WIDTH = 600;
+	private static final int HEIGHT = 800;
 	private static final int SMALL_SPACING = 5;
 	private static final int BIG_SPACING = 10;
-	private Book bookOnDisplay;
-	private ObservableList<Page> pages;
+	private ObservableList<PageViewModel> pages;
+	private String summary;
+	private String isbn;
+	private String imagePath;
+	private String title;
+	private Collection<PageViewModel> bookPages;
 
 	public BookDetailsView(BookDetailsPresenter presenter) {
 		this.presenter = presenter;
 		presenter.setView(this);
+		stage.setOnCloseRequest(event -> presenter.closeView());
 	}
 
 	@Override
@@ -82,8 +86,10 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 	@Override
 	public void setBaseView(ViewInterface baseView) {
-		this.baseView = baseView;
-		launchStage();
+		if (this.baseView == null) {
+			this.baseView = baseView;
+			initStage();
+		}
 	}
 
 	@Override
@@ -94,7 +100,12 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	@Override
 	public void refresh() {
 		mainPane.getChildren().clear();
-		displayBook(bookOnDisplay);
+		presenter.askIsbn();
+		presenter.askImagePath();
+		presenter.askSummary();
+		presenter.askTitle();
+		presenter.askPages();
+		displayBook();
 	}
 
 	@Override
@@ -103,19 +114,19 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	}
 
 	@Override
-	public void displayBook(Book book) {
-		stage.setTitle(presenter.getTitle());
-		this.bookOnDisplay = book;
+	public void displayBook() {
+		stage.show();
+		stage.setTitle(this.title);
 		var insets = new Insets(SMALL_SPACING);
 
-		var centerBox = new VBox();
-		centerBox.setSpacing(BIG_SPACING);
-		centerBox.setAlignment(Pos.CENTER);
-		centerBox.setPadding(new javafx.geometry.Insets(5));
-		centerBox.setFillWidth(true);
-		centerBox.setMaxWidth(WIDTH / 2 - 5);
+		var bookBox = new VBox();
+		bookBox.setSpacing(BIG_SPACING);
+		bookBox.setAlignment(Pos.CENTER);
+		bookBox.setPadding(new javafx.geometry.Insets(5));
+		bookBox.setFillWidth(true);
+		bookBox.setMaxWidth(WIDTH / 2 - 5);
 
-		var title = new Label(presenter.getTitle());
+		var title = new Label(this.title);
 		title.getStyleClass().add("details-title");
 		title.setWrapText(true);
 		title.setAlignment(Pos.CENTER);
@@ -124,8 +135,8 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		BorderPane.setMargin(title, insets);
 
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (presenter.getImagePath() != null && !presenter.getImagePath().isEmpty()) {
-			iv = new ImageView(new Image(presenter.getImagePath()));
+		if (imagePath != null && !imagePath.isEmpty()) {
+			iv = new ImageView(new Image(imagePath));
 		}
 		iv.setFitWidth(100);
 		iv.setPreserveRatio(true);
@@ -133,19 +144,19 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		var imageBox = new VBox();
 		imageBox.getChildren().add(iv);
 		imageBox.setAlignment(Pos.CENTER);
-		centerBox.getChildren().add(imageBox);
+		bookBox.getChildren().add(imageBox);
 
-		centerBox.getChildren().add(new Label(presenter.getIsbn()));
+		bookBox.getChildren().add(new Label(isbn));
 
 //		centerBox.getChildren().add(new Label(book.getAuthor().getFullName()));
 //		L'utilisateur ne pouvant voir QUE ses livres, on ne l'affiche donc pas
 
-		var summary = new Label(presenter.getSummary());
+		var summary = new Label(this.summary);
 		summary.setWrapText(true);
-		centerBox.getChildren().add(summary);
+		bookBox.getChildren().add(summary);
 
 		var scrollPane = new ScrollPane();
-		scrollPane.setContent(centerBox);
+		scrollPane.setContent(bookBox);
 		scrollPane.setFitToWidth(true);
 		mainPane.setCenter(scrollPane);
 		BorderPane.setMargin(scrollPane, insets);
@@ -153,7 +164,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		var editBtn = new Button("✏ Éditer");
 		editBtn.setOnAction(e -> presenter.editBook());
 		var deleteBtn = new Button("❌ Supprimer");
-		deleteBtn.setOnAction(e -> popupConfirmDeletion());
+		deleteBtn.setOnAction(e -> popupConfirmBookDeletion());
 		var closeBtn = new Button("Fermer");
 		closeBtn.setOnAction(action -> presenter.closeView());
 		var closeIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/emergency-exit.png"))));
@@ -169,7 +180,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		BorderPane.setMargin(bottomPane, insets);
 
 		var rightPane = new BorderPane();
-		var tableView = fillPagesTable(book);
+		var tableView = fillPagesTable(bookPages);
 		rightPane.setCenter(tableView);
 
 		var pageInputs = new VBox();
@@ -207,15 +218,55 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	}
 
 	@Override
-	public void editPage(Page selectedItem) {
+	public void editPage(PageViewModel selectedItem) {
 		popupEditPage(selectedItem);
 	}
 
-	private void launchStage() {
+	@Override
+	public void confirmPageSuppression(PageViewModel selectedPage) {
+		popupConfirmPageDeletion(selectedPage);
+	}
+
+	@Override
+	public void setSummary(String metadata) {
+		this.summary = metadata;
+	}
+
+	@Override
+	public void setIsbn(String metadata) {
+		this.isbn = metadata;
+	}
+
+	@Override
+	public void setImagePath(String metadata) {
+		this.imagePath = metadata;
+	}
+
+	@Override
+	public void setTitle(String metadata) {
+		this.title = metadata;
+	}
+
+	private void popupConfirmPageDeletion(PageViewModel selectedPage) {
+		var references = 0;
+		for (PageViewModel p : pages) {
+			System.out.println(p.getChoices());
+			if (p.getChoices().containsValue(selectedPage)) {
+				references++;
+			}
+		}
+		var alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setTitle("Suppression de page");
+		alert.setHeaderText(String.format("Cette page est référencée dans %d autre(s) page(s), êtes-vous sûr ?", references));
+		alert.setContentText("Cette action est irréversible.");
+		var result = alert.showAndWait();
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			presenter.confirmPageDeletion(selectedPage);
+		}
+	}
+
+	private void initStage() {
 		stage.initModality(Modality.NONE);
-		// This is a choice I made to allow the user to interact with the main window while the popup is open and vice versa.
-		// The reason for this choice is that the only advantage of using a popup is to have a smaller window NOT in the
-		// main window so that the user can interact with both at the same time.
 		stage.initOwner(baseView.getStage());
 		stage.setResizable(false);
 		stage.setWidth(WIDTH);
@@ -224,20 +275,19 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 		stage.setScene(scene);
 		setPosition(stage);
-		stage.show();
 	}
 
-	private TableView<Page> fillPagesTable(Book book) {
+	private TableView<PageViewModel> fillPagesTable(Collection<PageViewModel> pages) {
 		//Avec l'aide de https://docs.oracle.com/javafx/2/ui_controls/table-view.htm
 
-		var pagesView = new TableView<Page>();
+		var pagesView = new TableView<PageViewModel>();
 		pagesView.setEditable(false);
 		pagesView.setMaxWidth(WIDTH / 2 - 5);
 		pagesView.setMaxHeight(HEIGHT);
 		pagesView.setPlaceholder(new Label("Aucune page"));
 		pagesView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		pagesView.setRowFactory(tv -> {
-			var row = new TableRow<Page>();
+			var row = new TableRow<PageViewModel>();
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && !row.isEmpty()) {
 					presenter.editPage(row.getItem());
@@ -246,23 +296,24 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			return row;
 		});
 
-		var pageCol = new TableColumn<Page, String>("N°");
-		pageCol.setCellValueFactory(param -> new SimpleStringProperty(String.format("%d", presenter.getPageNumber(param.getValue()))));
+		var pageCol = new TableColumn<PageViewModel, String>("N°");
+		pageCol.setCellValueFactory(param -> new SimpleStringProperty(String.format("%02d", presenter.getPageNumber(param.getValue()))));
 		pageCol.setCellFactory(TextFieldTableCell.forTableColumn());
 		pageCol.setMaxWidth(20);
 		pageCol.setMinWidth(20);
+		pageCol.setResizable(false);
 
-		var contentCol = new TableColumn<Page, String>("Contenu");
+		var contentCol = new TableColumn<PageViewModel, String>("Contenu");
 		contentCol.setCellValueFactory(new PropertyValueFactory<>("content"));
 		contentCol.setCellFactory(TextFieldTableCell.forTableColumn());
 
-		var choicesCol = new TableColumn<Page, String>("Choix");
+		var choicesCol = new TableColumn<PageViewModel, String>("Choix");
 		choicesCol.setCellValueFactory(param -> {
 			var value = new StringJoiner(", ");
 			var page = param.getValue();
 			var choices = page.getChoices();
 			for (var destinationPage : choices.values()) {
-				value.add("" + book.getPageNumber(destinationPage));
+				value.add("" + presenter.getPageNumber(destinationPage));
 			}
 			return new SimpleStringProperty(value.toString());
 		});
@@ -270,27 +321,23 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 		pagesView.getColumns().addAll(Arrays.asList(pageCol, contentCol, choicesCol));
 
-		this.pages = FXCollections.observableArrayList(book.getPages());
-		pagesView.setItems(pages);
+		this.pages = FXCollections.observableArrayList(pages);
+		pagesView.setItems(this.pages);
 
 		pagesView.requestFocus();
 		pagesView.getFocusModel().focus(0);
 		pagesView.getSelectionModel().selectFirst();
+		pagesView.getSortOrder().add(pageCol);
 		return pagesView;
 	}
 
-	private void popupConfirmDeletion() {
+	private void popupConfirmBookDeletion() {
 		//Inspired by https://www.geeksforgeeks.org/javafx-popup-class/ and https://docs.oracle.com/javase/8/javafx/api/javafx/stage/Popup.html
 		var popup = new Popup();
 		var yesBtn = new Button("Oui");
 		yesBtn.setOnAction(e2 -> {
 			popup.hide();
-			if (presenter.deleteBook()) {
-				changeView(ViewsEnum.MAIN);
-			} else {
-				display("Erreur: Impossible de supprimer le livre");
-			}
-			presenter.closeView();
+			presenter.deleteBook();
 		});
 		var noBtn = new Button("Non");
 		noBtn.setOnAction(e2 -> popup.hide());
@@ -306,7 +353,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		fillAndPlacePopup(popup, popupRoot);
 	}
 
-	private void popupEditPage(Page selectedPage) {
+	private void popupEditPage(PageViewModel selectedPage) {
 		var popup = new Popup();
 		var popupRoot = new VBox();
 		popupRoot.paddingProperty().setValue(new Insets(BIG_SPACING));
@@ -335,7 +382,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			final var directionLabel = new Label("➡");
 			var destinationPage = choices.get(choice);
 			var content = destinationPage.getContent();
-			var destinationLabel = new Label(String.format("%d) %s", bookOnDisplay.getPageNumber(destinationPage), content.substring(0, Math.min(GLIMPSE_SIZE, content.length()))));
+			var destinationLabel = new Label(formatPage(destinationPage, content));
 			var deleteChoiceBtn = new Button("❌");
 			deleteChoiceBtn.setOnAction(event -> {
 				if (!choiceLabel.getText().isBlank() && !destinationLabel.getText().isBlank()) {
@@ -363,7 +410,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			saveChoiceBtn.setOnAction(event -> {
 				var item = destinationField.getItems().size() > 0 ? destinationField.getItems().get(0) : null;
 				if (!choiceField.getText().isBlank() && item != null) {
-					selectedPage.addChoice(choiceField.getText(), bookOnDisplay.getPageById(destinationField.getItems().get(0).getId()));
+					selectedPage.addChoice(choiceField.getText(), presenter.getPageById(destinationField.getItems().get(0).getId()));
 					refresh();
 				}
 			});
@@ -380,14 +427,18 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		fillAndPlacePopup(popup, popupRoot);
 	}
 
-	private MenuButton selectPageChoice(Page selected) {
+	private String formatPage(PageViewModel destinationPage, String content) {
+		return String.format("%d) %s", presenter.getPageNumber(destinationPage), content.substring(0, Math.min(GLIMPSE_SIZE, content.length())));
+	}
+
+	private MenuButton selectPageChoice(PageViewModel selected) {
 		var destinationField = new MenuButton("Page cible");
 		destinationField.getItems().addAll(pages.stream()
 				.filter(page -> !page.equals(selected) && !selected.getChoices().containsValue(page) &&
 						!page.getChoices().containsValue(selected))
 				.map(page -> {
 					final var content = page.getContent();
-					var item = new MenuItem(String.format("%d) %s", bookOnDisplay.getPageNumber(page), content.substring(0, Math.min(GLIMPSE_SIZE, content.length()))));
+					var item = new MenuItem(formatPage(page, content));
 					item.setOnAction(e -> destinationField.setText(item.getText()));
 					item.idProperty().setValue(page.getId());
 					return item;
@@ -407,5 +458,10 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	@Override
 	public void close() {
 		stage.close();
+	}
+
+	@Override
+	public void setBookPages(Collection<PageViewModel> bookPages) {
+		this.bookPages = bookPages;
 	}
 }

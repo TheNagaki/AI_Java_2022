@@ -15,9 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.helmo.gbeditor.presenters.EditBookPresenter;
+import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
-import org.helmo.gbeditor.presenters.ViewsEnum;
 
 import java.io.File;
 import java.util.Objects;
@@ -47,6 +47,11 @@ public class EditBookView implements EditBookViewInterface {
 	private final Label authorName = new Label("");
 	private final Label baseIsbnLabel = new Label("9-999999-");
 	private final Label isbnControlLabel = new Label("-?");
+	private String title = "";
+	private String imagePath = "";
+	private String summary = "";
+	private String bookId = "";
+	private String baseIsbn = "";
 
 	/**
 	 * Constructor of the CreateBookView class
@@ -63,6 +68,14 @@ public class EditBookView implements EditBookViewInterface {
 	@Override
 	public void setEditionMode(boolean b) {
 		this.bookCreation = !b;
+		if (b) {
+			this.createBookButton.setText("Edit");
+			presenter.askTitle();
+			presenter.askSummary();
+			presenter.askBaseIsbn();
+			presenter.askBookId();
+			presenter.askImagePath();
+		}
 		initView();
 	}
 
@@ -134,7 +147,7 @@ public class EditBookView implements EditBookViewInterface {
 		isbnControlBox.setAlignment(Pos.CENTER_LEFT);
 
 		createBookButton = new Button("Valider");
-		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), getFullIsbn(), inputSummary.getText().strip()));
+		createBookButton.setOnAction(action -> createBook(inputTitle.getText().strip(), inputSummary.getText().strip(), getFullIsbn()));
 
 		centerGrid.setAlignment(Pos.CENTER);
 		centerGrid.getChildren().clear();
@@ -160,7 +173,7 @@ public class EditBookView implements EditBookViewInterface {
 		if (!bookCreation) {
 			viewTitle = new Label("Modifiez votre livre");
 			topPane.setCenter(viewTitle);
-			var image = presenter.getImagePath();
+			var image = imagePath;
 			if (image != null && !image.isEmpty()) {
 				imageView = new ImageView(new Image(image));
 				imageView.setFitWidth(80);
@@ -254,10 +267,10 @@ public class EditBookView implements EditBookViewInterface {
 			presenter.askISBN();
 			inputSummary.setText("");
 		} else {
-			inputTitle.setText(presenter.getTitle());
-			baseIsbnLabel.setText(presenter.getIsbn().getLinguisticGroup() + "-" + presenter.getIsbn().getIdAuthor() + "-");
-			inputIsbn.setText(presenter.getIsbn().getIdBook() + "");
-			inputSummary.setText(presenter.getSummary());
+			inputTitle.setText(title);
+			baseIsbnLabel.setText(baseIsbn);
+			inputIsbn.setText(bookId);
+			inputSummary.setText(summary);
 		}
 		presenter.askAuthorName();
 		checkToEnableButton();
@@ -267,6 +280,16 @@ public class EditBookView implements EditBookViewInterface {
 	@Override
 	public void setAuthorName(String authorName) {
 		this.authorName.setText(authorName);
+	}
+
+	@Override
+	public void setBaseIsbn(String baseIsbn) {
+		this.baseIsbn = baseIsbn;
+	}
+
+	@Override
+	public void setBookId(int idBook) {
+		this.bookId = String.valueOf(idBook);
 	}
 
 	@Override
@@ -287,9 +310,9 @@ public class EditBookView implements EditBookViewInterface {
 		}
 	}
 
-	private void createBook(String title, String isbn, String summary) {
+	private void createBook(String title, String summary, String isbn) {
 		if (bookCreation) {
-			presenter.createBook(title, isbn, summary, imageChosen == null ? "" : imageChosen.getAbsolutePath());
+			presenter.createBook(title, summary, isbn, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		} else {
 			presenter.editBook(title, summary, isbn, imageChosen == null ? "" : imageChosen.getAbsolutePath());
 		}
@@ -297,5 +320,20 @@ public class EditBookView implements EditBookViewInterface {
 
 	private String getFullIsbn() {
 		return baseIsbnLabel.getText() + inputIsbn.getText() + isbnControlLabel.getText();
+	}
+
+	@Override
+	public void setSummary(String metadata) {
+		this.summary = metadata;
+	}
+
+	@Override
+	public void setImagePath(String metadata) {
+		this.imagePath = metadata;
+	}
+
+	@Override
+	public void setTitle(String metadata) {
+		this.title = metadata;
 	}
 }

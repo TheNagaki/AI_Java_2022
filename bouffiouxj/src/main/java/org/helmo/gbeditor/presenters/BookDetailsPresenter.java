@@ -2,11 +2,14 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
-import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
+
+import java.util.LinkedHashSet;
 
 /**
  * BookDetailsPresenter is the presenter for the book details view.
@@ -40,7 +43,6 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 */
 	public void setView(BookDetailsViewInterface view) {
 		this.view = view;
-		view.getStage().setOnCloseRequest(event -> closeView());
 	}
 
 	/**
@@ -49,8 +51,15 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param book the book to display
 	 */
 	public void displayBook(Book book) {
-		this.bookDisplayed = book;
-		view.displayBook(book);
+		if (book != null) {
+			this.bookDisplayed = book;
+			askIsbn();
+			askTitle();
+			askSummary();
+			askImagePath();
+			askPages();
+			view.displayBook();
+		}
 	}
 
 	/**
@@ -63,13 +72,17 @@ public class BookDetailsPresenter implements PresenterInterface {
 
 	/**
 	 * This method is used to delete a book from the current author
-	 *
-	 * @return true if the book has been deleted, false otherwise
 	 */
-	public boolean deleteBook() {
-		return engine.deleteBook(bookDisplayed);
+	public void deleteBook() {
+		if (bookDisplayed != null) {
+			if (engine.deleteBook(bookDisplayed)) {
+				view.changeView(ViewsEnum.MAIN);
+			} else {
+				view.display("Erreur: Impossible de supprimer le livre");
+			}
+			closeView();
+		}
 	}
-
 
 	/**
 	 * This method is used to tell the MainPresenter to create a new book or edit an existing one
@@ -87,7 +100,8 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 */
 	public void addPage(String text) {
 		engine.addPage(bookDisplayed, text);
-		view.refresh();
+		askPages();
+		displayBook(bookDisplayed);
 	}
 
 	/**
@@ -95,9 +109,12 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 *
 	 * @param selectedPage the page to delete
 	 */
-	public void removePage(Page selectedPage) {
-		engine.removePage(bookDisplayed, selectedPage);
-		view.refresh();
+	public void removePage(PageViewModel selectedPage) {
+		if (bookDisplayed.hasChoicesTo(selectedPage.toPage())) {
+			view.confirmPageSuppression(selectedPage);
+		} else {
+			confirmPageDeletion(selectedPage);
+		}
 	}
 
 	/**
@@ -105,7 +122,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 *
 	 * @param selectedItem the page to edit
 	 */
-	public void editPage(Page selectedItem) {
+	public void editPage(PageViewModel selectedItem) {
 		view.editPage(selectedItem);
 	}
 
@@ -114,34 +131,101 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 *
 	 * @param selected the page to save
 	 */
-	public void updatePage(Page selected) {
-		engine.updatePage(bookDisplayed, selected);
+	public void updatePage(PageViewModel selected) {
+		engine.updatePage(bookDisplayed, selected.toPage());
 		view.refresh();
 	}
 
 	/**
 	 * This method is used to ask the engine the number of a page
 	 *
-	 * @param value the page to get the number
+	 * @param selectedPage the page to get the number
 	 * @return the number of the page
 	 */
-	public int getPageNumber(Page value) {
-		return engine.getPageNumber(bookDisplayed, value);
+	public int getPageNumber(PageViewModel selectedPage) {
+		return engine.getPageNumber(bookDisplayed, selectedPage.toPage());
 	}
 
-	public String getTitle() {
-		return bookDisplayed.getMetadata(BookDataFields.TITLE);
+	/**
+	 * This method is used to ask the engine the title of the book
+	 */
+	public void askTitle() {
+		view.setTitle(bookDisplayed.getMetadata(BookDataFields.TITLE));
 	}
 
-	public String getImagePath() {
-		return bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH);
+	/**
+	 * This method is used to ask the engine the path to the image of the book
+	 */
+	public void askImagePath() {
+		view.setImagePath(bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH));
 	}
 
-	public String getIsbn() {
-		return bookDisplayed.getMetadata(BookDataFields.ISBN);
+	/**
+	 * This method is used to ask the engine the isbn of the book
+	 */
+	public void askIsbn() {
+		view.setIsbn(bookDisplayed.getMetadata(BookDataFields.BOOK_ISBN));
 	}
 
-	public String getSummary() {
-		return bookDisplayed.getMetadata(BookDataFields.SUMMARY);
+	/**
+	 * This method is used to communicate the Summary of the book in the view
+	 */
+	public void askSummary() {
+		view.setSummary(bookDisplayed.getMetadata(BookDataFields.SUMMARY));
+	}
+
+	/**
+	 * This method is used to confirm the deletion of a page
+	 *
+	 * @param selectedPage the page to delete
+	 */
+	public void confirmPageDeletion(PageViewModel selectedPage) {
+		engine.removePage(bookDisplayed, selectedPage.toPage());
+		view.refresh();
+	}
+
+	/**
+	 * This method is used to give the list of pages to the view
+	 */
+	public void askPages() {
+		view.setBookPages(bookDisplayed.getPages().stream().map(PageViewModel::new).collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll));
+	}
+
+	/**
+	 * This method is used to get a Page from the engine by its identifier
+	 *
+	 * @param id the identifier of the page
+	 * @return the page
+	 */
+	public PageViewModel getPageById(String id) {
+		return new PageViewModel(engine.getPageById(bookDisplayed, id));
+	}
+
+	/**
+	 * This method is used to set the main presenter of this presenter
+	 *
+	 * @param mainPresenter the main presenter
+	 */
+	public void setMainPresenter(MainPresenter mainPresenter) {
+		this.mainPresenter = mainPresenter;
+	}
+
+	/**
+	 * This method is used to set the Base view of this presenter's view
+	 *
+	 * @param view the view to set
+	 */
+	public void setBaseView(MainViewInterface view) {
+		this.baseView = view;
+		this.view.setBaseView(view);
+	}
+
+	/**
+	 * Gets the base view associated to this presenter
+	 *
+	 * @return the base view
+	 */
+	public MainViewInterface getBaseView() {
+		return baseView;
 	}
 }

@@ -136,11 +136,28 @@ public interface GBEInterface {
 	String getIsbnControlNum(String isbn);
 
 	/**
-	 *  This method is used to get the page number of a page in a book
+	 * This method is used to get the page number of a page in a book
 	 *
 	 * @param bookDisplayed the book in which the page is
-	 * @param value the page to get the number from
+	 * @param value         the page to get the number from
 	 * @return the page number of the page
 	 */
 	int getPageNumber(Book bookDisplayed, Page value);
+
+	/**
+	 * Gets a Page from its book by id
+	 *
+	 * @param bookDisplayed The book to get the page from
+	 * @param id            The id of the wanted page
+	 * @return the wanted page
+	 */
+	Page getPageById(Book bookDisplayed, String id);
+
+	/**
+	 * Gets a book from its isbn
+	 *
+	 * @param isbn the isbn of the wanted book
+	 * @return the wanted book
+	 */
+	Book getBook(String isbn);
 }

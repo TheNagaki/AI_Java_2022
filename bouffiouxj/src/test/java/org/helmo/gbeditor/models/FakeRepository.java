@@ -30,15 +30,6 @@ public class FakeRepository implements RepositoryInterface {
 	}
 
 	@Override
-	public boolean saveBook(Book book) {
-		if (!bookCollection.contains(book)) {
-			bookCollection.add(book);
-			return true;
-		}
-		return false;
-	}
-
-	@Override
 	public boolean deleteBook(Book book) {
 		if (bookCollection.contains(book)) {
 			bookCollection.remove(book);
