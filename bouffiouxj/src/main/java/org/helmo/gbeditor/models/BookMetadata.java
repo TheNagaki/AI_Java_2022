@@ -5,7 +5,11 @@ import org.helmo.gbeditor.models.exceptions.IllegalAuthorException;
 import org.helmo.gbeditor.models.exceptions.IllegalBookSummaryException;
 import org.helmo.gbeditor.models.exceptions.IllegalBookTitleException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import static org.helmo.gbeditor.models.BookDataFields.*;
 
 /**
  * BookMetadata class which represents the metadata of a book
@@ -14,31 +18,29 @@ public class BookMetadata {
 
 	protected static final int MAX_SUMMARY = 500;
 	protected static final int MAX_TITLE = 150;
-
 	public static final int LINGUISTIC_GROUP = 2;
-	private String title;
 	private final Author author;
 	private ISBN isbn;
-	private String summary;
-	private String imagePath;
+
+	private final Map<BookDataFields, String> metadata = new LinkedHashMap<>();
 
 	/**
 	 * Constructor of the BookMetadata class
-	 * @param title the title of the book
-	 * @param author the author of the book
-	 * @param isbn the isbn of the book
-	 * @param summary the summary of the book
+	 *
+	 * @param title     the title of the book
+	 * @param author    the author of the book
+	 * @param isbn      the isbn of the book
+	 * @param summary   the summary of the book
 	 * @param imagePath the path of the image of the book
 	 */
 	public BookMetadata(String title, Author author, String isbn, String summary, String imagePath) {
-		checkTitle(title);
-		this.title = title;
+		setTitle(title);
 		checkAuthor(author);
 		this.author = author;
-		this.isbn = isbn.isBlank() ? ISBN.createNewISBN(LINGUISTIC_GROUP, author.getMatricule()) : new ISBN(isbn);
-		checkSummary(summary);
-		this.summary = summary;
-		this.imagePath = imagePath == null ? "" : imagePath;
+		metadata.put(AUTHOR_MATRICULE, String.format("%06d", author.getIdentifier()));
+		setIsbn(isbn);
+		setSummary(summary);
+		metadata.put(IMAGE_PATH, imagePath == null ? "" : imagePath);
 	}
 
 	/**
@@ -48,20 +50,7 @@ public class BookMetadata {
 	 * @return the value of the field
 	 */
 	public String getField(BookDataFields fieldName) {
-		switch (fieldName) {
-			case TITLE:
-				return title;
-			case AUTHOR_MATRICULE:
-				return author.getMatricule() + "";
-			case SUMMARY:
-				return summary;
-			case IMAGE_PATH:
-				return imagePath;
-			case ISBN:
-				return isbn.toString();
-			default:
-				throw new FieldNotValidException(fieldName);
-		}
+		return metadata.get(fieldName);
 	}
 
 	public Author getAuthor() {
@@ -77,22 +66,35 @@ public class BookMetadata {
 	public void setField(BookDataFields fieldName, String value) {
 		switch (fieldName) {
 			case TITLE:
-				checkTitle(value);
-				title = value;
+				setTitle(value);
 				break;
 			case SUMMARY:
-				checkSummary(value);
-				summary = value;
+				setSummary(value);
 				break;
-			case ISBN:
-				isbn = new ISBN(value);
+			case BOOK_ISBN:
+				setIsbn(value);
 				break;
 			case IMAGE_PATH:
-				imagePath = value;
+				metadata.put(fieldName, value == null ? "" : value);
 				break;
 			default:
 				throw new FieldNotValidException(fieldName);
 		}
+	}
+
+	private void setIsbn(String value) {
+		isbn = value == null || value.isBlank() ? ISBN.createNewISBN(LINGUISTIC_GROUP, author.getIdentifier()) : new ISBN(value);
+		metadata.put(BOOK_ISBN, isbn.toString());
+	}
+
+	private void setSummary(String value) {
+		checkSummary(value);
+		metadata.put(SUMMARY, value);
+	}
+
+	private void setTitle(String value) {
+		checkTitle(value);
+		metadata.put(TITLE, value);
 	}
 
 	private static void checkTitle(String title) {
@@ -102,7 +104,7 @@ public class BookMetadata {
 	}
 
 	private static void checkSummary(String summary) {
-		if (summary == null || summary.length() > MAX_SUMMARY || summary.length() < 1) {
+		if (summary == null || summary.length() > MAX_SUMMARY || summary.length() < 1 || summary.isBlank()) {
 			throw new IllegalBookSummaryException();
 		}
 	}
@@ -115,8 +117,12 @@ public class BookMetadata {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		BookMetadata that = (BookMetadata) o;
 		return isbn.equals(that.isbn);
 	}
@@ -133,11 +139,11 @@ public class BookMetadata {
 	@Override
 	public String toString() {
 		return "BookMetadata{" +
-				"title='" + title + '\'' +
+				"title='" + metadata.get(TITLE) + '\'' +
 				", author=" + author +
 				", isbn=" + isbn +
-				", summary='" + summary + '\'' +
-				", imagePath='" + imagePath + '\'' +
+				", summary='" + metadata.get(SUMMARY) + '\'' +
+				", imagePath='" + metadata.get(IMAGE_PATH) + '\'' +
 				'}';
 	}
 }

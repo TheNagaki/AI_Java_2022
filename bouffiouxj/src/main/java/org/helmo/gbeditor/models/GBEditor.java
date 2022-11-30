@@ -87,7 +87,7 @@ public class GBEditor implements GBEInterface {
 			if (books.remove(book)) {
 				book.setMetadata(BookDataFields.TITLE, title);
 				book.setMetadata(BookDataFields.SUMMARY, summary);
-				book.setMetadata(BookDataFields.ISBN, isbn);
+				book.setMetadata(BookDataFields.BOOK_ISBN, isbn);
 				books.add(book);
 				repository.saveBooks(books);
 			}

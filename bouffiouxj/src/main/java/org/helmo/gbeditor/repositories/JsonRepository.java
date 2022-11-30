@@ -53,9 +53,9 @@ public class JsonRepository implements RepositoryInterface {
 					Arrays.asList(gson.fromJson(reader, Book[].class)).forEach(bLoaded -> {
 						Book book;
 						try {
-							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(ISBN), bLoaded.getMetadata(IMAGE_PATH));
+							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(BOOK_ISBN), bLoaded.getMetadata(IMAGE_PATH));
 						} catch (IllegalArgumentException e) {
-							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(ISBN));
+							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), bLoaded.getMetadata(BOOK_ISBN));
 						}
 						while (bookList.contains(book)) {
 							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), "", bLoaded.getMetadata(IMAGE_PATH));
