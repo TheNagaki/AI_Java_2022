@@ -1,5 +1,7 @@
 package org.helmo.gbeditor.models;
 
+import org.helmo.gbeditor.models.exceptions.IllegalBookSummaryException;
+import org.helmo.gbeditor.models.exceptions.IllegalBookTitleException;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +12,6 @@ import java.util.Set;
 
 import static org.helmo.gbeditor.models.BookDataFields.SUMMARY;
 import static org.helmo.gbeditor.models.BookDataFields.TITLE;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -62,7 +63,7 @@ class GBEditorTest {
 	@Test
 	void createBookWorksWithNormalBehavior() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
-		gbe.createBook("title", "summary", ISBN.createNewISBN(2, authorA.getMatricule()).toString(), "");
+		gbe.createBook("title", "summary", ISBN.createNewISBN(2, authorA.getIdentifier()).toString(), "");
 		assertEquals(3, gbe.getBooksFromCurrentAuthor().size());
 	}
 
@@ -115,14 +116,14 @@ class GBEditorTest {
 	void updateBookReturnsExceptionMessageOnEmptyTitle() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
-		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "", "new summary", "", ""));
+		assertEquals(new IllegalBookTitleException().getMessage(), gbe.updateBook(book, "", "new summary", "", ""));
 	}
 
 	@Test
 	void updateBookReturnsExceptionMessageOnEmptySummary() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
 		Book book = booksFromAuthorA.iterator().next();
-		assertThrows(IllegalArgumentException.class, () -> gbe.updateBook(book, "new title", "", "", ""));
+		assertEquals(new IllegalBookSummaryException().getMessage(), gbe.updateBook(book, "new title", "", "", ""));
 	}
 
 	@Test
@@ -163,7 +164,7 @@ class GBEditorTest {
 	@Test
 	void presetISBN() {
 		gbe.connect(authorA.getName(), authorA.getFirstName());
-		assertEquals(String.format("2-%d-", authorA.getMatricule()), String.format("2-%d-", gbe.presetISBN()[1]));
+		assertEquals(String.format("2-%d-", authorA.getIdentifier()), String.format("2-%d-", gbe.presetISBN()[1]));
 	}
 
 	@Test

@@ -122,7 +122,11 @@ public class GBEditor implements GBEInterface {
 
 	@Override
 	public int[] presetISBN() {
-		return new int[]{LINGUISTIC_GROUP, currentAuthor.getMatricule()};
+		if (currentAuthor != null) {
+			return new int[]{LINGUISTIC_GROUP, currentAuthor.getIdentifier()};
+		} else {
+			return null;
+		}
 	}
 
 	@Override

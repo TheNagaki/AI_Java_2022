@@ -4,10 +4,7 @@ import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.helmo.gbeditor.models.BookDataFields.*;
 
@@ -82,5 +79,18 @@ public class BookViewModel {
 			b.addPage(p.toPage());
 		}
 		return b;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		BookViewModel that = (BookViewModel) o;
+		return metadata.get(BOOK_ISBN).equals(that.metadata.get(BOOK_ISBN));
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(metadata.get(BOOK_ISBN));
 	}
 }

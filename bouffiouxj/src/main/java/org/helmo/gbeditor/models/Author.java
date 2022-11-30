@@ -10,8 +10,7 @@ import java.util.Objects;
 public class Author {
 	private final String name;
 	private final String firstName;
-	private final int matricule;
-
+	private final int identifier;
 	private static final int MATRICULE_LENGTH = 6;
 
 	/**
@@ -24,7 +23,7 @@ public class Author {
 		checkValidity(name, firstName);
 		this.name = name;
 		this.firstName = firstName;
-		this.matricule = computeMatricule();
+		this.identifier = computeIdentifier();
 	}
 
 	private static void checkValidity(String name, String firstName) {
@@ -33,7 +32,7 @@ public class Author {
 		}
 	}
 
-	private int computeMatricule() {
+	private int computeIdentifier() {
 		return (int) (Math.random() * 1000000);
 	}
 
@@ -42,16 +41,16 @@ public class Author {
 	 *
 	 * @param name      the name of the author
 	 * @param firstName the first name of the author
-	 * @param matricule the matricule of the author
+	 * @param identifier the matricule of the author
 	 */
-	public Author(String name, String firstName, int matricule) {
+	public Author(String name, String firstName, int identifier) {
 		checkValidity(name, firstName);
 		this.name = name;
 		this.firstName = firstName;
-		if ((String.format("%d", matricule)).length() != MATRICULE_LENGTH) {
+		if ((String.format("%06d", identifier)).length() != MATRICULE_LENGTH || identifier < 0) {
 			throw new IllegalArgumentException("Matricule must be 6 digits");
 		}
-		this.matricule = matricule;
+		this.identifier = identifier;
 	}
 
 	/**
@@ -84,8 +83,8 @@ public class Author {
 		return name;
 	}
 
-	public int getMatricule() {
-		return matricule;
+	public int getIdentifier() {
+		return identifier;
 	}
 
 	public String getFirstName() {
@@ -97,7 +96,7 @@ public class Author {
 		return "Author{" +
 				"name='" + name + '\'' +
 				", firstName='" + firstName + '\'' +
-				", matricule=" + matricule +
+				", matricule=" + identifier +
 				'}';
 	}
 }

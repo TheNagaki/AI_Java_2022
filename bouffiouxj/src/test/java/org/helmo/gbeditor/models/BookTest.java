@@ -31,6 +31,26 @@ class BookTest {
 	}
 
 	@Test
+	void canCreateBook() {
+		assertNotNull(book);
+	}
+
+	@Test
+	void canCreateBookWithNullIsbn() {
+		assertDoesNotThrow(() -> new Book(title, author, summary, null));
+	}
+
+	@Test
+	void canCreateBookWithEmptyIsbn() {
+		assertDoesNotThrow(() -> new Book(title, author, summary, ""));
+	}
+
+	@Test
+	void canCreateBookWithBlankIsbn() {
+		assertDoesNotThrow(() -> new Book(title, author, summary, " "));
+	}
+
+	@Test
 	void createBookWithNullTitleThrowsException() {
 		assertThrows(IllegalArgumentException.class, () -> new Book(null, author, summary, "", imagePath));
 	}
@@ -151,6 +171,11 @@ class BookTest {
 	}
 
 	@Test
+	void testBookDoesNotEqualsNull() {
+		assertNotEquals(book, null);
+	}
+
+	@Test
 	void setImagePath() {
 		book.setMetadata(IMAGE_PATH, "newImagePath");
 		assertEquals("newImagePath", book.getMetadata(IMAGE_PATH));
@@ -158,13 +183,12 @@ class BookTest {
 
 	@Test
 	void setNullImagePathDoesNotThrowException() {
-		assertDoesNotThrow(() -> book.setMetadata(IMAGE_PATH, null));
-		assertEquals("", book.getMetadata(IMAGE_PATH));
+		assertDoesNotThrow(() -> book.setMetadata(IMAGE_PATH, null), "Setting null image path should not throw exception");
+		assertEquals("", book.getMetadata(IMAGE_PATH), "Setting null image path should set empty string");
 	}
 
 	@Test
 	void addPage() {
-
 		book.addPage(page);
 		assertTrue(book.getPages().contains(page));
 	}
@@ -197,12 +221,8 @@ class BookTest {
 	void testToString() {
 		var author = new Author(name, firstName);
 		var book2 = new Book(title, author, summary, "2-689305-96-0", "");
-		assertEquals("Book{title='title',\n" +
-				" author=org.helmo.gbeditor.models.Author@e26c3f1,\n" +
-				" isbn=2-689305-96-0,\n" +
-				" summary='summary',\n" +
-				" imagePath='',\n" +
-				" pages=[]}", book2.toString());
+		assertEquals("Book{BookMetadata{title='title', author=" + author + ", isbn=2-689305-96-0, summary='summary', imagePath=''} pages=[]}",
+				book2.toString());
 	}
 
 	@Test
@@ -224,6 +244,66 @@ class BookTest {
 	}
 
 	@Test
+	void updateAPageRedirectsChoicesToTheNewPage() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		book.addPage(page2);
+		page.addChoice("choice", page2);
+		page2.setContent("newContent");
+		book.updatePage(page2);
+		assertEquals(page2, page.getChoices().get("choice"));
+	}
+
+	@Test
+	void removingAPageDeletesAllChoicesToThisPage() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		book.addPage(page2);
+		page.addChoice("choice", page2);
+		book.removePage(page2);
+		assertEquals(0, page.getChoices().size());
+	}
+
+	@Test
+	void aBookContainsChoicesToAPage() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		book.addPage(page2);
+		page.addChoice("choice", page2);
+		assertTrue(book.hasChoicesTo(page2));
+	}
+
+	@Test
+	void aBookDoesNotContainChoicesToANullPage() {
+		book.addPage(page);
+		assertFalse(book.hasChoicesTo(null));
+	}
+
+	@Test
+	void aBookDoesNotContainChoicesToAPageNotInThisBook() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		assertFalse(book.hasChoicesTo(page2));
+	}
+
+	@Test
+	void aBookDoesNotContainChoicesToAPageIfThereSNoChoices() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		book.addPage(page2);
+		assertFalse(book.hasChoicesTo(page2));
+	}
+
+	@Test
+	void aBookDoesNotContainChoicesToAPageIfThereSNoChoicesToIt() {
+		var page2 = new Page("content2");
+		book.addPage(page);
+		page2.addChoice("choice", page);
+		book.addPage(page2);
+		assertFalse(book.hasChoicesTo(page2));
+	}
+
+	@Test
 	void getPageNumber() {
 		book.addPage(page);
 		assertEquals(1, book.getPageNumber(page));
@@ -237,5 +317,31 @@ class BookTest {
 	@Test
 	void getPageNumberWithUnknownPageDoesNotThrowException() {
 		assertThrows(IllegalArgumentException.class, () -> book.getPageNumber(page));
+	}
+
+	@Test
+	void getPagesWithNullIdThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> book.getPageById(null));
+	}
+
+	@Test
+	void getPagesWithUnknownPageDoesNotThrowExceptionAndReturnsNull() {
+		assertDoesNotThrow(() -> book.getPageById("unknownId"));
+	}
+
+	@Test
+	void getPageById() {
+		book.addPage(page);
+		assertEquals(page, book.getPageById(page.getId()));
+	}
+
+	@Test
+	void getPagesWithEmptyIdThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> book.getPageById(""));
+	}
+
+	@Test
+	void getPagesWithBlankIdThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> book.getPageById(" "));
 	}
 }

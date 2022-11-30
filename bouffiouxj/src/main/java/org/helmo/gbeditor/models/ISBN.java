@@ -54,7 +54,7 @@ public class ISBN {
 	 * @return The check sum of the ISBN.
 	 */
 	public static String computeCheckSum(String isbn) {
-		var isbnWoutControl = "\\d-?\\d{0,6}-?\\d{0,2}";
+		var isbnWoutControl = "\\d-\\d{6}-\\d{2}";
 		if (Pattern.matches(isbnWoutControl, isbn)) {
 			var splittedS = isbn.split("-");
 			var splittedI = new int[3];
@@ -110,6 +110,9 @@ public class ISBN {
 	 * @param isbn The string representation of the ISBN.
 	 */
 	public ISBN(String isbn) {
+		if (isbn == null || isbn.isBlank()) {
+			throw new IllegalIsbnFormatException();
+		}
 		String[] values;
 		values = splitIsbn(isbn);
 		this.linguisticGroup = Integer.parseInt(values[0]);
@@ -208,8 +211,12 @@ public class ISBN {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		ISBN isbn = (ISBN) o;
 		return linguisticGroup == isbn.linguisticGroup && idAuthor == isbn.idAuthor && idBook == isbn.idBook && checkSum == isbn.checkSum;
 	}
