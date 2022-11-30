@@ -182,12 +182,6 @@ public class Book {
 		}));
 	}
 
-	private List<Page> orderPages() {
-		var sortedPages = new ArrayList<>(pages);
-		sortedPages.sort(Comparator.comparing(page -> page.toString().length())); //TODO: make a better comparator
-		return sortedPages;
-	}
-
 	/**
 	 * This method is used to get the number of a page in the book
 	 *
