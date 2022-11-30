@@ -24,6 +24,7 @@ public class App extends Application {
 
 	/**
 	 * Starts the application.
+	 *
 	 * @param args The arguments to pass to the application.
 	 */
 	public static void main(String[] args) {
@@ -33,7 +34,9 @@ public class App extends Application {
 	private Map<ViewsEnum, ViewInterface> initViews(GBEInterface editor) {
 		ConnexionPresenter connexionPr = new ConnexionPresenter(editor);
 		ConnexionView connexionVw = new ConnexionView(connexionPr);
-		MainPresenter mainPr = new MainPresenter(editor);
+		BookDetailsPresenter bookDetailsPr = new BookDetailsPresenter(editor);
+		new BookDetailsView(bookDetailsPr);
+		MainPresenter mainPr = new MainPresenter(editor, bookDetailsPr);
 		MainView mainVw = new MainView(mainPr);
 		EditBookPresenter createBookPr = new EditBookPresenter(editor);
 		EditBookView createBookVw = new EditBookView(createBookPr);

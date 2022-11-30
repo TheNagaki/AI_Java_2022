@@ -1,12 +1,14 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
-import org.helmo.gbeditor.views.BookDetailsView;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The MainPresenter is the presenter of the main view
@@ -15,26 +17,32 @@ import org.helmo.gbeditor.views.BookDetailsView;
 public class MainPresenter implements PresenterInterface {
 	private final GBEInterface engine;
 	private MainViewInterface view;
-
 	private Book bookShown = null;
-
-	private BookDetailsPresenter detailsPresenter = null;
+	private final BookDetailsPresenter detailsPresenter;
+	private boolean bookDetailsOpened = false;
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
 	 *
 	 * @param gbEditor the logic of the application
 	 */
-	public MainPresenter(GBEInterface gbEditor) {
+	public MainPresenter(GBEInterface gbEditor, BookDetailsPresenter detailsPresenter) {
 		this.engine = gbEditor;
+		this.detailsPresenter = detailsPresenter;
+		detailsPresenter.setMainPresenter(this);
 	}
 
 	/**
 	 * This method is used to get all the books created by the author
 	 */
 	public void askBooksFromAuthor() {
-		if (engine.getBooksFromCurrentAuthor() != null) {
-			view.setBooksFromAuthor(engine.getBooksFromCurrentAuthor());
+		var booksFromAuthor = engine.getBooksFromCurrentAuthor();
+		if (booksFromAuthor != null && !booksFromAuthor.isEmpty()) {
+			Set<BookViewModel> books = new HashSet<>();
+			for (Book b : booksFromAuthor) {
+				books.add(new BookViewModel(b));
+			}
+			view.setBooksFromAuthor(books);
 		}
 	}
 
@@ -42,9 +50,17 @@ public class MainPresenter implements PresenterInterface {
 	 * This method is used by the view to get the current author name
 	 */
 	public void askAuthorName() {
-		view.setAuthorName(engine.getAuthorName());
+		var name = engine.getAuthorName();
+		if (name != null && !name.isBlank()) {
+			view.setAuthorName(name);
+		}
 	}
 
+	/**
+	 * This method is used to set the view of the presenter
+	 *
+	 * @param view the view to set
+	 */
 	public void setView(MainViewInterface view) {
 		this.view = view;
 	}
@@ -59,27 +75,28 @@ public class MainPresenter implements PresenterInterface {
 	 *
 	 * @param book the book to display
 	 */
-	public void bookClicked(Book book) {
-		if (bookShown == null || !bookShown.equals(book)) {
-			if (detailsPresenter == null) {
-				var presenter = new BookDetailsPresenter(engine, this);
-				var detailsView = new BookDetailsView(presenter);
-				detailsView.setBaseView(view);
-				presenter.displayBook(book);
-				detailsPresenter = presenter;
-			} else {
-				detailsPresenter.displayBook(book);
+	public void bookClicked(BookViewModel book) {
+		setBaseViewOfDetailsPresenter();
+		if (!bookDetailsOpened || !bookShown.equals(book.toBook())) {
+			bookShown = engine.getBook(book.getIsbn());
+			if (bookShown != null) {
+				detailsPresenter.displayBook(bookShown);
+				bookDetailsOpened = true;
 			}
-			bookShown = book;
+		}
+	}
+
+	private void setBaseViewOfDetailsPresenter() {
+		if (detailsPresenter.getBaseView() == null || detailsPresenter.getBaseView() != view) {
+			detailsPresenter.setBaseView(view);
 		}
 	}
 
 	/**
 	 * This method is used to know when the book details view is closed
 	 */
-	public void BookDetailsClosed() {
-		bookShown = null;
-		detailsPresenter = null;
+	public void bookDetailsClosed() {
+		this.bookDetailsOpened = false;
 	}
 
 	/**
@@ -96,17 +113,5 @@ public class MainPresenter implements PresenterInterface {
 	 */
 	public void onQuit_Click() {
 		view.close();
-	}
-
-	public String getTitle(Book b) {
-		return b.getMetadata(BookDataFields.TITLE);
-	}
-
-	public String getIsbn(Book b) {
-		return b.getMetadata(BookDataFields.ISBN);
-	}
-
-	public String getImagePath(Book book) {
-		return book.getMetadata(BookDataFields.IMAGE_PATH);
 	}
 }

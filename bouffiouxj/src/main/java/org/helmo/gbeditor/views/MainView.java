@@ -11,19 +11,22 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Window;
-import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.presenters.MainPresenter;
+import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
-import org.helmo.gbeditor.presenters.ViewsEnum;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Main view of the application
  * It displays all the books of the current author and allows to create a new one
  * It displays the book details in a popup when the user clicks on a book
- * In this popup, the user can edit the book or delete it
+ * In this popup, the user can edit the book or delete it.
  * It also allows the user to add pages to the book
  */
 public class MainView implements MainViewInterface {
@@ -33,7 +36,7 @@ public class MainView implements MainViewInterface {
 	private final GridPane gridPane = new GridPane();
 	private final BorderPane topPane = new BorderPane();
 	private final BorderPane mainPane = new BorderPane();
-	private Set<Book> booksFromAuthor = new LinkedHashSet<>();
+	private Set<BookViewModel> booksFromAuthor = new LinkedHashSet<>();
 
 	/**
 	 * Constructor of the MainView class
@@ -48,7 +51,7 @@ public class MainView implements MainViewInterface {
 
 	private void initView() {
 		presenter.askBooksFromAuthor();
-		Iterator<Book> ite = booksFromAuthor.iterator();
+		Iterator<BookViewModel> ite = booksFromAuthor.iterator();
 		final int ITEMS_PER_ROW = 4;
 		final int NUMBER_OF_ROWS = 2;
 		final int BOOK_BOX_SIZE = 3;
@@ -56,7 +59,7 @@ public class MainView implements MainViewInterface {
 			for (int i = 0; ite.hasNext() && i < booksFromAuthor.size(); i++) {
 				var b = ite.next();
 				var box = new BorderPane();
-				var title = new Label(presenter.getTitle(b));
+				var title = new Label(b.getTitle());
 				title.getStyleClass().add("thumbnail-title");
 				title.setAlignment(Pos.CENTER);
 				box.setTop(title);
@@ -65,7 +68,7 @@ public class MainView implements MainViewInterface {
 
 				var bottomBox = new HBox();
 				bottomBox.setAlignment(Pos.CENTER);
-				var isbn = new Label(presenter.getIsbn(b));
+				var isbn = new Label(b.getIsbn());
 				isbn.getStyleClass().add("thumbnail-isbn");
 				bottomBox.getChildren().add(isbn);
 				box.setBottom(bottomBox);
@@ -153,10 +156,10 @@ public class MainView implements MainViewInterface {
 		return baseView.getStage();
 	}
 
-	private ImageView setBookImage(Book book, int width) {
+	private ImageView setBookImage(BookViewModel book, int width) {
 		var iv = new ImageView(new Image(Objects.requireNonNull(getClass().getResource("/placeholder.png")).toExternalForm()));
-		if (presenter.getImagePath(book) != null && !presenter.getImagePath(book).isEmpty()) {
-			iv = new ImageView(new Image(presenter.getImagePath(book)));
+		if (book.getImagePath() != null && !book.getImagePath().isEmpty()) {
+			iv = new ImageView(new Image(book.getImagePath()));
 		}
 		iv.setFitWidth(width);
 		iv.setPreserveRatio(true);
@@ -169,7 +172,7 @@ public class MainView implements MainViewInterface {
 	 * @param books the books to set
 	 */
 	@Override
-	public void setBooksFromAuthor(Set<Book> books) {
+	public void setBooksFromAuthor(Set<BookViewModel> books) {
 		if (books != null) {
 			booksFromAuthor = books;
 		}

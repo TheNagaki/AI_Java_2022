@@ -12,21 +12,20 @@ import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
  * BookDetailsPresenter is the presenter for the book details view.
  * It is used to display the details of a book.
  */
-public class BookDetailsPresenter implements Presenter {
-	private final MainPresenter mainPresenter;
+public class BookDetailsPresenter implements PresenterInterface {
+	private MainPresenter mainPresenter;
 	private BookDetailsViewInterface view;
 	private final GBEInterface engine;
 	private Book bookDisplayed;
+	private MainViewInterface baseView;
 
 	/**
 	 * Constructor of the presenter with the engine and the main presenter
 	 *
-	 * @param engine        the logic of the application
-	 * @param mainPresenter the main presenter of the application
+	 * @param engine the logic of the application
 	 */
-	public BookDetailsPresenter(GBEInterface engine, MainPresenter mainPresenter) {
+	public BookDetailsPresenter(GBEInterface engine) {
 		this.engine = engine;
-		this.mainPresenter = mainPresenter;
 	}
 
 	@Override
@@ -58,7 +57,7 @@ public class BookDetailsPresenter implements Presenter {
 	 * This method is used to close the view
 	 */
 	public void closeView() {
-		mainPresenter.BookDetailsClosed();
+		mainPresenter.bookDetailsClosed();
 		view.close();
 	}
 

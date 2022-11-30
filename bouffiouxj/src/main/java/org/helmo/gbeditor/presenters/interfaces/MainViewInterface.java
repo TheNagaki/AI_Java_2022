@@ -1,6 +1,6 @@
 package org.helmo.gbeditor.presenters.interfaces;
 
-import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 
 import java.util.Set;
 
@@ -13,7 +13,7 @@ public interface MainViewInterface extends ViewInterface {
 	/**
 	 * This method is used to display the list of books of the current author
 	 */
-	void setBooksFromAuthor(Set<Book> books);
+	void setBooksFromAuthor(Set<BookViewModel> books);
 	/**
 	 * Set the name of the author in the view
 	 *
