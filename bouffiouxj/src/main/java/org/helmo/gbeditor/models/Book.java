@@ -1,6 +1,9 @@
 package org.helmo.gbeditor.models;
 
-import org.helmo.gbeditor.models.exceptions.*;
+import org.helmo.gbeditor.models.exceptions.CannotUpdatePublishedBookException;
+import org.helmo.gbeditor.models.exceptions.IllegalPageException;
+import org.helmo.gbeditor.models.exceptions.NotEnoughPagesException;
+import org.helmo.gbeditor.models.exceptions.PageNotInBookException;
 
 import java.util.*;
 
@@ -9,7 +12,8 @@ import java.util.*;
  */
 public class Book {
 	private final BookMetadata metadata;
-	private final Set<Page> pages = new LinkedHashSet<>();
+	private final List<Page> pages = new ArrayList<>();
+	private boolean isPublished = false;
 
 	/**
 	 * Constructor of the Book class (computes the ISBN later)
@@ -54,7 +58,10 @@ public class Book {
 	 * @param value the value to set
 	 */
 	public void setMetadata(BookDataFields field, String value) {
-		this.metadata.setField(field, value);
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
+		metadata.setField(field, value);
 	}
 
 	/**
@@ -99,6 +106,9 @@ public class Book {
 	 * @param page the page to add
 	 */
 	public void addPage(Page page) {
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
 		if (page != null) {
 			pages.add(page);
 		} else {
@@ -110,6 +120,9 @@ public class Book {
 	 * Removes a page from the book (if it is in the book)
 	 */
 	public void removePage(Page page) {
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
 		pages.remove(page);
 		removeChoicesToPage(page);
 	}
@@ -130,8 +143,7 @@ public class Book {
 	 */
 	@Override
 	public String toString() {
-		return String.format("Book{%s" + " pages=%s}",
-				metadata, pages);
+		return String.format("Book{%s" + " pages=%s}", metadata, pages);
 	}
 
 	/**
@@ -140,6 +152,9 @@ public class Book {
 	 * @param page the page to set
 	 */
 	public void updatePage(Page page) {
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
 		var oldPages = new HashSet<>(pages);
 		for (Page p : oldPages) {
 			if (p.equals(page)) {
@@ -152,21 +167,19 @@ public class Book {
 	}
 
 	private void removeChoicesToPage(Page page) {
-		pages.stream().filter(p -> p.getChoices().containsValue(page))
-				.forEach(p -> p.getChoices().forEach((k, v) -> {
-					if (v.equals(page)) {
-						p.removeChoice(k);
-					}
-				}));
+		pages.stream().filter(p -> p.getChoices().containsValue(page)).forEach(p -> p.getChoices().forEach((k, v) -> {
+			if (v.equals(page)) {
+				p.removeChoice(k);
+			}
+		}));
 	}
 
 	private void updateChoicesToPage(Page page) {
-		pages.stream().filter(p -> p.getChoices().containsValue(page))
-				.forEach(p -> p.getChoices().forEach((k, v) -> {
-					if (v.equals(page)) {
-						p.updateChoice(k, page);
-					}
-				}));
+		pages.stream().filter(p -> p.getChoices().containsValue(page)).forEach(p -> p.getChoices().forEach((k, v) -> {
+			if (v.equals(page)) {
+				p.updateChoice(k, page);
+			}
+		}));
 	}
 
 	private List<Page> orderPages() {
@@ -182,11 +195,8 @@ public class Book {
 	 * @return the number of the page corresponding to its position in the book (starting at 1)
 	 */
 	public int getPageNumber(Page page) {
-		//Le contains fait planter mon app...
-		for (Page p : pages) {
-			if (p.equals(page)) {
-				return orderPages().indexOf(p) + 1;
-			}
+		if (pages.contains(page)) {
+			return pages.indexOf(page) + 1;
 		}
 		throw new PageNotInBookException();
 	}
@@ -198,6 +208,9 @@ public class Book {
 	 * @return the page with the given id
 	 */
 	public Page getPageById(String id) {
+		if (id == null || id.isBlank()) {
+			throw new IllegalArgumentException();
+		}
 		for (var p : pages) {
 			if (Objects.equals(p.getId(), id)) {
 				return p;
@@ -213,5 +226,34 @@ public class Book {
 	 */
 	public ISBN getIsbn() {
 		return this.metadata.getIsbn();
+	}
+
+	/**
+	 * Determines if at least one page of the book has a choice to the given page
+	 *
+	 * @param selectedPage the page to check
+	 * @return true if at least one page has a choice to the given page, false otherwise
+	 */
+	public boolean hasChoicesTo(Page selectedPage) {
+		return pages.stream().anyMatch(p -> p.getChoices().containsValue(selectedPage));
+	}
+
+	/**
+	 * Gets if the book is published or not
+	 *
+	 * @return true if the book is published, false otherwise
+	 */
+	public boolean isPublished() {
+		return isPublished;
+	}
+
+	/**
+	 * Publishes the book
+	 */
+	public void publish() {
+		if (pages.size() < 1) {
+			throw new NotEnoughPagesException();
+		}
+		isPublished = true;
 	}
 }
