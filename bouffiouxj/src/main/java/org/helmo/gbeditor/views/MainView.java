@@ -139,6 +139,8 @@ public class MainView implements MainViewInterface {
 
 	@Override
 	public void refresh() {
+		presenter.askAuthorName();
+		presenter.askBooksFromAuthor();
 		gridPane.getChildren().clear();
 		initView();
 		display("");

@@ -3,6 +3,7 @@ package org.helmo.gbeditor.repositories;
 import com.google.gson.Gson;
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.repositories.exceptions.IllegalImageExtensionException;
 
@@ -30,6 +31,10 @@ public class JsonRepository implements RepositoryInterface {
 	private final Gson gson = new Gson();
 	private final Path bookPath;
 	private final Path imgDirPath;
+	private final Set<Book> allBooks;
+	private final Set<Author> authors;
+	private Author currentAuthor;
+	private Book bookToEdit;
 
 	/**
 	 * Constructor of the JsonRepository class.
@@ -41,10 +46,16 @@ public class JsonRepository implements RepositoryInterface {
 	public JsonRepository(Path bookPath, Path imgDirPath) {
 		this.bookPath = bookPath;
 		this.imgDirPath = imgDirPath;
+		this.allBooks = loadBooks();
+		this.authors = loadAuthors();
 	}
 
 	@Override
-	public Set<Book> loadBooks() {
+	public Set<Book> getBooks() {
+		return new LinkedHashSet<>(allBooks);
+	}
+
+	private Set<Book> loadBooks() {
 		if (Files.exists(bookPath) && Files.isRegularFile(bookPath) && Files.isReadable(bookPath)) {
 			try (BufferedReader reader = Files.newBufferedReader(bookPath)) {
 				List<Book> bookList = new LinkedList<>();
@@ -94,7 +105,7 @@ public class JsonRepository implements RepositoryInterface {
 
 	@Override
 	public boolean deleteBook(Book book) {
-		Set<Book> books = loadBooks();
+		Set<Book> books = getBooks();
 		for (Book b : books) {
 			if (b.equals(book)) {
 				books.remove(b);
@@ -105,7 +116,11 @@ public class JsonRepository implements RepositoryInterface {
 	}
 
 	@Override
-	public Set<Author> loadAuthors() {
+	public Set<Author> getAuthors() {
+		return new LinkedHashSet<>(authors);
+	}
+
+	private Set<Author> loadAuthors() {
 		Set<Book> books = loadBooks();
 		Set<Author> authors = new LinkedHashSet<>();
 		for (Book book : books) {
@@ -137,6 +152,49 @@ public class JsonRepository implements RepositoryInterface {
 		} catch (IOException e) {
 			return "";
 		}
+	}
+
+	@Override
+	public void setCurrentAuthor(Author author) {
+		this.currentAuthor = author;
+	}
+
+	@Override
+	public Author getCurrentAuthor() {
+		return currentAuthor;
+	}
+
+	@Override
+	public Book getBookToEdit() {
+		return this.bookToEdit;
+	}
+
+	@Override
+	public void setBookToEdit(Book book) {
+		if (book != null) {
+			this.bookToEdit = book;
+		}
+	}
+
+	@Override
+	public Set<Book> getBooksFromAuthor(Author currentAuthor) {
+		Set<Book> result = new HashSet<>();
+		for (Book book : allBooks) {
+			if (book.getAuthor().equals(currentAuthor)) {
+				result.add(book);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Book getBook(String isbn) {
+		for (Book book : allBooks) {
+			if (book.getMetadata(BookDataFields.BOOK_ISBN).equals(isbn)) {
+				return book;
+			}
+		}
+		return null;
 	}
 
 	/**

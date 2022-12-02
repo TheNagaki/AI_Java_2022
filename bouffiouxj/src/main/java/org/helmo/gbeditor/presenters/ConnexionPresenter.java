@@ -1,8 +1,9 @@
 package org.helmo.gbeditor.presenters;
 
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.helmo.gbeditor.views.ConnexionView;
 
 /**
@@ -12,16 +13,16 @@ import org.helmo.gbeditor.views.ConnexionView;
  */
 public class ConnexionPresenter implements PresenterInterface {
 
-	private final GBEInterface engine;
+	private final RepositoryInterface repo;
 	private ConnexionView view;
 
 	/**
 	 * Constructor of the presenter with the engine
 	 *
-	 * @param engine the logic of the application
+	 * @param repo the repository of the application
 	 */
-	public ConnexionPresenter(GBEInterface engine) {
-		this.engine = engine;
+	public ConnexionPresenter(RepositoryInterface repo) {
+		this.repo = repo;
 	}
 
 	/**
@@ -31,10 +32,31 @@ public class ConnexionPresenter implements PresenterInterface {
 	 * @param firstName the first name of the user
 	 */
 	public void connect(String name, String firstName) {
-		if (engine.connect(name, firstName)) {
+		if (repoConnection(name, firstName)) {
 			view.changeView(ViewsEnum.MAIN);
 		} else {
 			view.display("Erreur de connexion");
+		}
+	}
+
+	private boolean repoConnection(String name, String firstName) {
+		try {
+			Author author = new Author(name, firstName);
+			var authors = repo.getAuthors();
+			if (!authors.contains(new Author(name, firstName))) {
+				authors.add(author);
+				repo.setCurrentAuthor(author);
+			} else {
+				for (Author a : authors) {
+					if (a.equals(author)) {
+						repo.setCurrentAuthor(a);
+						break;
+					}
+				}
+			}
+			return true;
+		} catch (IllegalArgumentException e) {
+			return false;
 		}
 	}
 

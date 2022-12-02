@@ -18,7 +18,7 @@ public interface RepositoryInterface {
 	 *
 	 * @return a Set of Book
 	 */
-	Set<Book> loadBooks();
+	Set<Book> getBooks();
 
 	/**
 	 * Save a set of books in the storage.
@@ -41,7 +41,7 @@ public interface RepositoryInterface {
 	 *
 	 * @return a set of authors
 	 */
-	Set<Author> loadAuthors();
+	Set<Author> getAuthors();
 
 	/**
 	 * Copies the image from the temporary folder to the image folder.
@@ -50,4 +50,40 @@ public interface RepositoryInterface {
 	 * @return The path of the image.
 	 */
 	String copyImage(String imagePath);
+
+	/**
+	 * Sets the current author in the repository.
+	 *
+	 * @param author The author to set.
+	 */
+	void setCurrentAuthor(Author author);
+
+	/**
+	 * Gets the current author in the repository.
+	 *
+	 * @return The current author.
+	 */
+	Author getCurrentAuthor();
+
+	/**
+	 * Gets the book to edit.
+	 *
+	 * @return The book to edit.
+	 */
+	Book getBookToEdit();
+
+	/**
+	 * Sets the book to edit.
+	 *
+	 * @param book The book to edit.
+	 */
+	void setBookToEdit(Book book);
+
+	/**
+	 * Gets all the books of the current author.
+	 * @return A set of books.
+	 */
+	Set<Book> getBooksFromAuthor(Author currentAuthor);
+
+	Book getBook(String isbn);
 }

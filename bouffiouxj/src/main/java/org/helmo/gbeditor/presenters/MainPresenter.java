@@ -1,11 +1,13 @@
 package org.helmo.gbeditor.presenters;
 
+import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,19 +17,21 @@ import java.util.Set;
  * It is used to manage the books of one author
  */
 public class MainPresenter implements PresenterInterface {
-	private final GBEInterface engine;
+	private final RepositoryInterface repo;
 	private MainViewInterface view;
 	private Book bookShown = null;
 	private final BookDetailsPresenter detailsPresenter;
 	private boolean bookDetailsOpened = false;
+	private Author currentAuthor;
+	private Set<Book> books = new HashSet<>();
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
 	 *
-	 * @param gbEditor the logic of the application
+	 * @param repo the repository of the application
 	 */
-	public MainPresenter(GBEInterface gbEditor, BookDetailsPresenter detailsPresenter) {
-		this.engine = gbEditor;
+	public MainPresenter(RepositoryInterface repo, BookDetailsPresenter detailsPresenter) {
+		this.repo = repo;
 		this.detailsPresenter = detailsPresenter;
 		detailsPresenter.setMainPresenter(this);
 	}
@@ -36,10 +40,10 @@ public class MainPresenter implements PresenterInterface {
 	 * This method is used to get all the books created by the author
 	 */
 	public void askBooksFromAuthor() {
-		var booksFromAuthor = engine.getBooksFromCurrentAuthor();
-		if (booksFromAuthor != null && !booksFromAuthor.isEmpty()) {
+		books = repo.getBooksFromAuthor(currentAuthor);
+		if (books != null && !books.isEmpty()) {
 			Set<BookViewModel> books = new HashSet<>();
-			for (Book b : booksFromAuthor) {
+			for (Book b : this.books) {
 				books.add(new BookViewModel(b));
 			}
 			view.setBooksFromAuthor(books);
@@ -50,9 +54,9 @@ public class MainPresenter implements PresenterInterface {
 	 * This method is used by the view to get the current author name
 	 */
 	public void askAuthorName() {
-		var name = engine.getAuthorName();
-		if (name != null && !name.isBlank()) {
-			view.setAuthorName(name);
+		this.currentAuthor = repo.getCurrentAuthor();
+		if (currentAuthor != null) {
+			view.setAuthorName(currentAuthor.getFullName());
 		}
 	}
 
@@ -78,7 +82,7 @@ public class MainPresenter implements PresenterInterface {
 	public void bookClicked(BookViewModel book) {
 		setBaseViewOfDetailsPresenter();
 		if (!bookDetailsOpened || !bookShown.equals(book.toBook())) {
-			bookShown = engine.getBook(book.getIsbn());
+			bookShown = repo.getBook(book.getIsbn());
 			if (bookShown != null) {
 				detailsPresenter.displayBook(bookShown);
 				bookDetailsOpened = true;
@@ -105,7 +109,7 @@ public class MainPresenter implements PresenterInterface {
 	 * @param book the book to edit, null if the user wants to create a new book
 	 */
 	public void setBookToEdit(Book book) {
-		engine.setBookToEdit(book);
+		repo.setBookToEdit(book);
 	}
 
 	/**
@@ -113,5 +117,23 @@ public class MainPresenter implements PresenterInterface {
 	 */
 	public void onQuit_Click() {
 		view.close();
+	}
+
+	public void addPage(Book bookDisplayed, String text) {
+		books.forEach(b -> {
+			if (b.equals(bookDisplayed)) {
+				b.addPage(new Page(text));
+			}
+		});
+		repo.saveBooks(books);
+	}
+
+	public void updatePage(Book bookDisplayed, Page toPage) {
+		books.forEach(b -> {
+			if (b.equals(bookDisplayed)) {
+				b.updatePage(toPage);
+			}
+		});
+		repo.saveBooks(books);
 	}
 }

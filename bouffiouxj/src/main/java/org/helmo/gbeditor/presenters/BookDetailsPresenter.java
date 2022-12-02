@@ -3,11 +3,12 @@ package org.helmo.gbeditor.presenters;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import java.util.LinkedHashSet;
 
@@ -16,19 +17,19 @@ import java.util.LinkedHashSet;
  * It is used to display the details of a book.
  */
 public class BookDetailsPresenter implements PresenterInterface {
+	private final RepositoryInterface repo;
 	private MainPresenter mainPresenter;
 	private BookDetailsViewInterface view;
-	private final GBEInterface engine;
 	private Book bookDisplayed;
 	private MainViewInterface baseView;
 
 	/**
 	 * Constructor of the presenter with the engine and the main presenter
 	 *
-	 * @param engine the logic of the application
+	 * @param repo the logic of the application
 	 */
-	public BookDetailsPresenter(GBEInterface engine) {
-		this.engine = engine;
+	public BookDetailsPresenter(RepositoryInterface repo) {
+		this.repo = repo;
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 */
 	public void deleteBook() {
 		if (bookDisplayed != null) {
-			if (engine.deleteBook(bookDisplayed)) {
+			if (repo.deleteBook(bookDisplayed)) {
 				view.changeView(ViewsEnum.MAIN);
 			} else {
 				view.display("Erreur: Impossible de supprimer le livre");
@@ -99,7 +100,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param text the text of the page
 	 */
 	public void addPage(String text) {
-		engine.addPage(bookDisplayed, text);
+		mainPresenter.addPage(bookDisplayed, text);
 		askPages();
 		displayBook(bookDisplayed);
 	}
@@ -132,7 +133,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selected the page to save
 	 */
 	public void updatePage(PageViewModel selected) {
-		engine.updatePage(bookDisplayed, selected.toPage());
+		mainPresenter.updatePage(bookDisplayed, selected.toPage());
 		view.refresh();
 	}
 
@@ -143,7 +144,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @return the number of the page
 	 */
 	public int getPageNumber(PageViewModel selectedPage) {
-		return engine.getPageNumber(bookDisplayed, selectedPage.toPage());
+		return bookDisplayed.getPageNumber(selectedPage.toPage());
 	}
 
 	/**
@@ -180,7 +181,11 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedPage the page to delete
 	 */
 	public void confirmPageDeletion(PageViewModel selectedPage) {
-		engine.removePage(bookDisplayed, selectedPage.toPage());
+		var books = repo.getBooks();
+		for (Book book : books) {
+			book.removePage(selectedPage.toPage());
+		}
+		mainPresenter.bookClicked(new BookViewModel(bookDisplayed));
 		view.refresh();
 	}
 
@@ -198,7 +203,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @return the page
 	 */
 	public PageViewModel getPageById(String id) {
-		return new PageViewModel(engine.getPageById(bookDisplayed, id));
+		return new PageViewModel(bookDisplayed.getPageById(id));
 	}
 
 	/**

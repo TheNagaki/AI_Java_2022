@@ -4,9 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.helmo.gbeditor.models.GBEditor;
 import org.helmo.gbeditor.presenters.*;
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.repositories.JsonRepository;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
@@ -31,14 +29,14 @@ public class App extends Application {
 		launch(args);
 	}
 
-	private Map<ViewsEnum, ViewInterface> initViews(GBEInterface editor) {
-		ConnexionPresenter connexionPr = new ConnexionPresenter(editor);
+	private Map<ViewsEnum, ViewInterface> initViews(RepositoryInterface repo) {
+		ConnexionPresenter connexionPr = new ConnexionPresenter(repo);
 		ConnexionView connexionVw = new ConnexionView(connexionPr);
-		BookDetailsPresenter bookDetailsPr = new BookDetailsPresenter(editor);
+		BookDetailsPresenter bookDetailsPr = new BookDetailsPresenter(repo);
 		new BookDetailsView(bookDetailsPr);
-		MainPresenter mainPr = new MainPresenter(editor, bookDetailsPr);
+		MainPresenter mainPr = new MainPresenter(repo, bookDetailsPr);
 		MainView mainVw = new MainView(mainPr);
-		EditBookPresenter createBookPr = new EditBookPresenter(editor);
+		EditBookPresenter createBookPr = new EditBookPresenter(repo);
 		EditBookView createBookVw = new EditBookView(createBookPr);
 		return new HashMap<>() {
 			{
@@ -60,12 +58,11 @@ public class App extends Application {
 		Path bookPath = Path.of(System.getProperty("user.home") + "/ue36/e190740.json");
 		Path imgDirPath = Path.of(System.getProperty("user.home") + "/ue36/images_e190740");
 		RepositoryInterface repo = new JsonRepository(bookPath, imgDirPath);
-		GBEInterface editor = new GBEditor(repo);
-		ViewInterface mainView = new BaseView(initViews(editor));
+		ViewInterface mainView = new BaseView(initViews(repo));
 		Parent root = mainView.getRoot();
 		Scene scene = new Scene(root, 400, 500);
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
-		primaryStage.setTitle("Gamebook Editor");
+		primaryStage.setTitle("GameBook Editor");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}

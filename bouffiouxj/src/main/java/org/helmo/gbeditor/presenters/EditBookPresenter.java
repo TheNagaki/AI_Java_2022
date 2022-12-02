@@ -1,11 +1,16 @@
 package org.helmo.gbeditor.presenters;
 
+import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
+import org.helmo.gbeditor.models.ISBN;
+import org.helmo.gbeditor.models.exceptions.IllegalIsbnLinguisticIdException;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
+
+import static org.helmo.gbeditor.models.BookMetadata.LINGUISTIC_GROUP;
 
 /**
  * The CreateBookPresenter is the presenter for the CreateBookView.
@@ -13,17 +18,18 @@ import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
  * It is also used to edit an existing book.
  */
 public class EditBookPresenter implements PresenterInterface {
-	private final GBEInterface engine;
+	private final RepositoryInterface repo;
 	private EditBookViewInterface view;
 	private Book bookEdited = null;
+	private Author currentAuthor;
 
 	/**
 	 * Constructor of the presenter with the engine
 	 *
-	 * @param editor the logic of the application
+	 * @param repo the repository of the application
 	 */
-	public EditBookPresenter(GBEInterface editor) {
-		this.engine = editor;
+	public EditBookPresenter(RepositoryInterface repo) {
+		this.repo = repo;
 	}
 
 	/**
@@ -35,14 +41,30 @@ public class EditBookPresenter implements PresenterInterface {
 	 * @param imagePath the path to the image of the book
 	 */
 	public void createBook(String title, String summary, String isbn, String imagePath) {
-		view.display(engine.createBook(title, summary, isbn, imagePath));
+		try {
+			var books = repo.getBooks();
+			var book = new Book(title, currentAuthor, summary, isbn, ""); //check isbn in constructor
+			if (!books.contains(book)) {
+				String path2Image = repo.copyImage(imagePath);
+				book = new Book(title, currentAuthor, summary, isbn, path2Image);
+				books.add(book);
+				repo.saveBooks(books);
+				view.display("Votre livre a bien été enregistré");
+			}
+		} catch (IllegalIsbnLinguisticIdException e) {
+			view.display(String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP));
+		} catch (IllegalArgumentException e) {
+			view.display(e.getMessage());
+		}
+		view.display("Votre livre a déjà été enregistré");
 	}
 
 	/**
 	 * Answers to the view's request to display the author's name
 	 */
 	public void askAuthorName() {
-		view.setAuthorName(engine.getAuthorName());
+		this.currentAuthor = repo.getCurrentAuthor();
+		view.setAuthorName(currentAuthor.getFullName());
 	}
 
 	/**
@@ -63,14 +85,17 @@ public class EditBookPresenter implements PresenterInterface {
 	 * Asks the engine to preset the isbn with the author's id
 	 */
 	public void askISBN() {
-		view.presetISBN(engine.presetISBN());
+		currentAuthor = repo.getCurrentAuthor();
+		if (currentAuthor != null) {
+			view.presetISBN(new int[]{LINGUISTIC_GROUP, currentAuthor.getIdentifier()});
+		}
 	}
 
 	/**
 	 * Asks the engine if there is a book to edit
 	 */
 	public void askBookToEdit() {
-		this.bookEdited = engine.getBookToEdit();
+		this.bookEdited = repo.getBookToEdit();
 		view.setEditionMode(bookEdited != null);
 	}
 
@@ -83,7 +108,25 @@ public class EditBookPresenter implements PresenterInterface {
 	 * @param imagePath the new image path
 	 */
 	public void editBook(String title, String summary, String isbn, String imagePath) {
-		view.display(engine.updateBook(bookEdited, title, summary, isbn, imagePath));
+		try {
+			var books = repo.getBooks();
+			if (imagePath != null && !imagePath.isEmpty()) {
+				String path2Image = repo.copyImage(imagePath);
+				bookEdited.setMetadata(BookDataFields.IMAGE_PATH, path2Image);
+			}
+			if (books.remove(bookEdited)) {
+				bookEdited.setMetadata(BookDataFields.TITLE, title);
+				bookEdited.setMetadata(BookDataFields.SUMMARY, summary);
+				bookEdited.setMetadata(BookDataFields.BOOK_ISBN, isbn);
+				books.add(bookEdited);
+				repo.saveBooks(books);
+			}
+		} catch (IllegalIsbnLinguisticIdException e) {
+			view.display(String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP));
+		} catch (IllegalArgumentException e) {
+			view.display(e.getMessage());
+		}
+		view.display("Votre livre a bien été mis à jour");
 	}
 
 	/**
@@ -92,7 +135,7 @@ public class EditBookPresenter implements PresenterInterface {
 	 * @param isbn the isbn to check
 	 */
 	public void askIsbnControlNumber(String isbn) {
-		view.setIsbnControlNumber(engine.getIsbnControlNum(isbn));
+		view.setIsbnControlNumber(ISBN.computeCheckSum(isbn));
 	}
 
 	/**
