@@ -8,6 +8,7 @@ import org.helmo.gbeditor.models.exceptions.IllegalIsbnLinguisticIdException;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 
 import static org.helmo.gbeditor.models.BookMetadata.LINGUISTIC_GROUP;
@@ -97,7 +98,12 @@ public class EditBookPresenter implements PresenterInterface {
 	 */
 	public void askBookToEdit() {
 		this.bookEdited = repo.getBookToEdit();
-		view.setEditionMode(bookEdited != null);
+		if (bookEdited != null) {
+			view.setBookToDisplay(new BookViewModel(bookEdited));
+			view.setEditionMode(true);
+		} else {
+			view.setEditionMode(false);
+		}
 	}
 
 	/**
@@ -148,27 +154,6 @@ public class EditBookPresenter implements PresenterInterface {
 	 */
 	public void onQuit_Clicked() {
 		view.close();
-	}
-
-	/**
-	 * This method is used to ask the engine the title of the book
-	 */
-	public void askTitle() {
-		view.setTitle(bookEdited.getMetadata(BookDataFields.TITLE));
-	}
-
-	/**
-	 * This method is used to ask the engine the path to the image of the book
-	 */
-	public void askImagePath() {
-		view.setImagePath(bookEdited.getMetadata(BookDataFields.IMAGE_PATH));
-	}
-
-	/**
-	 * This method is used to communicate the Summary of the book in the view
-	 */
-	public void askSummary() {
-		view.setSummary(bookEdited.getMetadata(BookDataFields.SUMMARY));
 	}
 
 	public void askBaseIsbn() {

@@ -1,25 +1,13 @@
 package org.helmo.gbeditor.presenters.interfaces;
 
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
+
 public interface DisplayBookViewInterface {
 
 	/**
-	 * This method is used to set the summary of the book in the view
+	 * This method is used to set the book to display in the view
 	 *
-	 * @param metadata the summary of the book
+	 * @param bookToDisplay the book to display
 	 */
-	void setSummary(String metadata);
-
-	/**
-	 * This method is used to set the path to the image of the book in the view
-	 *
-	 * @param metadata the path to the image of the book
-	 */
-	void setImagePath(String metadata);
-
-	/**
-	 * This method is used to set the title of the book in the view
-	 *
-	 * @param metadata the title of the book
-	 */
-	void setTitle(String metadata);
+	void setBookToDisplay(BookViewModel bookToDisplay);
 }

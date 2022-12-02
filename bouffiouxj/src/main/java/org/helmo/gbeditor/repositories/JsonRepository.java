@@ -74,6 +74,9 @@ public class JsonRepository implements RepositoryInterface {
 						for (Page p : bLoaded.getPages()) {
 							book.addPage(p);
 						}
+						if (bLoaded.isPublished()) {
+							book.publish();
+						}
 						bookList.add(book);
 					});
 				}

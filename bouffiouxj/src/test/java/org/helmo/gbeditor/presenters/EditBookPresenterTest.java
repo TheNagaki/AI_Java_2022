@@ -5,6 +5,7 @@ import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookMetadata;
 import org.helmo.gbeditor.models.ISBN;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,11 @@ class EditBookPresenterTest {
 	private EditBookViewInterface view;
 	private RepositoryInterface repo;
 
+	private Book book;
+
 	@BeforeEach
 	void setUp() {
+		book = new Book("title", new Author("name", "firstName"), "summary");
 		repo = mock(RepositoryInterface.class);
 		presenter = new EditBookPresenter(repo);
 		view = mock(EditBookViewInterface.class);
@@ -75,13 +79,13 @@ class EditBookPresenterTest {
 
 	@Test
 	void askBookToEditCallsEngineGetBookToEdit() {
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
 		verify(repo, atMostOnce()).getBookToEdit();
 	}
 
 	@Test
 	void askBookToEditSetsTheEditionModeInTheView() {
-		var book = mock(Book.class);
 		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
 		verify(view, atMostOnce()).setEditionMode(true);
@@ -150,27 +154,10 @@ class EditBookPresenterTest {
 	}
 
 	@Test
-	void askTitleSetsTheBookToEditSTitleInTheView() {
-		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
+	void askBookToEditSetsTheBookToEditInTheView() {
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
-		presenter.askTitle();
-		verify(view, atMostOnce()).setTitle("title");
-	}
-
-	@Test
-	void askImagePathSetsTheBookToEditSImagePathInTheView() {
-		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
-		presenter.askBookToEdit();
-		presenter.askImagePath();
-		verify(view, atMostOnce()).setImagePath("");
-	}
-
-	@Test
-	void askSummarySetsTheBookToEditSSummaryInTheView() {
-		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
-		presenter.askBookToEdit();
-		presenter.askSummary();
-		verify(view, atMostOnce()).setSummary("summary");
+		verify(view, atMostOnce()).setBookToDisplay(new BookViewModel(book));
 	}
 
 	@Test

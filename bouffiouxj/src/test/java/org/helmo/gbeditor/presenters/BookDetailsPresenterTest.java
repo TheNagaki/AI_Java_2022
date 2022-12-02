@@ -2,10 +2,10 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,23 +50,15 @@ class BookDetailsPresenterTest {
 	@Test
 	void displayBookSetsAllBookDetailsInTheView() {
 		presenter.displayBook(book);
-		verify(view, atMostOnce()).setTitle(book.getMetadata(BookDataFields.TITLE));
-		verify(view, atMostOnce()).setSummary(book.getMetadata(BookDataFields.SUMMARY));
-		verify(view, atMostOnce()).setIsbn(book.getMetadata(BookDataFields.BOOK_ISBN));
-		verify(view, atMostOnce()).setImagePath(book.getAuthor().getFullName());
-		verify(view, atMostOnce()).setBookPages(any());
+		verify(view).setBookToDisplay(new BookViewModel(book));
 		verify(view, atMostOnce()).displayBook();
 	}
 
 	@Test
 	void displayBookSetsAllBookDetailsInTheViewWithNullBookOrDoesNotSetThem() {
 		presenter.displayBook(null);
-		verify(view, atMostOnce()).setTitle("");
-		verify(view, atMostOnce()).setSummary("");
-		verify(view, atMostOnce()).setIsbn("");
-		verify(view, atMostOnce()).setImagePath("");
-		verify(view, atMostOnce()).setBookPages(any());
-		verify(view, atMostOnce()).displayBook();
+		verify(view, never()).setBookToDisplay(any());
+		verify(view, never()).displayBook();
 	}
 
 	@Test
@@ -197,65 +189,15 @@ class BookDetailsPresenterTest {
 	}
 
 	@Test
-	void askTitleIsUsedWhenDisplayingBook() {
+	void setBookToDisplayIsUsedWhenDisplayingBook() {
 		presenter.displayBook(book);
-		verify(view, times(1)).setTitle(book.getMetadata(BookDataFields.TITLE));
+		verify(view, times(1)).setBookToDisplay(new BookViewModel(book));
 	}
 
 	@Test
-	void askTitleWithNullBookDoesNotUpdateTheView() {
+	void setBookToDisplayIsNotUsedWhenDisplayingNullBook() {
 		presenter.displayBook(null);
-		presenter.askTitle();
-		verify(view, never()).setTitle("");
-	}
-
-	@Test
-	void askTitleUpdatesTheView() {
-		presenter.displayBook(book);
-		presenter.askTitle();
-		verify(view, times(2)).setTitle(book.getMetadata(BookDataFields.TITLE));
-	}
-
-	@Test
-	void askImagePathUpdatesTheView() {
-		presenter.displayBook(book);
-		presenter.askImagePath();
-		verify(view, times(2)).setImagePath(book.getMetadata(BookDataFields.IMAGE_PATH));
-	}
-
-	@Test
-	void askImagePathWithNullBookDoesNotUpdateTheView() {
-		presenter.displayBook(null);
-		presenter.askImagePath();
-		verify(view, never()).setImagePath("");
-	}
-
-	@Test
-	void askIsbn() {
-		presenter.displayBook(book);
-		presenter.askIsbn();
-		verify(view, times(2)).setIsbn(book.getMetadata(BookDataFields.BOOK_ISBN));
-	}
-
-	@Test
-	void askIsbnWithNullBookDoesNotUpdateTheView() {
-		presenter.displayBook(null);
-		presenter.askIsbn();
-		verify(view, never()).setIsbn("");
-	}
-
-	@Test
-	void askSummary() {
-		presenter.displayBook(book);
-		presenter.askSummary();
-		verify(view, times(2)).setSummary(book.getMetadata(BookDataFields.SUMMARY));
-	}
-
-	@Test
-	void askSummaryWithNullBookDoesNotUpdateTheView() {
-		presenter.displayBook(null);
-		presenter.askSummary();
-		verify(view, never()).setSummary("");
+		verify(view, never()).setBookToDisplay(any());
 	}
 
 	@Test
@@ -282,15 +224,15 @@ class BookDetailsPresenterTest {
 		presenter.addPage("test");
 		presenter.addPage("test2");
 		presenter.addPage("test3");
-		presenter.askPages();
-		verify(view, times(5)).setBookPages(anySet());
+		presenter.askBookToView();
+		verify(view, times(5)).setBookToDisplay(any());
 	}
 
 	@Test
 	void askPagesWithNullBookDoesNotUpdateView() {
 		presenter.displayBook(null);
-		presenter.askPages();
-		verify(view, never()).setBookPages(anySet());
+		presenter.askBookToView();
+		verify(view, never()).setBookToDisplay(any());
 	}
 
 	@Test

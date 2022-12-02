@@ -1,16 +1,14 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.BookDataFields;
 import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
-
-import java.util.LinkedHashSet;
 
 /**
  * BookDetailsPresenter is the presenter for the book details view.
@@ -54,12 +52,14 @@ public class BookDetailsPresenter implements PresenterInterface {
 	public void displayBook(Book book) {
 		if (book != null) {
 			this.bookDisplayed = book;
-			askIsbn();
-			askTitle();
-			askSummary();
-			askImagePath();
-			askPages();
+			askBookToView();
 			view.displayBook();
+		}
+	}
+
+	public void askBookToView() {
+		if (bookDisplayed != null) {
+			view.setBookToDisplay(new BookViewModel(bookDisplayed));
 		}
 	}
 
@@ -75,7 +75,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * This method is used to delete a book from the current author
 	 */
 	public void deleteBook() {
-		if (bookDisplayed != null) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
 			if (repo.deleteBook(bookDisplayed)) {
 				view.changeView(ViewsEnum.MAIN);
 			} else {
@@ -89,9 +89,11 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * This method is used to tell the MainPresenter to create a new book or edit an existing one
 	 */
 	public void editBook() {
-		mainPresenter.setBookToEdit(bookDisplayed);
-		view.changeView(ViewsEnum.EDIT_BOOK);
-		closeView();
+		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
+			mainPresenter.setBookToEdit(bookDisplayed);
+			view.changeView(ViewsEnum.EDIT_BOOK);
+			closeView();
+		}
 	}
 
 	/**
@@ -100,9 +102,11 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param text the text of the page
 	 */
 	public void addPage(String text) {
-		bookDisplayed.addPage(new Page(text));
-		repo.updatesAddBook(bookDisplayed);
-		askPages();
+		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
+			bookDisplayed.addPage(new Page(text));
+			repo.updatesAddBook(bookDisplayed);
+			askBookToView();
+		}
 	}
 
 	/**
@@ -111,7 +115,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedPage the page to delete
 	 */
 	public void removePage(PageViewModel selectedPage) {
-		if (selectedPage != null && bookDisplayed.getPages().contains(selectedPage.toPage())) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished() && selectedPage != null && bookDisplayed.getPages().contains(selectedPage.toPage())) {
 			if (bookDisplayed.hasChoicesTo(selectedPage.toPage())) {
 				view.confirmPageSuppression(selectedPage);
 			} else {
@@ -126,7 +130,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedItem the page to edit
 	 */
 	public void editPage(PageViewModel selectedItem) {
-		if (selectedItem != null) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished() && selectedItem != null) {
 			view.editPage(selectedItem);
 		}
 	}
@@ -137,7 +141,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selected the page to save
 	 */
 	public void updatePage(PageViewModel selected) {
-		if (selected != null) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished() && selected != null) {
 			bookDisplayed.updatePage(selected.toPage());
 			repo.updatesAddBook(bookDisplayed);
 			view.refresh();
@@ -151,46 +155,10 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @return the number of the page
 	 */
 	public int getPageNumber(PageViewModel selectedPage) {
-		if (selectedPage != null) {
+		if (bookDisplayed != null && selectedPage != null) {
 			return bookDisplayed.getPageNumber(selectedPage.toPage());
 		}
 		return -1;
-	}
-
-	/**
-	 * This method is used to ask the engine the title of the book
-	 */
-	public void askTitle() {
-		if (bookDisplayed != null) {
-			view.setTitle(bookDisplayed.getMetadata(BookDataFields.TITLE));
-		}
-	}
-
-	/**
-	 * This method is used to ask the engine the path to the image of the book
-	 */
-	public void askImagePath() {
-		if (bookDisplayed != null) {
-			view.setImagePath(bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH));
-		}
-	}
-
-	/**
-	 * This method is used to ask the engine the isbn of the book
-	 */
-	public void askIsbn() {
-		if (bookDisplayed != null) {
-			view.setIsbn(bookDisplayed.getMetadata(BookDataFields.BOOK_ISBN));
-		}
-	}
-
-	/**
-	 * This method is used to communicate the Summary of the book in the view
-	 */
-	public void askSummary() {
-		if (bookDisplayed != null) {
-			view.setSummary(bookDisplayed.getMetadata(BookDataFields.SUMMARY));
-		}
 	}
 
 	/**
@@ -202,20 +170,9 @@ public class BookDetailsPresenter implements PresenterInterface {
 		if (selectedPage != null) {
 			bookDisplayed.removePage(selectedPage.toPage());
 			repo.updatesAddBook(bookDisplayed);
-			askPages();
+			askBookToView();
 			displayBook(bookDisplayed);
 		}
-	}
-
-	/**
-	 * This method is used to give the list of pages to the view
-	 */
-	public void askPages() {
-		if (bookDisplayed != null) {
-			view.setBookPages(bookDisplayed.getPages().stream().map(PageViewModel::new)
-					.collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll));
-		}
-
 	}
 
 	/**
@@ -254,5 +211,16 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 */
 	public MainViewInterface getBaseView() {
 		return baseView;
+	}
+
+	/**
+	 * Publishes the book
+	 */
+	public void publishBook() {
+		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
+			bookDisplayed.publish();
+			repo.updatesAddBook(bookDisplayed);
+			view.refresh();
+		}
 	}
 }

@@ -21,6 +21,7 @@ import org.helmo.gbeditor.presenters.BookDetailsPresenter;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 
 import java.util.Arrays;
@@ -45,6 +46,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	private String imagePath;
 	private String title;
 	private Collection<PageViewModel> bookPages;
+	private boolean published;
 
 	public BookDetailsView(BookDetailsPresenter presenter) {
 		this.presenter = presenter;
@@ -100,11 +102,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	@Override
 	public void refresh() {
 		mainPane.getChildren().clear();
-		presenter.askIsbn();
-		presenter.askImagePath();
-		presenter.askSummary();
-		presenter.askTitle();
-		presenter.askPages();
+		presenter.askBookToView();
 		displayBook();
 	}
 
@@ -161,21 +159,25 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		mainPane.setCenter(scrollPane);
 		BorderPane.setMargin(scrollPane, insets);
 
-		var editBtn = new Button("✏ Éditer");
-		editBtn.setOnAction(e -> presenter.editBook());
-		var deleteBtn = new Button("❌ Supprimer");
-		deleteBtn.setOnAction(e -> popupConfirmBookDeletion());
+		var bottomPane = new HBox();
+		bottomPane.setAlignment(Pos.CENTER);
+		bottomPane.setSpacing(SMALL_SPACING);
+		if (!published) {
+			var editBtn = new Button("✏ Éditer");
+			editBtn.setOnAction(e -> presenter.editBook());
+			var publishBtn = new Button("📖 Publier");
+			publishBtn.setOnAction(e -> presenter.publishBook());
+			var deleteBtn = new Button("❌ Supprimer");
+			deleteBtn.setOnAction(e -> popupConfirmBookDeletion());
+			bottomPane.getChildren().addAll(editBtn, publishBtn, deleteBtn);
+		}
 		var closeBtn = new Button("Fermer");
 		closeBtn.setOnAction(action -> presenter.closeView());
 		var closeIcon = new ImageView(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/emergency-exit.png"))));
 		closeIcon.setFitHeight(20);
 		closeIcon.setPreserveRatio(true);
 		closeBtn.setGraphic(closeIcon);
-
-		var bottomPane = new HBox();
-		bottomPane.setAlignment(Pos.CENTER);
-		bottomPane.setSpacing(SMALL_SPACING);
-		bottomPane.getChildren().addAll(editBtn, deleteBtn, closeBtn);
+		bottomPane.getChildren().add(closeBtn);
 		mainPane.setBottom(bottomPane);
 		BorderPane.setMargin(bottomPane, insets);
 
@@ -185,33 +187,33 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 		var pageInputs = new VBox();
 		pageInputs.setSpacing(SMALL_SPACING);
+		if (!published) {
+			var fieldsInputs = new HBox();
+			var contentInput = new TextArea();
+			contentInput.setPromptText("Contenu de la page");
+			contentInput.setWrapText(true);
+			contentInput.setPrefRowCount(2);
+			fieldsInputs.getChildren().add(contentInput);
 
-		var fieldsInputs = new HBox();
-		var contentInput = new TextArea();
-		contentInput.setPromptText("Contenu de la page");
-		contentInput.setWrapText(true);
-		contentInput.setPrefRowCount(2);
-		fieldsInputs.getChildren().add(contentInput);
+			var buttonBox = new HBox();
+			buttonBox.setSpacing(BIG_SPACING);
+			buttonBox.setAlignment(Pos.CENTER);
 
-		var buttonBox = new HBox();
-		buttonBox.setSpacing(BIG_SPACING);
-		buttonBox.setAlignment(Pos.CENTER);
-		var addPageBtn = new Button("➕");
-		addPageBtn.setOnAction(e -> {
-			if (!contentInput.getText().isEmpty()) {
-				presenter.addPage(contentInput.getText());
-				contentInput.clear();
-			}
-		});
-		var editPageBtn = new Button("✏");
-		editPageBtn.setOnAction(e -> presenter.editPage(tableView.getSelectionModel().getSelectedItem()));
-		var removePageBtn = new Button("➖");
-		removePageBtn.setOnAction(e -> presenter.removePage(tableView.getSelectionModel().getSelectedItem()));
-		buttonBox.getChildren().addAll(addPageBtn, editPageBtn, removePageBtn);
-
-		pageInputs.getChildren().addAll(fieldsInputs, buttonBox);
+			var addPageBtn = new Button("➕");
+			addPageBtn.setOnAction(e -> {
+				if (!contentInput.getText().isEmpty()) {
+					presenter.addPage(contentInput.getText());
+					contentInput.clear();
+				}
+			});
+			var editPageBtn = new Button("✏");
+			editPageBtn.setOnAction(e -> presenter.editPage(tableView.getSelectionModel().getSelectedItem()));
+			var removePageBtn = new Button("➖");
+			removePageBtn.setOnAction(e -> presenter.removePage(tableView.getSelectionModel().getSelectedItem()));
+			buttonBox.getChildren().addAll(addPageBtn, editPageBtn, removePageBtn);
+			pageInputs.getChildren().addAll(fieldsInputs, buttonBox);
+		}
 		rightPane.setBottom(pageInputs);
-
 		rightPane.setMaxSize(WIDTH / 2 - 5, HEIGHT);
 		mainPane.setRight(rightPane);
 		BorderPane.setMargin(rightPane, insets);
@@ -228,23 +230,13 @@ public class BookDetailsView implements BookDetailsViewInterface {
 	}
 
 	@Override
-	public void setSummary(String metadata) {
-		this.summary = metadata;
-	}
-
-	@Override
-	public void setIsbn(String metadata) {
-		this.isbn = metadata;
-	}
-
-	@Override
-	public void setImagePath(String metadata) {
-		this.imagePath = metadata;
-	}
-
-	@Override
-	public void setTitle(String metadata) {
-		this.title = metadata;
+	public void setBookToDisplay(BookViewModel bookToDisplay) {
+		this.title = bookToDisplay.getTitle();
+		this.isbn = bookToDisplay.getIsbn();
+		this.summary = bookToDisplay.getSummary();
+		this.imagePath = bookToDisplay.getImagePath();
+		this.published = bookToDisplay.isPublished();
+		this.bookPages = bookToDisplay.getPages();
 	}
 
 	private void popupConfirmPageDeletion(PageViewModel selectedPage) {
@@ -288,11 +280,13 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		pagesView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		pagesView.setRowFactory(tv -> {
 			var row = new TableRow<PageViewModel>();
-			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && !row.isEmpty()) {
-					presenter.editPage(row.getItem());
-				}
-			});
+			if (!published) {
+				row.setOnMouseClicked(event -> {
+					if (event.getClickCount() == 2 && (!row.isEmpty())) {
+						presenter.editPage(row.getItem());
+					}
+				});
+			}
 			return row;
 		});
 
@@ -460,8 +454,4 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		stage.close();
 	}
 
-	@Override
-	public void setBookPages(Collection<PageViewModel> bookPages) {
-		this.bookPages = bookPages;
-	}
 }

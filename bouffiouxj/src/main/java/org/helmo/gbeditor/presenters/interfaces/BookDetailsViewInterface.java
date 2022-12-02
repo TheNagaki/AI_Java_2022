@@ -2,8 +2,6 @@ package org.helmo.gbeditor.presenters.interfaces;
 
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 
-import java.util.Collection;
-
 /**
  * This interface is used to define the methods that the view must implement to interact with the presenter
  */
@@ -26,18 +24,4 @@ public interface BookDetailsViewInterface extends ViewInterface, DisplayBookView
 	 * @param selectedPage the page to delete
 	 */
 	void confirmPageSuppression(PageViewModel selectedPage);
-
-	/**
-	 * This method is used to set the list of pages in the view
-	 *
-	 * @param pages the list of pages
-	 */
-	void setBookPages(Collection<PageViewModel> pages);
-
-	/**
-	 * This method is used to set the isbn in the view
-	 *
-	 * @param metadata the isbn
-	 */
-	void setIsbn(String metadata);
 }

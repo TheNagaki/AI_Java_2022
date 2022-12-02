@@ -18,9 +18,11 @@ import org.helmo.gbeditor.presenters.EditBookPresenter;
 import org.helmo.gbeditor.presenters.ViewsEnum;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
+import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * View for the creation of a book
@@ -70,13 +72,18 @@ public class EditBookView implements EditBookViewInterface {
 		this.bookCreation = !b;
 		if (b) {
 			this.createBookButton.setText("Edit");
-			presenter.askTitle();
-			presenter.askSummary();
 			presenter.askBaseIsbn();
 			presenter.askBookId();
-			presenter.askImagePath();
 		}
 		initView();
+	}
+
+	@Override
+	public void setBookToDisplay(BookViewModel bookToDisplay) {
+		this.title = bookToDisplay.getTitle();
+		this.baseIsbn = bookToDisplay.getIsbn();
+		this.summary = bookToDisplay.getSummary();
+		this.imagePath = bookToDisplay.getImagePath();
 	}
 
 	@Override
@@ -210,10 +217,13 @@ public class EditBookView implements EditBookViewInterface {
 			if (newValue.length() > MAX_BOOK_ID) {
 				inputIsbn.setText(oldValue);
 				display(String.format("Vous avez atteint la limite de %d caractères pour l'identifiant du livre.", MAX_BOOK_ID));
+			} else if (Pattern.matches("[^0-9]", newValue)) {
+				inputIsbn.setText(oldValue);
+				display("L'identifiant du livre ne peut contenir que des chiffres.");
 			} else {
 				display("");
 				if (newValue.length() > 0) {
-					presenter.askIsbnControlNumber(baseIsbnLabel.getText() + newValue);
+					presenter.askIsbnControlNumber(baseIsbnLabel.getText() + String.format("%02d", Integer.parseInt(newValue)));
 				} else {
 					isbnControlLabel.setText("-?"); // If the isbn is empty, we display a question mark
 				}
@@ -320,20 +330,5 @@ public class EditBookView implements EditBookViewInterface {
 
 	private String getFullIsbn() {
 		return baseIsbnLabel.getText() + inputIsbn.getText() + isbnControlLabel.getText();
-	}
-
-	@Override
-	public void setSummary(String metadata) {
-		this.summary = metadata;
-	}
-
-	@Override
-	public void setImagePath(String metadata) {
-		this.imagePath = metadata;
-	}
-
-	@Override
-	public void setTitle(String metadata) {
-		this.title = metadata;
 	}
 }

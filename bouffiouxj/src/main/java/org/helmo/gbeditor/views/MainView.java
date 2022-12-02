@@ -59,6 +59,9 @@ public class MainView implements MainViewInterface {
 			for (int i = 0; ite.hasNext() && i < booksFromAuthor.size(); i++) {
 				var b = ite.next();
 				var box = new BorderPane();
+				if (b.isPublished()) {
+					box.setStyle("-fx-border-width: 2px; -fx-border-color: #00ff00;");
+				}
 				var title = new Label(b.getTitle());
 				title.getStyleClass().add("thumbnail-title");
 				title.setAlignment(Pos.CENTER);
