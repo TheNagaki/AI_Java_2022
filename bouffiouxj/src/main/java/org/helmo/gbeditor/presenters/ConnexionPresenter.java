@@ -1,10 +1,10 @@
 package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Author;
+import org.helmo.gbeditor.presenters.interfaces.ConnexionViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
-import org.helmo.gbeditor.views.ConnexionView;
 
 /**
  * The ConnexionPresenter is the presenter for the ConnexionView.
@@ -14,7 +14,7 @@ import org.helmo.gbeditor.views.ConnexionView;
 public class ConnexionPresenter implements PresenterInterface {
 
 	private final RepositoryInterface repo;
-	private ConnexionView view;
+	private ConnexionViewInterface view;
 
 	/**
 	 * Constructor of the presenter with the engine
@@ -41,11 +41,12 @@ public class ConnexionPresenter implements PresenterInterface {
 
 	private boolean repoConnection(String name, String firstName) {
 		try {
-			Author author = new Author(name, firstName);
+			var author = new Author(name, firstName);
 			var authors = repo.getAuthors();
 			if (!authors.contains(new Author(name, firstName))) {
 				authors.add(author);
 				repo.setCurrentAuthor(author);
+				repo.addAuthor(author);
 			} else {
 				for (Author a : authors) {
 					if (a.equals(author)) {
@@ -60,7 +61,7 @@ public class ConnexionPresenter implements PresenterInterface {
 		}
 	}
 
-	public void setView(ConnexionView connexionView) {
+	public void setView(ConnexionViewInterface connexionView) {
 		this.view = connexionView;
 	}
 

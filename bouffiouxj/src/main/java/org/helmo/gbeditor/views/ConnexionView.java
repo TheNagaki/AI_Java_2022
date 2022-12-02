@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 import org.helmo.gbeditor.presenters.ConnexionPresenter;
 import org.helmo.gbeditor.presenters.ViewsEnum;
+import org.helmo.gbeditor.presenters.interfaces.ConnexionViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 
 import java.util.Objects;
@@ -19,7 +20,7 @@ import java.util.Objects;
  * View for the connection of an author
  * It displays a form to fill in order to connect to the application (name, first name)
  */
-public class ConnexionView implements ViewInterface {
+public class ConnexionView implements ConnexionViewInterface {
 	private static final int MAX_NAME = 20;
 	private final ConnexionPresenter presenter;
 	private ViewInterface baseView;

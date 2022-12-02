@@ -31,8 +31,8 @@ public class JsonRepository implements RepositoryInterface {
 	private final Gson gson = new Gson();
 	private final Path bookPath;
 	private final Path imgDirPath;
-	private final Set<Book> allBooks;
-	private final Set<Author> authors;
+	private Set<Book> allBooks;
+	private Set<Author> authors;
 	private Author currentAuthor;
 	private Book bookToEdit;
 
@@ -97,10 +97,16 @@ public class JsonRepository implements RepositoryInterface {
 		try (BufferedWriter writer = Files.newBufferedWriter(bookPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
 			Set<Book> books2Save = new LinkedHashSet<>(books);
 			gson.toJson(books2Save, writer);
-			return true;
 		} catch (IOException e) {
 			return false;
 		}
+		reload();
+		return true;
+	}
+
+	private void reload() {
+		this.allBooks = loadBooks();
+		this.authors = loadAuthors();
 	}
 
 	@Override
@@ -195,6 +201,18 @@ public class JsonRepository implements RepositoryInterface {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void addAuthor(Author author) {
+		authors.add(author);
+		saveBooks(allBooks);
+	}
+
+	@Override
+	public void updatesAddBook(Book book) {
+		allBooks.add(book);
+		saveBooks(allBooks);
 	}
 
 	/**

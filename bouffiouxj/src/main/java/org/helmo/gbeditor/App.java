@@ -5,6 +5,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.helmo.gbeditor.presenters.*;
+import org.helmo.gbeditor.presenters.interfaces.ConnexionViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.repositories.JsonRepository;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
@@ -31,13 +34,13 @@ public class App extends Application {
 
 	private Map<ViewsEnum, ViewInterface> initViews(RepositoryInterface repo) {
 		ConnexionPresenter connexionPr = new ConnexionPresenter(repo);
-		ConnexionView connexionVw = new ConnexionView(connexionPr);
+		ConnexionViewInterface connexionVw = new ConnexionView(connexionPr);
 		BookDetailsPresenter bookDetailsPr = new BookDetailsPresenter(repo);
 		new BookDetailsView(bookDetailsPr);
 		MainPresenter mainPr = new MainPresenter(repo, bookDetailsPr);
-		MainView mainVw = new MainView(mainPr);
+		MainViewInterface mainVw = new MainView(mainPr);
 		EditBookPresenter createBookPr = new EditBookPresenter(repo);
-		EditBookView createBookVw = new EditBookView(createBookPr);
+		EditBookViewInterface createBookVw = new EditBookView(createBookPr);
 		return new HashMap<>() {
 			{
 				put(ViewsEnum.CONNEXION, connexionVw);

@@ -2,11 +2,11 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Book;
 import org.helmo.gbeditor.models.BookDataFields;
+import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.BookDetailsViewInterface;
+import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
-import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
-import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 import org.helmo.gbeditor.repositories.RepositoryInterface;
 
@@ -100,9 +100,9 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param text the text of the page
 	 */
 	public void addPage(String text) {
-		mainPresenter.addPage(bookDisplayed, text);
+		bookDisplayed.addPage(new Page(text));
+		repo.updatesAddBook(bookDisplayed);
 		askPages();
-		displayBook(bookDisplayed);
 	}
 
 	/**
@@ -111,10 +111,12 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedPage the page to delete
 	 */
 	public void removePage(PageViewModel selectedPage) {
-		if (bookDisplayed.hasChoicesTo(selectedPage.toPage())) {
-			view.confirmPageSuppression(selectedPage);
-		} else {
-			confirmPageDeletion(selectedPage);
+		if (selectedPage != null && bookDisplayed.getPages().contains(selectedPage.toPage())) {
+			if (bookDisplayed.hasChoicesTo(selectedPage.toPage())) {
+				view.confirmPageSuppression(selectedPage);
+			} else {
+				confirmPageDeletion(selectedPage);
+			}
 		}
 	}
 
@@ -124,7 +126,9 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedItem the page to edit
 	 */
 	public void editPage(PageViewModel selectedItem) {
-		view.editPage(selectedItem);
+		if (selectedItem != null) {
+			view.editPage(selectedItem);
+		}
 	}
 
 	/**
@@ -133,8 +137,11 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selected the page to save
 	 */
 	public void updatePage(PageViewModel selected) {
-		mainPresenter.updatePage(bookDisplayed, selected.toPage());
-		view.refresh();
+		if (selected != null) {
+			bookDisplayed.updatePage(selected.toPage());
+			repo.updatesAddBook(bookDisplayed);
+			view.refresh();
+		}
 	}
 
 	/**
@@ -144,35 +151,46 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @return the number of the page
 	 */
 	public int getPageNumber(PageViewModel selectedPage) {
-		return bookDisplayed.getPageNumber(selectedPage.toPage());
+		if (selectedPage != null) {
+			return bookDisplayed.getPageNumber(selectedPage.toPage());
+		}
+		return -1;
 	}
 
 	/**
 	 * This method is used to ask the engine the title of the book
 	 */
 	public void askTitle() {
-		view.setTitle(bookDisplayed.getMetadata(BookDataFields.TITLE));
+		if (bookDisplayed != null) {
+			view.setTitle(bookDisplayed.getMetadata(BookDataFields.TITLE));
+		}
 	}
 
 	/**
 	 * This method is used to ask the engine the path to the image of the book
 	 */
 	public void askImagePath() {
-		view.setImagePath(bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH));
+		if (bookDisplayed != null) {
+			view.setImagePath(bookDisplayed.getMetadata(BookDataFields.IMAGE_PATH));
+		}
 	}
 
 	/**
 	 * This method is used to ask the engine the isbn of the book
 	 */
 	public void askIsbn() {
-		view.setIsbn(bookDisplayed.getMetadata(BookDataFields.BOOK_ISBN));
+		if (bookDisplayed != null) {
+			view.setIsbn(bookDisplayed.getMetadata(BookDataFields.BOOK_ISBN));
+		}
 	}
 
 	/**
 	 * This method is used to communicate the Summary of the book in the view
 	 */
 	public void askSummary() {
-		view.setSummary(bookDisplayed.getMetadata(BookDataFields.SUMMARY));
+		if (bookDisplayed != null) {
+			view.setSummary(bookDisplayed.getMetadata(BookDataFields.SUMMARY));
+		}
 	}
 
 	/**
@@ -181,19 +199,23 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * @param selectedPage the page to delete
 	 */
 	public void confirmPageDeletion(PageViewModel selectedPage) {
-		var books = repo.getBooks();
-		for (Book book : books) {
-			book.removePage(selectedPage.toPage());
+		if (selectedPage != null) {
+			bookDisplayed.removePage(selectedPage.toPage());
+			repo.updatesAddBook(bookDisplayed);
+			askPages();
+			displayBook(bookDisplayed);
 		}
-		mainPresenter.bookClicked(new BookViewModel(bookDisplayed));
-		view.refresh();
 	}
 
 	/**
 	 * This method is used to give the list of pages to the view
 	 */
 	public void askPages() {
-		view.setBookPages(bookDisplayed.getPages().stream().map(PageViewModel::new).collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll));
+		if (bookDisplayed != null) {
+			view.setBookPages(bookDisplayed.getPages().stream().map(PageViewModel::new)
+					.collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll));
+		}
+
 	}
 
 	/**

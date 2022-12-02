@@ -50,13 +50,14 @@ public class EditBookPresenter implements PresenterInterface {
 				books.add(book);
 				repo.saveBooks(books);
 				view.display("Votre livre a bien été enregistré");
+			} else {
+				view.display("Votre livre a déjà été enregistré");
 			}
 		} catch (IllegalIsbnLinguisticIdException e) {
 			view.display(String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP));
 		} catch (IllegalArgumentException e) {
 			view.display(e.getMessage());
 		}
-		view.display("Votre livre a déjà été enregistré");
 	}
 
 	/**
@@ -108,25 +109,29 @@ public class EditBookPresenter implements PresenterInterface {
 	 * @param imagePath the new image path
 	 */
 	public void editBook(String title, String summary, String isbn, String imagePath) {
-		try {
-			var books = repo.getBooks();
-			if (imagePath != null && !imagePath.isEmpty()) {
-				String path2Image = repo.copyImage(imagePath);
-				bookEdited.setMetadata(BookDataFields.IMAGE_PATH, path2Image);
+		if (bookEdited != null) {
+			try {
+				if (imagePath != null && !imagePath.isEmpty()) {
+					String path2Image = repo.copyImage(imagePath);
+					bookEdited.setMetadata(BookDataFields.IMAGE_PATH, path2Image);
+				}
+				if (repo.deleteBook(bookEdited)) {
+					bookEdited.setMetadata(BookDataFields.TITLE, title);
+					bookEdited.setMetadata(BookDataFields.SUMMARY, summary);
+					bookEdited.setMetadata(BookDataFields.BOOK_ISBN, isbn);
+					repo.updatesAddBook(bookEdited);
+					view.display("Votre livre a bien été mis à jour");
+					return;
+				}
+			} catch (IllegalIsbnLinguisticIdException e) {
+				view.display(String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP));
+				return;
+			} catch (IllegalArgumentException e) {
+				view.display(e.getMessage());
+				return;
 			}
-			if (books.remove(bookEdited)) {
-				bookEdited.setMetadata(BookDataFields.TITLE, title);
-				bookEdited.setMetadata(BookDataFields.SUMMARY, summary);
-				bookEdited.setMetadata(BookDataFields.BOOK_ISBN, isbn);
-				books.add(bookEdited);
-				repo.saveBooks(books);
-			}
-		} catch (IllegalIsbnLinguisticIdException e) {
-			view.display(String.format("L'identifiant linguistique de l'isbn est invalide (%d attendu)", LINGUISTIC_GROUP));
-		} catch (IllegalArgumentException e) {
-			view.display(e.getMessage());
 		}
-		view.display("Votre livre a bien été mis à jour");
+		view.display("Une erreur est survenue lors de la mise à jour de votre livre");
 	}
 
 	/**

@@ -85,5 +85,22 @@ public interface RepositoryInterface {
 	 */
 	Set<Book> getBooksFromAuthor(Author currentAuthor);
 
+	/**
+	 * Get a book by its isbn.
+	 * @param isbn The isbn of the wanted book.
+	 * @return The book.
+	 */
 	Book getBook(String isbn);
+
+	/**
+	 * Adds and saves an author.
+	 * @param author The author to add.
+	 */
+	void addAuthor(Author author);
+
+	/**
+	 * Adds and saves a book.
+	 * @param book The book to add.
+	 */
+	void updatesAddBook(Book book);
 }

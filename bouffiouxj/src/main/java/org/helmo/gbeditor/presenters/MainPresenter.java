@@ -2,7 +2,6 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
-import org.helmo.gbeditor.models.Page;
 import org.helmo.gbeditor.presenters.interfaces.MainViewInterface;
 import org.helmo.gbeditor.presenters.interfaces.PresenterInterface;
 import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
@@ -23,7 +22,6 @@ public class MainPresenter implements PresenterInterface {
 	private final BookDetailsPresenter detailsPresenter;
 	private boolean bookDetailsOpened = false;
 	private Author currentAuthor;
-	private Set<Book> books = new HashSet<>();
 
 	/**
 	 * This constructor is used to create a new MainPresenter with the given engine
@@ -40,13 +38,20 @@ public class MainPresenter implements PresenterInterface {
 	 * This method is used to get all the books created by the author
 	 */
 	public void askBooksFromAuthor() {
-		books = repo.getBooksFromAuthor(currentAuthor);
-		if (books != null && !books.isEmpty()) {
+		loadAuthor();
+		Set<Book> books1 = repo.getBooksFromAuthor(currentAuthor);
+		if (books1 != null && !books1.isEmpty()) {
 			Set<BookViewModel> books = new HashSet<>();
-			for (Book b : this.books) {
+			for (Book b : books1) {
 				books.add(new BookViewModel(b));
 			}
 			view.setBooksFromAuthor(books);
+		}
+	}
+
+	private void loadAuthor() {
+		if (currentAuthor == null) {
+			currentAuthor = repo.getCurrentAuthor();
 		}
 	}
 
@@ -54,7 +59,7 @@ public class MainPresenter implements PresenterInterface {
 	 * This method is used by the view to get the current author name
 	 */
 	public void askAuthorName() {
-		this.currentAuthor = repo.getCurrentAuthor();
+		loadAuthor();
 		if (currentAuthor != null) {
 			view.setAuthorName(currentAuthor.getFullName());
 		}
@@ -66,7 +71,11 @@ public class MainPresenter implements PresenterInterface {
 	 * @param view the view to set
 	 */
 	public void setView(MainViewInterface view) {
-		this.view = view;
+		if (view != null) {
+			this.view = view;
+		}else {
+			throw new IllegalArgumentException("The view cannot be null");
+		}
 	}
 
 	@Override
@@ -119,21 +128,4 @@ public class MainPresenter implements PresenterInterface {
 		view.close();
 	}
 
-	public void addPage(Book bookDisplayed, String text) {
-		books.forEach(b -> {
-			if (b.equals(bookDisplayed)) {
-				b.addPage(new Page(text));
-			}
-		});
-		repo.saveBooks(books);
-	}
-
-	public void updatePage(Book bookDisplayed, Page toPage) {
-		books.forEach(b -> {
-			if (b.equals(bookDisplayed)) {
-				b.updatePage(toPage);
-			}
-		});
-		repo.saveBooks(books);
-	}
 }

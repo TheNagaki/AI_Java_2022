@@ -2,51 +2,60 @@ package org.helmo.gbeditor.presenters;
 
 import org.helmo.gbeditor.models.Author;
 import org.helmo.gbeditor.models.Book;
+import org.helmo.gbeditor.models.BookMetadata;
+import org.helmo.gbeditor.models.ISBN;
 import org.helmo.gbeditor.presenters.interfaces.EditBookViewInterface;
-import org.helmo.gbeditor.presenters.interfaces.GBEInterface;
+import org.helmo.gbeditor.repositories.RepositoryInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class EditBookPresenterTest {
 	private EditBookPresenter presenter;
-	private GBEInterface engine;
 	private EditBookViewInterface view;
+	private RepositoryInterface repo;
 
 	@BeforeEach
 	void setUp() {
-		engine = mock(GBEInterface.class);
-		presenter = new EditBookPresenter(engine);
+		repo = mock(RepositoryInterface.class);
+		presenter = new EditBookPresenter(repo);
 		view = mock(EditBookViewInterface.class);
 		presenter.setView(view);
 	}
 
 	@Test
 	void createBookDisplaysTheResultOfTheEngineToTheView() {
-		when(engine.createBook(anyString(), anyString(), anyString(), anyString())).thenReturn("result");
 		presenter.createBook("title", "isbn", "summary", "imagePath");
 		verify(view, atMostOnce()).display("result");
 	}
 
 	@Test
 	void createBookSendsTheInformationToTheEngine() {
-		presenter.createBook("title", "isbn", "summary", "imagePath");
-		verify(engine).createBook("title", "isbn", "summary", "imagePath");
+		when(repo.getBooks()).thenReturn(new LinkedHashSet<>());
+		var author = new Author("name", "surname");
+		when(repo.getCurrentAuthor()).thenReturn(author);
+		presenter.askAuthorName();
+		presenter.createBook("title", "summary", ISBN.createNewISBN(BookMetadata.LINGUISTIC_GROUP, author.getIdentifier()).toString(), "imagePath");
+		verify(repo).saveBooks(any());
 	}
 
 	@Test
 	void askAuthorNameCallsTheEngineGetAuthorName() {
+		when(repo.getCurrentAuthor()).thenReturn(new Author("name", "firstName"));
 		presenter.askAuthorName();
-		verify(engine, atMostOnce()).getAuthorName();
+		verify(repo, atMostOnce()).getCurrentAuthor();
 	}
 
 	@Test
 	void askAuthorNameSetsTheAuthorNameInTheView() {
-		when(engine.getAuthorName()).thenReturn("authorName");
+		var author = new Author("name", "firstName");
+		when(repo.getCurrentAuthor()).thenReturn(author);
 		presenter.askAuthorName();
-		verify(view, atMostOnce()).setAuthorName("authorName");
+		verify(view, atMostOnce()).setAuthorName(author.getFullName());
 	}
 
 	@Test
@@ -56,15 +65,10 @@ class EditBookPresenterTest {
 	}
 
 	@Test
-	void askISBNCallsPresetISBNFromEngine() {
-		presenter.askISBN();
-		verify(engine, atMostOnce()).presetISBN();
-	}
-
-	@Test
 	void askISBNCallsPresetISBNFromEngineAndSetsItsResultInTheView() {
-		var arr = new int[2];
-		when(engine.presetISBN()).thenReturn(arr);
+		var author = new Author("name", "firstName");
+		var arr = new int[]{BookMetadata.LINGUISTIC_GROUP, author.getIdentifier()};
+		when(repo.getCurrentAuthor()).thenReturn(author);
 		presenter.askISBN();
 		verify(view, atMostOnce()).presetISBN(arr);
 	}
@@ -72,20 +76,20 @@ class EditBookPresenterTest {
 	@Test
 	void askBookToEditCallsEngineGetBookToEdit() {
 		presenter.askBookToEdit();
-		verify(engine, atMostOnce()).getBookToEdit();
+		verify(repo, atMostOnce()).getBookToEdit();
 	}
 
 	@Test
 	void askBookToEditSetsTheEditionModeInTheView() {
 		var book = mock(Book.class);
-		when(engine.getBookToEdit()).thenReturn(book);
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
 		verify(view, atMostOnce()).setEditionMode(true);
 	}
 
 	@Test
 	void askBookToEditSetsTheEditionModeInTheViewToFalseIfNoBookToEdit() {
-		when(engine.getBookToEdit()).thenReturn(null);
+		when(repo.getBookToEdit()).thenReturn(null);
 		presenter.askBookToEdit();
 		verify(view, atMostOnce()).setEditionMode(false);
 	}
@@ -93,49 +97,50 @@ class EditBookPresenterTest {
 	@Test
 	void editBookCallsEngineUpdateBook() {
 		presenter.editBook("title", "summary", "isbn", "imagePath");
-		verify(engine, atMostOnce()).updateBook(any(Book.class), eq("title"), eq("summary"), eq("isbn"), eq("imagePath"));
+		verify(repo, atMostOnce()).deleteBook(any(Book.class));
+		verify(repo, atMostOnce()).saveBooks(any());
 	}
 
 	@Test
 	void editBookCallsEngineUpdateBookWithTheBookToEdit() {
 		var book = mock(Book.class);
-		when(engine.getBookToEdit()).thenReturn(book);
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.editBook("title", "summary", "isbn", "imagePath");
-		verify(engine, atMostOnce()).updateBook(eq(book), anyString(), anyString(), anyString(), anyString());
+		verify(repo, atMostOnce()).deleteBook(book);
+		verify(repo, atMostOnce()).saveBooks(any());
 	}
 
 	@Test
 	void editBookCallsEngineUpdateBookWithTheBookToEditAndTheGivenInformation() {
 		var book = mock(Book.class);
-		when(engine.getBookToEdit()).thenReturn(book);
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.editBook("title", "summary", "isbn", "imagePath");
-		verify(engine, atMostOnce()).updateBook(eq(book), eq("title"), eq("summary"), eq("isbn"), eq("imagePath"));
+		verify(repo, atMostOnce()).deleteBook(book);
+		verify(repo, atMostOnce()).saveBooks(any());
 	}
 
 	@Test
 	void editBookDisplaysTheResultOfTheEngineToTheView() {
-		when(engine.updateBook(any(Book.class), anyString(), anyString(), anyString(), anyString())).thenReturn("result");
 		presenter.editBook("title", "summary", "isbn", "imagePath");
-		verify(view, atMostOnce()).display("result");
+		verify(view, atMostOnce()).display("Votre livre a bien été mis à jour");
 	}
 
 	@Test
 	void askIsbnControlNumberCallsEngine() {
-		presenter.askIsbnControlNumber("isbn");
-		verify(engine, atMostOnce()).getIsbnControlNum(anyString());
-	}
-
-	@Test
-	void askIsbnControlNumberCallsEngineWithTheGivenIsbn() {
-		presenter.askIsbnControlNumber("isbn");
-		verify(engine, atMostOnce()).getIsbnControlNum(eq("isbn"));
+		var author = new Author("name", "firstName");
+		when(repo.getCurrentAuthor()).thenReturn(author);
+		var isbn = ISBN.createNewISBN(BookMetadata.LINGUISTIC_GROUP, author.getIdentifier());
+		presenter.askIsbnControlNumber(String.format("%d-%06d-%02d", isbn.getLinguisticGroup(), isbn.getIdAuthor(), isbn.getIdBook()));
+		verify(repo, atMostOnce()).getCurrentAuthor();
 	}
 
 	@Test
 	void askIsbnControlNumberSetsTheResultInTheView() {
-		when(engine.getIsbnControlNum(anyString())).thenReturn("result");
-		presenter.askIsbnControlNumber("isbn");
-		verify(view, atMostOnce()).setIsbnControlNumber("result");
+		var author = new Author("name", "firstName");
+		when(repo.getCurrentAuthor()).thenReturn(author);
+		var isbn = ISBN.createNewISBN(BookMetadata.LINGUISTIC_GROUP, author.getIdentifier());
+		presenter.askIsbnControlNumber(String.format("%d-%06d-%02d", isbn.getLinguisticGroup(), isbn.getIdAuthor(), isbn.getIdBook()));
+		verify(view, atMostOnce()).setIsbnControlNumber(isbn.getCheckSum() + "");
 	}
 
 	@Test
@@ -146,7 +151,7 @@ class EditBookPresenterTest {
 
 	@Test
 	void askTitleSetsTheBookToEditSTitleInTheView() {
-		when(engine.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
+		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
 		presenter.askBookToEdit();
 		presenter.askTitle();
 		verify(view, atMostOnce()).setTitle("title");
@@ -154,7 +159,7 @@ class EditBookPresenterTest {
 
 	@Test
 	void askImagePathSetsTheBookToEditSImagePathInTheView() {
-		when(engine.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
+		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
 		presenter.askBookToEdit();
 		presenter.askImagePath();
 		verify(view, atMostOnce()).setImagePath("");
@@ -162,7 +167,7 @@ class EditBookPresenterTest {
 
 	@Test
 	void askSummarySetsTheBookToEditSSummaryInTheView() {
-		when(engine.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
+		when(repo.getBookToEdit()).thenReturn(new Book("title", new Author("a", "a"), "summary"));
 		presenter.askBookToEdit();
 		presenter.askSummary();
 		verify(view, atMostOnce()).setSummary("summary");
@@ -171,7 +176,7 @@ class EditBookPresenterTest {
 	@Test
 	void askBaseIsbnSetsTheBookToEditSBaseIsbnInTheView() {
 		var book = new Book("title", new Author("a", "a"), "summary");
-		when(engine.getBookToEdit()).thenReturn(book);
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
 		presenter.askBaseIsbn();
 		var isbn = book.getIsbn();
@@ -181,7 +186,7 @@ class EditBookPresenterTest {
 	@Test
 	void askBookId() {
 		var book = new Book("title", new Author("a", "a"), "summary");
-		when(engine.getBookToEdit()).thenReturn(book);
+		when(repo.getBookToEdit()).thenReturn(book);
 		presenter.askBookToEdit();
 		presenter.askBookId();
 		verify(view, atMostOnce()).setBookId(book.getIsbn().getIdBook());
