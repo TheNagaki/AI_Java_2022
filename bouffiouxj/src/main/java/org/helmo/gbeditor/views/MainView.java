@@ -60,7 +60,7 @@ public class MainView implements MainViewInterface {
 				var b = ite.next();
 				var box = new BorderPane();
 				if (b.isPublished()) {
-					box.setStyle("-fx-border-width: 2px; -fx-border-color: #00ff00;");
+					box.setStyle("-fx-border-width: 2px; -fx-border-color: #1c1c96; -fx-border-style: dotted;");
 				}
 				var title = new Label(b.getTitle());
 				title.getStyleClass().add("thumbnail-title");

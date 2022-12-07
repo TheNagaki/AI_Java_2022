@@ -24,10 +24,7 @@ import org.helmo.gbeditor.presenters.interfaces.ViewInterface;
 import org.helmo.gbeditor.presenters.viewmodels.BookViewModel;
 import org.helmo.gbeditor.presenters.viewmodels.PageViewModel;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BookDetailsView implements BookDetailsViewInterface {
