@@ -352,6 +352,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		buttonsBox.setSpacing(BIG_SPACING);
 		buttonsBox.setAlignment(Pos.BOTTOM_CENTER);
 		popupRoot.getChildren().add(buttonsBox);
+		popup.setAutoHide(true);
 		fillAndPlacePopup(popup, popupRoot);
 	}
 
@@ -361,6 +362,7 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		popupRoot.paddingProperty().setValue(new Insets(BIG_SPACING));
 		popupRoot.setSpacing(SMALL_SPACING);
 		popupRoot.setAlignment(Pos.CENTER);
+		popup.setAutoHide(false);
 		var contentBox = new HBox();
 		var contentField = new TextField(selectedPage.getContent());
 		contentField.setPromptText("Contenu de la page");
@@ -420,13 +422,32 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			choicesBox.getChildren().add(choiceBox);
 		});
 		var cancelBtn = new Button("✖");
-		cancelBtn.setOnAction(e -> popup.hide());
+		cancelBtn.setOnAction(e -> {
+			if (selectedPage.hasBeenModified() || !Objects.equals(contentField.getText(), selectedPage.getContent())) {
+				alertConfirmQuitWithoutSaving(popup);
+			} else {
+				popup.hide();
+			}
+		});
 		var buttonsBox = new HBox();
 		buttonsBox.getChildren().addAll(saveBtn, addChoiceBtn, cancelBtn);
 		buttonsBox.setSpacing(BIG_SPACING);
 		buttonsBox.setAlignment(Pos.BOTTOM_CENTER);
 		popupRoot.getChildren().addAll(contentBox, choicesBox, buttonsBox);
 		fillAndPlacePopup(popup, popupRoot);
+	}
+
+	private void alertConfirmQuitWithoutSaving(Popup popup) {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setTitle("Confirmation");
+		alert.setHeaderText("Quitter sans sauvegarder ?");
+		alert.setContentText("Êtes-vous sûr de vouloir quitter sans sauvegarder ?");
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			popup.hide();
+		} else {
+			alert.close();
+		}
 	}
 
 	private String formatPage(PageViewModel destinationPage, String content) {
@@ -450,7 +471,6 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 	private void fillAndPlacePopup(Popup popup, Node popupRoot) {
 		popup.getContent().add(popupRoot);
-		popup.setAutoHide(true);
 		popup.show(stage);
 		//Apparemment, les propriétés height et width ne sont définies qu'après le show() lorsqu'on utilise un Popup
 		popup.setX(stage.getX() + stage.getWidth() / 2 - popup.getWidth() / 2);
