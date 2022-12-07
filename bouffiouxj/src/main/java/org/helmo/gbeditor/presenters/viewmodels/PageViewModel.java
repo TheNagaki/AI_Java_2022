@@ -10,8 +10,10 @@ public class PageViewModel {
 	private String content;
 	private final String id;
 	private final Map<String, PageViewModel> choices;
+	private final Page originalPage;
 
 	public PageViewModel(Page page) {
+		originalPage = page;
 		this.content = page.getContent();
 		this.id = page.getId();
 		this.choices = new HashMap<>();
@@ -51,6 +53,24 @@ public class PageViewModel {
 
 	public void addChoice(String choice, PageViewModel page) {
 		choices.put(choice, page);
+	}
+
+	public boolean hasBeenModified() {
+		if (!Objects.equals(content, originalPage.getContent())) {
+			return true;
+		}
+		if (originalPage.getChoices().size() != choices.size()) {
+			return true;
+		}
+		for (String choice : choices.keySet()) {
+			if (!originalPage.getChoices().containsKey(choice)) {
+				return true;
+			}
+			if (!choices.get(choice).toPage().equals(originalPage.getChoices().get(choice))) {
+				return true;
+			}
+		}
+		return originalPage.getContent() != null ? !originalPage.getContent().equals(content) : content != null;
 	}
 
 	@Override

@@ -223,4 +223,20 @@ public class BookDetailsPresenter implements PresenterInterface {
 			view.refresh();
 		}
 	}
+
+	public void movePageUp(PageViewModel selectedItem) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished() && selectedItem != null && bookDisplayed.getPages().contains(selectedItem.toPage())) {
+			bookDisplayed.movePageUp(selectedItem.toPage());
+			repo.updatesAddBook(bookDisplayed);
+			view.refresh();
+		}
+	}
+
+	public void movePageDown(PageViewModel selectedItem) {
+		if (bookDisplayed != null && !bookDisplayed.isPublished() && selectedItem != null && bookDisplayed.getPages().contains(selectedItem.toPage())) {
+			bookDisplayed.movePageDown(selectedItem.toPage());
+			repo.updatesAddBook(bookDisplayed);
+			view.refresh();
+		}
+	}
 }

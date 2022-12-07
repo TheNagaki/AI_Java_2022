@@ -253,4 +253,34 @@ public class Book {
 		}
 		isPublished = true;
 	}
+
+	public void movePageUp(Page toPage) {
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
+		if (pages.contains(toPage)) {
+			int index = pages.indexOf(toPage);
+			if (index > 0) {
+				pages.remove(toPage);
+				pages.add(index - 1, toPage);
+			}
+		} else {
+			throw new PageNotInBookException();
+		}
+	}
+
+	public void movePageDown(Page toPage) {
+		if (isPublished) {
+			throw new CannotUpdatePublishedBookException();
+		}
+		if (pages.contains(toPage)) {
+			int index = pages.indexOf(toPage);
+			if (index < pages.size() - 1) {
+				pages.remove(toPage);
+				pages.add(index + 1, toPage);
+			}
+		} else {
+			throw new PageNotInBookException();
+		}
+	}
 }

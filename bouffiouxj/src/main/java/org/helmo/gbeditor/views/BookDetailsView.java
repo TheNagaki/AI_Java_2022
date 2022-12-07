@@ -180,12 +180,23 @@ public class BookDetailsView implements BookDetailsViewInterface {
 		var pageInputs = new VBox();
 		pageInputs.setSpacing(SMALL_SPACING);
 		if (!published) {
-			var fieldsInputs = new HBox();
+			var fieldsInputs = new VBox();
+			var positionBox = new HBox();
+			Label positionLabel = new Label("Position :");
+			var pagePosition = new TextField();
+			pagePosition.setPromptText("Position");
+			pagePosition.textProperty().addListener((observable, oldValue, newValue) -> {
+				if (!newValue.matches("\\d*")) {
+					pagePosition.setText(oldValue);
+				}
+			});
+			pagePosition.setText(String.valueOf(bookPages.size() + 1));
+			positionBox.getChildren().addAll(positionLabel, pagePosition);
 			var contentInput = new TextArea();
 			contentInput.setPromptText("Contenu de la page");
 			contentInput.setWrapText(true);
 			contentInput.setPrefRowCount(2);
-			fieldsInputs.getChildren().add(contentInput);
+			fieldsInputs.getChildren().addAll(positionBox, contentInput);
 
 			var buttonBox = new HBox();
 			buttonBox.setSpacing(BIG_SPACING);
@@ -194,15 +205,20 @@ public class BookDetailsView implements BookDetailsViewInterface {
 			var addPageBtn = new Button("➕");
 			addPageBtn.setOnAction(e -> {
 				if (!contentInput.getText().isEmpty()) {
-					presenter.addPage(contentInput.getText());
+					var position = Integer.parseInt(pagePosition.getText().isBlank() ? bookPages.size() + 1 + "" : pagePosition.getText());
+					presenter.addPage(contentInput.getText(), position);
 					contentInput.clear();
 				}
 			});
 			var editPageBtn = new Button("✏");
 			editPageBtn.setOnAction(e -> presenter.editPage(tableView.getSelectionModel().getSelectedItem()));
+			var pageUpBtn = new Button("⬆");
+			pageUpBtn.setOnAction(e -> presenter.movePageUp(tableView.getSelectionModel().getSelectedItem()));
+			var pageDownBtn = new Button("⬇");
+			pageDownBtn.setOnAction(e -> presenter.movePageDown(tableView.getSelectionModel().getSelectedItem()));
 			var removePageBtn = new Button("➖");
 			removePageBtn.setOnAction(e -> presenter.removePage(tableView.getSelectionModel().getSelectedItem()));
-			buttonBox.getChildren().addAll(addPageBtn, editPageBtn, removePageBtn);
+			buttonBox.getChildren().addAll(addPageBtn, editPageBtn, pageUpBtn, pageDownBtn, removePageBtn);
 			pageInputs.getChildren().addAll(fieldsInputs, buttonBox);
 		}
 		rightPane.setBottom(pageInputs);
