@@ -107,7 +107,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void addPage() {
 		presenter.displayBook(book);
-		presenter.addPage("cyril");
+		presenter.addPage("cyril", 0);
 		verify(repo, times(1)).updatesAddBook(book);
 		assertEquals(1, book.getPages().size());
 	}
@@ -115,7 +115,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void removePage() {
 		presenter.displayBook(book);
-		presenter.addPage("tests");
+		presenter.addPage("tests", 0);
 		presenter.removePage(new PageViewModel(book.getPages().iterator().next()));
 		verify(repo, times(2)).updatesAddBook(book);
 		assertEquals(0, book.getPages().size());
@@ -124,7 +124,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void removePageWithNullPageDoesNotUpdateTheBook() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test", 0);
 		presenter.removePage(null);
 		verify(repo, times(1)).updatesAddBook(book);
 		assertEquals(1, book.getPages().size());
@@ -133,7 +133,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void editPage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test", 0);
 		var pVM = new PageViewModel(book.getPages().iterator().next());
 		presenter.editPage(pVM);
 		verify(view, times(1)).editPage(pVM);
@@ -142,7 +142,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void editNullPageDoesNotEditPage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test", 0);
 		presenter.editPage(null);
 		verify(view, never()).editPage(any());
 	}
@@ -150,7 +150,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void updatePage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test", 0);
 		var pVM = new PageViewModel(book.getPages().iterator().next());
 		pVM.setContent("test2");
 		presenter.updatePage(pVM);
@@ -161,7 +161,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void updateNullPageDoesNotUpdatePage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test", 0);
 		presenter.updatePage(null);
 		verify(repo, times(1)).updatesAddBook(book);
 		assertEquals("test", book.getPages().iterator().next().getContent());
@@ -170,9 +170,9 @@ class BookDetailsPresenterTest {
 	@Test
 	void getPageNumber() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
-		presenter.addPage("test2");
-		presenter.addPage("test3");
+		presenter.addPage("test", 0);
+		presenter.addPage("test2", 1);
+		presenter.addPage("test3", 2);
 		var ite = book.getPages().iterator();
 		assertEquals(1, presenter.getPageNumber(new PageViewModel(ite.next())));
 		assertEquals(2, presenter.getPageNumber(new PageViewModel(ite.next())));
@@ -182,9 +182,9 @@ class BookDetailsPresenterTest {
 	@Test
 	void getPageNumberWithNullPage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
-		presenter.addPage("test2");
-		presenter.addPage("test3");
+		presenter.addPage("test", 0);
+		presenter.addPage("test2", 1);
+		presenter.addPage("test3", 2);
 		assertEquals(-1, presenter.getPageNumber(null));
 	}
 
@@ -203,7 +203,7 @@ class BookDetailsPresenterTest {
 	@Test
 	void confirmPageDeletion() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test",0);
 		var pVM = new PageViewModel(book.getPages().iterator().next());
 		presenter.confirmPageDeletion(pVM);
 		verify(repo, times(2)).updatesAddBook(book);
@@ -212,20 +212,20 @@ class BookDetailsPresenterTest {
 	@Test
 	void confirmPageDeletionWithNullPageDoesNotDeletePage() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
+		presenter.addPage("test",0);
 		presenter.confirmPageDeletion(null);
 		verify(repo, times(1)).updatesAddBook(book);
-		verify(view, never()).refresh();
+		verify(view, atMostOnce()).refresh();
 	}
 
 	@Test
 	void askPagesIsCalledOnDisplayBookAndEachTimeANewPageIsAdded() {
 		presenter.displayBook(book);
-		presenter.addPage("test");
-		presenter.addPage("test2");
-		presenter.addPage("test3");
+		presenter.addPage("test",0);
+		presenter.addPage("test2",1);
+		presenter.addPage("test3",2);
 		presenter.askBookToView();
-		verify(view, times(5)).setBookToDisplay(any());
+		verify(view, times(2)).setBookToDisplay(any());
 	}
 
 	@Test
@@ -239,7 +239,7 @@ class BookDetailsPresenterTest {
 	void getPageById() {
 		presenter.displayBook(book);
 		Page page = new Page("test");
-		book.addPage(page);
+		book.addPage(page,0);
 		var ite = book.getPages().iterator();
 		assertEquals(ite.next(), presenter.getPageById(page.getId()).toPage());
 	}

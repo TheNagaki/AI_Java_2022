@@ -71,8 +71,9 @@ public class JsonRepository implements RepositoryInterface {
 						while (bookList.contains(book)) {
 							book = new Book(bLoaded.getMetadata(TITLE), bLoaded.getAuthor(), bLoaded.getMetadata(SUMMARY), "", bLoaded.getMetadata(IMAGE_PATH));
 						}
+						var bLoadedPages = bLoaded.getPages();
 						for (Page p : bLoaded.getPages()) {
-							book.addPage(p);
+							book.addPage(p, bLoadedPages.indexOf(p));
 						}
 						if (bLoaded.isPublished()) {
 							book.publish();

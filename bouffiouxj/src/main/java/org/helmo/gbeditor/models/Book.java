@@ -104,13 +104,16 @@ public class Book {
 	 * Adds a page to the book (if it is not already in the book)
 	 *
 	 * @param page the page to add
+	 * @param pos  the position of the page
 	 */
-	public void addPage(Page page) {
+	public void addPage(Page page, int pos) {
 		if (isPublished) {
 			throw new CannotUpdatePublishedBookException();
 		}
-		if (page != null) {
-			pages.add(page);
+		if (page != null && !pages.contains(page)) {
+			if (pos < 0) pages.add(0, page);
+			else if (pos > pages.size()) pages.add(page);
+			else pages.add(pos, page);
 		} else {
 			throw new IllegalPageException();
 		}
@@ -132,8 +135,8 @@ public class Book {
 	 *
 	 * @return the pages of the book
 	 */
-	public Set<Page> getPages() {
-		return new LinkedHashSet<>(pages);
+	public List<Page> getPages() {
+		return new ArrayList<>(pages);
 	}
 
 	/**

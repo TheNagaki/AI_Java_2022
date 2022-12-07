@@ -100,10 +100,11 @@ public class BookDetailsPresenter implements PresenterInterface {
 	 * This method is used to tell the MainPresenter to create a new page or edit an existing one
 	 *
 	 * @param text the text of the page
+	 * @param pos  the position of the page
 	 */
-	public void addPage(String text) {
+	public void addPage(String text, int pos) {
 		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
-			bookDisplayed.addPage(new Page(text));
+			bookDisplayed.addPage(new Page(text), pos);
 			repo.updatesAddBook(bookDisplayed);
 			view.refresh();
 		}

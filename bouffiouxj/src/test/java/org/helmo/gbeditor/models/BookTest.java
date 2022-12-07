@@ -189,23 +189,23 @@ class BookTest {
 
 	@Test
 	void addPage() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertTrue(book.getPages().contains(page));
 	}
 
 	@Test
 	void addNullPageThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.addPage(null));
+		assertThrows(IllegalArgumentException.class, () -> book.addPage(null, 0));
 	}
 
 	@Test
 	void addPageWithNullContentThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> book.addPage(new Page(null)));
+		assertThrows(IllegalArgumentException.class, () -> book.addPage(new Page(null), 0));
 	}
 
 	@Test
 	void removePage() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertTrue(book.getPages().contains(page));
 		book.removePage(page);
 		assertFalse(book.getPages().contains(page));
@@ -213,7 +213,7 @@ class BookTest {
 
 	@Test
 	void getPages() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertTrue(book.getPages().contains(page));
 	}
 
@@ -227,7 +227,7 @@ class BookTest {
 
 	@Test
 	void updatePage() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertEquals("content", book.getPages().iterator().next().getContent());
 		page.setContent("newContent");
 		book.updatePage(page);
@@ -236,7 +236,7 @@ class BookTest {
 
 	@Test
 	void updateAPageDoesNotAddIt() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertEquals(1, book.getPages().size());
 		page.setContent("newContent");
 		book.updatePage(page);
@@ -246,8 +246,8 @@ class BookTest {
 	@Test
 	void updateAPageRedirectsChoicesToTheNewPage() {
 		var page2 = new Page("content2");
-		book.addPage(page);
-		book.addPage(page2);
+		book.addPage(page, 0);
+		book.addPage(page2, 1);
 		page.addChoice("choice", page2);
 		page2.setContent("newContent");
 		book.updatePage(page2);
@@ -257,8 +257,8 @@ class BookTest {
 	@Test
 	void removingAPageDeletesAllChoicesToThisPage() {
 		var page2 = new Page("content2");
-		book.addPage(page);
-		book.addPage(page2);
+		book.addPage(page, 0);
+		book.addPage(page2, 1);
 		page.addChoice("choice", page2);
 		book.removePage(page2);
 		assertEquals(0, page.getChoices().size());
@@ -267,45 +267,45 @@ class BookTest {
 	@Test
 	void aBookContainsChoicesToAPage() {
 		var page2 = new Page("content2");
-		book.addPage(page);
-		book.addPage(page2);
+		book.addPage(page, 0);
+		book.addPage(page2, 1);
 		page.addChoice("choice", page2);
 		assertTrue(book.hasChoicesTo(page2));
 	}
 
 	@Test
 	void aBookDoesNotContainChoicesToANullPage() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertFalse(book.hasChoicesTo(null));
 	}
 
 	@Test
 	void aBookDoesNotContainChoicesToAPageNotInThisBook() {
 		var page2 = new Page("content2");
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertFalse(book.hasChoicesTo(page2));
 	}
 
 	@Test
 	void aBookDoesNotContainChoicesToAPageIfThereSNoChoices() {
 		var page2 = new Page("content2");
-		book.addPage(page);
-		book.addPage(page2);
+		book.addPage(page, 0);
+		book.addPage(page2, 1);
 		assertFalse(book.hasChoicesTo(page2));
 	}
 
 	@Test
 	void aBookDoesNotContainChoicesToAPageIfThereSNoChoicesToIt() {
 		var page2 = new Page("content2");
-		book.addPage(page);
+		book.addPage(page, 0);
 		page2.addChoice("choice", page);
-		book.addPage(page2);
+		book.addPage(page2, 1);
 		assertFalse(book.hasChoicesTo(page2));
 	}
 
 	@Test
 	void getPageNumber() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertEquals(1, book.getPageNumber(page));
 	}
 
@@ -331,7 +331,7 @@ class BookTest {
 
 	@Test
 	void getPageById() {
-		book.addPage(page);
+		book.addPage(page, 0);
 		assertEquals(page, book.getPageById(page.getId()));
 	}
 

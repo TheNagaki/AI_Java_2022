@@ -11,7 +11,7 @@ import static org.helmo.gbeditor.models.BookDataFields.*;
 public class BookViewModel {
 	private final boolean isPublished;
 	private AuthorViewModel author;
-	private final Set<PageViewModel> pages = new LinkedHashSet<>();
+	private final List<PageViewModel> pages = new ArrayList<>();
 
 	private final Map<BookDataFields, String> metadata = new LinkedHashMap<>();
 
@@ -71,14 +71,14 @@ public class BookViewModel {
 		return isPublished;
 	}
 
-	public Set<PageViewModel> getPages() {
+	public List<PageViewModel> getPages() {
 		return pages;
 	}
 
 	public Book toBook() {
 		Book b = new Book(metadata.get(TITLE), author.toAuthor(), metadata.get(SUMMARY), metadata.get(BOOK_ISBN), metadata.get(IMAGE_PATH));
 		for (PageViewModel p : pages) {
-			b.addPage(p.toPage());
+			b.addPage(p.toPage(), this.pages.indexOf(p));
 		}
 		if (isPublished) {
 			b.publish();
