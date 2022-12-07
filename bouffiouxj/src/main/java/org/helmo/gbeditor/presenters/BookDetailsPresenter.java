@@ -105,7 +105,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 		if (bookDisplayed != null && !bookDisplayed.isPublished()) {
 			bookDisplayed.addPage(new Page(text));
 			repo.updatesAddBook(bookDisplayed);
-			askBookToView();
+			view.refresh();
 		}
 	}
 
@@ -170,8 +170,7 @@ public class BookDetailsPresenter implements PresenterInterface {
 		if (selectedPage != null) {
 			bookDisplayed.removePage(selectedPage.toPage());
 			repo.updatesAddBook(bookDisplayed);
-			askBookToView();
-			displayBook(bookDisplayed);
+			view.refresh();
 		}
 	}
 
