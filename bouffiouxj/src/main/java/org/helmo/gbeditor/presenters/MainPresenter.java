@@ -73,7 +73,7 @@ public class MainPresenter implements PresenterInterface {
 	public void setView(MainViewInterface view) {
 		if (view != null) {
 			this.view = view;
-		}else {
+		} else {
 			throw new IllegalArgumentException("The view cannot be null");
 		}
 	}
@@ -93,7 +93,7 @@ public class MainPresenter implements PresenterInterface {
 		if (!bookDetailsOpened || !bookShown.equals(book.toBook())) {
 			bookShown = repo.getBook(book.getIsbn());
 			if (bookShown != null) {
-				detailsPresenter.displayBook(bookShown);
+				detailsPresenter.displayBook(repo.getBook(book.getIsbn() + ""));
 				bookDetailsOpened = true;
 			}
 		}
