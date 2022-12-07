@@ -141,7 +141,6 @@ public class ConnexionView implements ConnexionViewInterface {
 		inputName.setPromptText("Votre nom");
 		inputFirstName.setText("");
 		inputFirstName.setPromptText("Votre prénom");
-		display("");
 		validerButton.setDisable(checkDisableButton());
 	}
 

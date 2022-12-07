@@ -206,8 +206,6 @@ public class EditBookView implements EditBookViewInterface {
 			if (newValue.length() > MAX_TITLE) {
 				inputTitle.setText(oldValue);
 				display(String.format("Vous avez atteint la limite de %d caractères pour le titre", MAX_TITLE));
-			} else {
-				display("");
 			}
 			inputTitle.positionCaret(inputTitle.getText().length());
 			checkToEnableButton();
@@ -221,7 +219,6 @@ public class EditBookView implements EditBookViewInterface {
 				inputIsbn.setText(oldValue);
 				display("L'identifiant du livre ne peut contenir que des chiffres.");
 			} else {
-				display("");
 				if (newValue.length() > 0) {
 					presenter.askIsbnControlNumber(baseIsbnLabel.getText() + String.format("%02d", Integer.parseInt(newValue)));
 				} else {
@@ -240,8 +237,6 @@ public class EditBookView implements EditBookViewInterface {
 			if (newValue.length() > MAX_SUMMARY) {
 				inputSummary.setText(oldValue);
 				display(String.format("Vous avez atteint la limite de %d caractères pour le résumé", MAX_SUMMARY));
-			} else {
-				display("");
 			}
 			inputSummary.positionCaret(inputSummary.getText().length());
 			checkToEnableButton();
@@ -284,7 +279,6 @@ public class EditBookView implements EditBookViewInterface {
 		}
 		presenter.askAuthorName();
 		checkToEnableButton();
-		display("");
 	}
 
 	@Override

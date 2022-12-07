@@ -54,7 +54,9 @@ public class BaseView implements ViewInterface {
 
 	@Override
 	public void display(String response) {
-		message.setText(response);
+		var alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setContentText(response);
+		alert.show();
 	}
 
 	@Override

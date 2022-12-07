@@ -50,7 +50,7 @@ public class EditBookPresenter implements PresenterInterface {
 				book = new Book(title, currentAuthor, summary, isbn, path2Image);
 				books.add(book);
 				repo.saveBooks(books);
-				view.display("Votre livre a bien été enregistré");
+				view.changeView(ViewsEnum.MAIN);
 			} else {
 				view.display("Votre livre a déjà été enregistré");
 			}
@@ -126,7 +126,7 @@ public class EditBookPresenter implements PresenterInterface {
 					bookEdited.setMetadata(BookDataFields.SUMMARY, summary);
 					bookEdited.setMetadata(BookDataFields.BOOK_ISBN, isbn);
 					repo.updatesAddBook(bookEdited);
-					view.display("Votre livre a bien été mis à jour");
+					view.changeView(ViewsEnum.MAIN);
 					return;
 				}
 			} catch (IllegalIsbnLinguisticIdException e) {
