@@ -63,7 +63,7 @@ public class App extends Application {
 		RepositoryInterface repo = new JsonRepository(bookPath, imgDirPath);
 		ViewInterface mainView = new BaseView(initViews(repo));
 		Parent root = mainView.getRoot();
-		Scene scene = new Scene(root, 400, 500);
+		Scene scene = new Scene(root, 400, 515);
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles.css")).toExternalForm());
 		primaryStage.setTitle("GameBook Editor");
 		primaryStage.setScene(scene);
