@@ -68,19 +68,14 @@ public class BookDetailsView implements BookDetailsViewInterface {
 
 		var baseX = baseView.getStage().getX();
 		var baseY = baseView.getStage().getY();
-		var computedX = baseX + baseView.getStage().getWidth() / 2 + BIG_SPACING + stage.getWidth() / 2;
+		var computedX = baseX + baseView.getStage().getWidth() + SMALL_SPACING;
 		var computedY = baseY + baseView.getStage().getHeight() / 2 - stage.getHeight() / 2;
 		//Si la fenêtre dépasse à droite, on la place à gauche
 		if (computedX + stage.getWidth() / 2 > Screen.getPrimary().getBounds().getMaxX()) {
-			computedX = baseX - baseView.getStage().getWidth() / 2 - BIG_SPACING - stage.getWidth() / 2;
+			computedX = baseX - stage.getWidth() - SMALL_SPACING;
 			if (computedX - stage.getWidth() / 2 < Screen.getPrimary().getBounds().getMinX()) {
 				computedX = baseX;
 			}
-		}
-		//Si la fenêtre dépasse en bas, on la place en haut TODO: CA MARCHE PAS
-		if (computedY + stage.getHeight() / 2 > Screen.getPrimary().getBounds().getMaxY()) {
-			System.out.println("dépassement Y");
-			computedY = baseY - baseView.getStage().getHeight() / 2 + stage.getHeight() / 2;
 		}
 		stage.setX(computedX);
 		stage.setY(computedY);
