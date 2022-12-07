@@ -39,3 +39,9 @@
     -fx-border-radius: 5px;
     -fx-padding: 5px;
 }
+
+.message{
+    -fx-text-fill: #000000;
+    -fx-font-style: italic;
+    -fx-padding: 0 0 2 2;
+}

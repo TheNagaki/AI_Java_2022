@@ -1,6 +1,9 @@
 package org.helmo.gbeditor.views;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Window;
@@ -18,10 +21,8 @@ public class BaseView implements ViewInterface {
 
 	private ViewInterface currentView;
 	private final Map<ViewsEnum, ViewInterface> views;
-
 	private final BorderPane principalPane = new BorderPane();
-
-	private final Label message = new Label("GBEditor by Jules Bouffioux, iteration 1.0");
+	private final Label message = new Label("GBEditor by Jules Bouffioux, iteration 3.0");
 
 	/**
 	 * Constructor of the BaseView class
@@ -29,6 +30,8 @@ public class BaseView implements ViewInterface {
 	 * @param views the map of all the other views to display
 	 */
 	public BaseView(Map<ViewsEnum, ViewInterface> views) {
+		message.getStyleClass().add("message");
+		message.setAlignment(Pos.BOTTOM_RIGHT);
 		for (ViewInterface view : views.values()) {
 			view.setBaseView(this);
 		}
@@ -36,7 +39,12 @@ public class BaseView implements ViewInterface {
 		this.currentView = views.get(ViewsEnum.CONNEXION);
 		currentView.refresh();
 		principalPane.setCenter(currentView.getRoot());
-		principalPane.setBottom(message);
+
+		message.setAlignment(Pos.CENTER_RIGHT);
+		var footer = new BorderPane();
+		footer.setPadding(new Insets(2));
+		footer.setRight(message);
+		principalPane.setBottom(footer);
 	}
 
 	@Override
